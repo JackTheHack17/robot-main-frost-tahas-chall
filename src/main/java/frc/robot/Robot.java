@@ -43,9 +43,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    Telemetry.setValue("general/PDP/Voltage", PDH.getVoltage());
-    Telemetry.setValue("general/PDP/Current", PDH.getTotalCurrent());
-    Telemetry.setValue("general/PDP/Temperature", PDH.getTemperature());
+    Telemetry.setValue("general/PDH/voltage", PDH.getVoltage());
+    Telemetry.setValue("general/PDH/current", PDH.getTotalCurrent());
+    Telemetry.setValue("general/PDH/temperature", PDH.getTemperature());
 
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
