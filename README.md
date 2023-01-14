@@ -10,7 +10,7 @@ none
 
 ## NT Docs /
 ### general/
-#### PDH
+#### PDH/
 The associated REV PDH (CAN ID 1)
 ##### voltage
 The input voltage from the battery
