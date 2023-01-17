@@ -32,16 +32,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Telemetry;
-import frc.robot.Constants;
+import static frc.robot.Constants.DRIVETRAIN.*;
+import static frc.robot.Constants.CAN.*;
 
 public class Drivetrain extends SubsystemBase {
   private final Pigeon m_gyro;
 
   private SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-    new Translation2d(-Constants.ROBOT_WIDTH/2, Constants.ROBOT_WIDTH/2),
-    new Translation2d(Constants.ROBOT_WIDTH/2, Constants.ROBOT_WIDTH/2),
-    new Translation2d(-Constants.ROBOT_WIDTH/2, -Constants.ROBOT_WIDTH/2),
-    new Translation2d(Constants.ROBOT_WIDTH/2, -Constants.ROBOT_WIDTH/2)
+    new Translation2d(-ROBOT_WIDTH/2, ROBOT_WIDTH/2),
+    new Translation2d(ROBOT_WIDTH/2, ROBOT_WIDTH/2),
+    new Translation2d(-ROBOT_WIDTH/2, -ROBOT_WIDTH/2),
+    new Translation2d(ROBOT_WIDTH/2, -ROBOT_WIDTH/2)
   );
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds();
@@ -50,22 +51,22 @@ public class Drivetrain extends SubsystemBase {
   private SwerveModuleState[] modules = new SwerveModuleState[3];
 
   // swerve module CANCoders
-  private final CANCoder FL_Position = new CANCoder(5);
-  private final CANCoder FR_Position = new CANCoder(6);
-  private final CANCoder BL_Position = new CANCoder(7);
-  private final CANCoder BR_Position = new CANCoder(8);
+  private final CANCoder FL_Position = new CANCoder(FL_CANCODER_ID);
+  private final CANCoder FR_Position = new CANCoder(FR_CANCODER_ID);
+  private final CANCoder BL_Position = new CANCoder(BL_CANCODER_ID);
+  private final CANCoder BR_Position = new CANCoder(BR_CANCODER_ID);
 
   // swerve module drive motors
-  private final TalonFX FL_Drive = new TalonFX(11);
-  private final TalonFX FR_Drive = new TalonFX(12);
-  private final TalonFX BL_Drive = new TalonFX(13);
-  private final TalonFX BR_Drive = new TalonFX(14);
+  private final TalonFX FL_Drive = new TalonFX(FL_DRIVE_ID);
+  private final TalonFX FR_Drive = new TalonFX(FR_DRIVE_ID);
+  private final TalonFX BL_Drive = new TalonFX(BL_DRIVE_ID);
+  private final TalonFX BR_Drive = new TalonFX(BR_DRIVE_ID);
 
   // swerve module azimuth (steering) motors
-  private final TalonFX FL_Azimuth = new TalonFX(21);
-  private final TalonFX FR_Azimuth = new TalonFX(22);
-  private final TalonFX BL_Azimuth = new TalonFX(23);
-  private final TalonFX BR_Azimuth = new TalonFX(24);
+  private final TalonFX FL_Azimuth = new TalonFX(FL_AZIMUTH_ID);
+  private final TalonFX FR_Azimuth = new TalonFX(FR_AZIMUTH_ID);
+  private final TalonFX BL_Azimuth = new TalonFX(BL_AZIMUTH_ID);
+  private final TalonFX BR_Azimuth = new TalonFX(BR_AZIMUTH_ID);
 
   // swerve module target rotations (degrees)
   private double FL_Target = 0.0;
@@ -93,40 +94,13 @@ public class Drivetrain extends SubsystemBase {
 
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = true;
-  // length = front to back (meters)
-  public static final double ROBOT_LENGTH_METERS = 0.7874;
-  // width = side to side (meters)
-  public static final double ROBOT_WIDTH_METERS = 0.7112;
-  // wheel diameter (meters)
-  public static final double WHEEL_DIAMETER_METERS = 0.1016;
-  // drive gear ratio
-  public static final double DRIVE_GEAR_RATIO = 6.75;
 
-  // constants for calculating rotation vector
-  private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
-  private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
+  // for calculating rotation vector
+  private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_WIDTH, ROBOT_WIDTH));
+  private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_WIDTH, ROBOT_WIDTH));
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 80, 80, 0);
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
-
-  // encoder offsets (degrees)
-  private static final double FL_ECODER_OFFSET = -313.682;
-  private static final double FR_ECODER_OFFSET = -166.553;
-  private static final double BL_ECODER_OFFSET = -246.006;
-  private static final double BR_ECODER_OFFSET = -204.258;
-
-  // pid values
-  private static final double AZIMUTH_kP = 0.4;
-  private static final double AZIMUTH_kD = 12;
-
-  // calculated via JVN calculator
-  private static final double DRIVE_kP = 0.044057;
-  private static final double DRIVE_kF = 0.028998;
-
-  /** maximum strafe speed (meters per second) */
-  private static final double MAX_LINEAR_SPEED = 5.4;
-  /** maximum rotation speed (radians per second) */
-  private static final double MAX_ROTATION_SPEED = Math.PI*2;
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
     new Rotation2d(), 
@@ -149,12 +123,12 @@ public class Drivetrain extends SubsystemBase {
   public Drivetrain(Pigeon m_gyro) {
     this.m_gyro = m_gyro;
     
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKp", _translationKp);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKi", _translationKi);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKd", _translationKd);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKp", _rotationKp);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKi", _rotationKi);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKd", _rotationKd);
+    Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
+    Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
+    Telemetry.setValue("drivetrain/PathPlanner/translationKd", _translationKd);
+    Telemetry.setValue("drivetrain/PathPlanner/rotationKp", _rotationKp);
+    Telemetry.setValue("drivetrain/PathPlanner/rotationKi", _rotationKi);
+    Telemetry.setValue("drivetrain/PathPlanner/rotationKd", _rotationKd);
 
     // config drive motors
     configDrive(FL_Drive);
@@ -181,12 +155,12 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
-    _translationKp = Telemetry.getValue("drivetrain/PathPlanner/constants/translationKp", 0);
-    _translationKi = Telemetry.getValue("drivetrain/PathPlanner/constants/translationKi", 0);
-    _translationKd = Telemetry.getValue("drivetrain/PathPlanner/constants/translationKd", 0);
-    _rotationKp = Telemetry.getValue("drivetrain/PathPlanner/constants/rotationKp", 0);
-    _rotationKi = Telemetry.getValue("drivetrain/PathPlanner/constants/rotationKi", 0);
-    _rotationKd = Telemetry.getValue("drivetrain/PathPlanner/constants/rotationKd", 0);
+    _translationKp = Telemetry.getValue("drivetrain/PathPlanner/translationKp", 0);
+    _translationKi = Telemetry.getValue("drivetrain/PathPlanner/translationKi", 0);
+    _translationKd = Telemetry.getValue("drivetrain/PathPlanner/translationKd", 0);
+    _rotationKp = Telemetry.getValue("drivetrain/PathPlanner/rotationKp", 0);
+    _rotationKi = Telemetry.getValue("drivetrain/PathPlanner/rotationKi", 0);
+    _rotationKd = Telemetry.getValue("drivetrain/PathPlanner/rotationKd", 0);
 
     // 'actual' read sensor positions of each module
     FL_Actual_Position = ((FL_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
@@ -195,10 +169,10 @@ public class Drivetrain extends SubsystemBase {
     BR_Actual_Position = ((BR_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
 
     // 'actual' read encoder speeds per module (meters per second)
-    FL_Actual_Speed = 2.0*(((FL_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER_METERS;
-    FR_Actual_Speed = 2.0*(((FR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER_METERS;
-    BL_Actual_Speed = 2.0*(((BL_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER_METERS;
-    BR_Actual_Speed = 2.0*(((BR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER_METERS;
+    FL_Actual_Speed = 2.0*(((FL_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
+    FR_Actual_Speed = 2.0*(((FR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
+    BL_Actual_Speed = 2.0*(((BL_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
+    BR_Actual_Speed = 2.0*(((BR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
 
     // dashboard data
     Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Target", FL_Target);
@@ -305,10 +279,10 @@ public class Drivetrain extends SubsystemBase {
     BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual_Position - (BR_Actual_Position % 360))) / 360) * 4096);
 
     // pass wheel speeds to motor controllers
-    FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
-    FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
-    BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
-    BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
+    FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
+    FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
+    BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
+    BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
   }
 
   /** Sets the gyroscope's current heading to 0 */
