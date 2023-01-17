@@ -11,6 +11,7 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Photonvision;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,6 +34,7 @@ public class RobotContainer {
   private final Drivetrain m_swerve = new Drivetrain(m_gyro);
   private final Limelight m_limelight = new Limelight();
   private final Photonvision m_Photonvision = new Photonvision();
+  private final LEDs m_LEDs = new LEDs();
 
   private final XboxController driver = new XboxController(0);
   private final GenericHID copilot = new GenericHID(1);
