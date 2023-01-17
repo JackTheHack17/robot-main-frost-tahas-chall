@@ -175,60 +175,60 @@ public class Drivetrain extends SubsystemBase {
     BR_Actual_Speed = 2.0*(((BR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
 
     // dashboard data
-    Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Target", FL_Target);
-    Telemetry.setValue("drivetrain/Modules/FR/Azimuth/Target", FR_Target);
-    Telemetry.setValue("drivetrain/Modules/BL/Azimuth/Target", BL_Target);
-    Telemetry.setValue("drivetrain/Modules/BR/Azimuth/Target", BR_Target);
-    Telemetry.setValue("drivetrain/Modules/FL/Drive/Power", FL_Speed);
-    Telemetry.setValue("drivetrain/Modules/FR/Drive/Power", FR_Speed);
-    Telemetry.setValue("drivetrain/Modules/BL/Drive/Power", BL_Speed);
-    Telemetry.setValue("drivetrain/Modules/BR/Drive/Power", BR_Speed);
-    Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Actual_Position", FL_Actual_Position);
-    Telemetry.setValue("drivetrain/Modules/FR/Azimuth/Actual_Position", FR_Actual_Position);
-    Telemetry.setValue("drivetrain/Modules/BL/Azimuth/Actual_Position", BL_Actual_Position);
-    Telemetry.setValue("drivetrain/Modules/BR/Azimuth/Actual_Position", BR_Actual_Position);
-    Telemetry.setValue("drivetrain/Modules/FL/Drive/Actual_Speed", FL_Actual_Speed);
-    Telemetry.setValue("drivetrain/Modules/FR/Drive/Actual_Speed", FR_Actual_Speed);
-    Telemetry.setValue("drivetrain/Modules/BL/Drive/Actual_Speed", BL_Actual_Speed);
-    Telemetry.setValue("drivetrain/Modules/BR/Drive/Actual_Speed", BR_Actual_Speed);
-    Telemetry.setValue("drivetrain/Modules/FL/Drive/Temperature", FL_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/Modules/FR/Drive/Temperature", FR_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/Modules/BL/Drive/Temperature", BL_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/Modules/BR/Drive/Temperature", BR_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Temperature", FL_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/Modules/FR/Azimuth/Temperature", FR_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/Modules/BL/Azimuth/Temperature", BL_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/Modules/BR/Azimuth/Temperature", BR_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Output_Voltage", FL_Azimuth.getMotorOutputVoltage());
-    Telemetry.setValue("drivetrain/Modules/FR/Azimuth/Output_Voltage", FR_Azimuth.getMotorOutputVoltage());
-    Telemetry.setValue("drivetrain/Modules/BL/Azimuth/Output_Voltage", BL_Azimuth.getMotorOutputVoltage());
-    Telemetry.setValue("drivetrain/Modules/BR/Azimuth/Output_Voltage", BR_Azimuth.getMotorOutputVoltage());
-    Telemetry.setValue("drivetrain/Modules/FL/Drive/Output_Voltage", FL_Drive.getMotorOutputVoltage());
-    Telemetry.setValue("drivetrain/Modules/FR/Drive/Output_Voltage", FR_Drive.getMotorOutputVoltage());
-    Telemetry.setValue("drivetrain/Modules/BL/Drive/Output_Voltage", BL_Drive.getMotorOutputVoltage());
-    Telemetry.setValue("drivetrain/Modules/BR/Drive/Output_Voltage", BR_Drive.getMotorOutputVoltage());
-    Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Stator_Current", FL_Azimuth.getStatorCurrent());
-    Telemetry.setValue("drivetrain/Modules/FR/Azimuth/Stator_Current", FR_Azimuth.getStatorCurrent());
-    Telemetry.setValue("drivetrain/Modules/BL/Azimuth/Stator_Current", BL_Azimuth.getStatorCurrent());
-    Telemetry.setValue("drivetrain/Modules/BR/Azimuth/Stator_Current", BR_Azimuth.getStatorCurrent());
-    Telemetry.setValue("drivetrain/Modules/FL/Drive/Stator_Current", FL_Drive.getStatorCurrent());
-    Telemetry.setValue("drivetrain/Modules/FR/Drive/Stator_Current", FR_Drive.getStatorCurrent());
-    Telemetry.setValue("drivetrain/Modules/BL/Drive/Stator_Current", BL_Drive.getStatorCurrent());
-    Telemetry.setValue("drivetrain/Modules/BR/Drive/Stator_Current", BR_Drive.getStatorCurrent());
+    Telemetry.setValue("drivetrain/modules/FL/azimuth/targetPosition", FL_Target);
+    Telemetry.setValue("drivetrain/modules/FR/azimuth/targetPosition", FR_Target);
+    Telemetry.setValue("drivetrain/modules/BL/azimuth/targetPosition", BL_Target);
+    Telemetry.setValue("drivetrain/modules/BR/azimuth/targetPosition", BR_Target);
+    Telemetry.setValue("drivetrain/modules/FL/drive/targetSpeed", FL_Speed);
+    Telemetry.setValue("drivetrain/modules/FR/drive/targetSpeed", FR_Speed);
+    Telemetry.setValue("drivetrain/modules/BL/drive/targetSpeed", BL_Speed);
+    Telemetry.setValue("drivetrain/modules/BR/drive/targetSpeed", BR_Speed);
+    Telemetry.setValue("drivetrain/modules/FL/azimuth/actualPosition", FL_Actual_Position);
+    Telemetry.setValue("drivetrain/modules/FR/azimuth/actualPosition", FR_Actual_Position);
+    Telemetry.setValue("drivetrain/modules/BL/azimuth/actualPosition", BL_Actual_Position);
+    Telemetry.setValue("drivetrain/modules/BR/azimuth/actualPosition", BR_Actual_Position);
+    Telemetry.setValue("drivetrain/modules/FL/drive/actualSpeed", FL_Actual_Speed);
+    Telemetry.setValue("drivetrain/modules/FR/drive/actualSpeed", FR_Actual_Speed);
+    Telemetry.setValue("drivetrain/modules/BL/drive/actualSpeed", BL_Actual_Speed);
+    Telemetry.setValue("drivetrain/modules/BR/drive/actualSpeed", BR_Actual_Speed);
+    Telemetry.setValue("drivetrain/modules/FL/drive/temperature", FL_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/modules/FR/drive/temperature", FR_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/modules/BL/drive/temperature", BL_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/modules/BR/drive/temperature", BR_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/modules/FL/azimuth/temperature", FL_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/modules/FR/azimuth/temperature", FR_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/modules/BL/azimuth/temperature", BL_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/modules/BR/azimuth/temperature", BR_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/modules/FL/azimuth/outputVoltage", FL_Azimuth.getMotorOutputVoltage());
+    Telemetry.setValue("drivetrain/modules/FR/azimuth/outputVoltage", FR_Azimuth.getMotorOutputVoltage());
+    Telemetry.setValue("drivetrain/modules/BL/azimuth/outputVoltage", BL_Azimuth.getMotorOutputVoltage());
+    Telemetry.setValue("drivetrain/modules/BR/azimuth/outputVoltage", BR_Azimuth.getMotorOutputVoltage());
+    Telemetry.setValue("drivetrain/modules/FL/drive/outputVoltage", FL_Drive.getMotorOutputVoltage());
+    Telemetry.setValue("drivetrain/modules/FR/drive/outputVoltage", FR_Drive.getMotorOutputVoltage());
+    Telemetry.setValue("drivetrain/modules/BL/drive/outputVoltage", BL_Drive.getMotorOutputVoltage());
+    Telemetry.setValue("drivetrain/modules/BR/drive/outputVoltage", BR_Drive.getMotorOutputVoltage());
+    Telemetry.setValue("drivetrain/modules/FL/azimuth/statorCurrent", FL_Azimuth.getStatorCurrent());
+    Telemetry.setValue("drivetrain/modules/FR/azimuth/statorCurrent", FR_Azimuth.getStatorCurrent());
+    Telemetry.setValue("drivetrain/modules/BL/azimuth/statorCurrent", BL_Azimuth.getStatorCurrent());
+    Telemetry.setValue("drivetrain/modules/BR/azimuth/statorCurrent", BR_Azimuth.getStatorCurrent());
+    Telemetry.setValue("drivetrain/modules/FL/drive/statorCurrent", FL_Drive.getStatorCurrent());
+    Telemetry.setValue("drivetrain/modules/FR/drive/statorCurrent", FR_Drive.getStatorCurrent());
+    Telemetry.setValue("drivetrain/modules/BL/drive/statorCurrent", BL_Drive.getStatorCurrent());
+    Telemetry.setValue("drivetrain/modules/BR/drive/statorCurrent", BR_Drive.getStatorCurrent());
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
 
     forwardKinematics = m_kinematics.toChassisSpeeds(new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
 
-    Telemetry.setValue("drivetrain/kinematics/official/robot/forward", forwardKinematics.vxMetersPerSecond);
-    Telemetry.setValue("drivetrain/kinematics/official/robot/rightward", -forwardKinematics.vyMetersPerSecond);
-    Telemetry.setValue("drivetrain/kinematics/official/clockwise_speed", Math.toDegrees(forwardKinematics.omegaRadiansPerSecond));
-    Telemetry.setValue("drivetrain/kinematics/official/field/DS_away", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
-    Telemetry.setValue("drivetrain/kinematics/official/field/DS_right", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
+    Telemetry.setValue("drivetrain/kinematics/robot/forwardSpeed", forwardKinematics.vxMetersPerSecond);
+    Telemetry.setValue("drivetrain/kinematics/robot/rightwardSpeed", -forwardKinematics.vyMetersPerSecond);
+    Telemetry.setValue("drivetrain/kinematics/clockwiseSpeed", Math.toDegrees(forwardKinematics.omegaRadiansPerSecond));
+    Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
+    Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
 
-    Telemetry.setValue("drivetrain/odometry/official/field/DS_away", -_robotPose.getX());
-    Telemetry.setValue("drivetrain/odometry/official/field/DS_right", _robotPose.getY());
+    Telemetry.setValue("drivetrain/odometry/field/DSawaySpeed", -_robotPose.getX());
+    Telemetry.setValue("drivetrain/odometry/field/DSrightSpeed", _robotPose.getY());
   }
 
   @Override
