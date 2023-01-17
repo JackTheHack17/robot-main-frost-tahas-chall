@@ -13,6 +13,7 @@ import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Photonvision;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Pigeon;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -23,15 +24,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final Pigeon m_gyro = new Pigeon(Constants.PIGEON_CAN_ID);
   private final Arm m_arm = new Arm();
-  private final Drivetrain m_swerve = new Drivetrain();
+  private final Drivetrain m_swerve = new Drivetrain(m_gyro);
   private final Limelight m_limelight = new Limelight();
   private final Photonvision m_Photonvision = new Photonvision();
+
+  private final XboxController driver = new XboxController(0);
+  private final GenericHID copilot = new GenericHID(1);
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
     // Configure the button bindings
     configureButtonBindings();
   }
