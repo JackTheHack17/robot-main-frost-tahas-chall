@@ -46,6 +46,7 @@ public final class Constants {
         public static final double FR_ECODER_OFFSET = -166.553;
         public static final double BL_ECODER_OFFSET = -246.006;
         public static final double BR_ECODER_OFFSET = -204.258;
+    
         
         /** maximum strafe speed (meters per second) */
         public static final double MAX_LINEAR_SPEED = 5.4;
@@ -60,4 +61,9 @@ public final class Constants {
         public static final double DRIVE_kP = 0.044057;
         public static final double DRIVE_kF = 0.028998;
     }
+
+    public static final double BEAM_BALANACED_DRIVE_KP =   1;
+    public static final double BEAM_BALANCED_GOAL_DEGREES = 0;
+    public static final double BACKWARDS_BALANCING_EXTRA_POWER_MULTIPLIER = 1.35;
+    public static final double BEAM_BALANCED_ANGLE_TRESHOLD_DEGREES = 1;
 }
