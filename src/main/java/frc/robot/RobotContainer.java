@@ -6,7 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.commands.BalanceCommand;
+//import frc.robot.commands.BalanceCommand;
 import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Arm;
@@ -63,7 +63,8 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    aButton.whileTrue(new BalanceCommand());
+    //aButton.whileTrue(new BalanceCommand(m_swerve, m_gyro));
+    //aButton.whileFalse(new DriveCommand(m_swerve, driver));
     
   }
 
