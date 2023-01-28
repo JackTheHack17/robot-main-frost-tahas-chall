@@ -1,0 +1,47 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo"
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "telemetry": {
+        "drivetrain": {
+          "kinematics": {
+            "field": {
+              "open": true
+            },
+            "open": true
+          },
+          "modules": {
+            "BL": {
+              "azimuth": {
+                "open": true
+              },
+              "drive": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "odometry": {
+            "field": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "general": {
+          "PDH": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      }
+    }
+  }
+}
