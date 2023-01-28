@@ -33,7 +33,6 @@ public class RobotContainer {
   private final Arm m_arm = new Arm();
   private final Drivetrain m_swerve = new Drivetrain(m_gyro);
   private final Limelight m_limelight = new Limelight();
-  private final Photonvision m_Photonvision = new Photonvision();
   private final LEDs m_LEDs = new LEDs();
 
   private final XboxController driver = new XboxController(0);
