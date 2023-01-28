@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.HashMap;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -18,8 +16,6 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.server.PathPlannerServer;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
-import edu.wpi.first.math.MatBuilder;
-import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -27,11 +23,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Telemetry;
+import frc.robot.Constants;
+
 import static frc.robot.Constants.DRIVETRAIN.*;
 import static frc.robot.Constants.CAN.*;
 
@@ -102,14 +100,17 @@ public class Drivetrain extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 80, 80, 0);
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
 
-  private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
-    new Rotation2d(), 
-    new Pose2d(), 
-    m_kinematics, 
-    new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01), 
-    new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.02), 
-    new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
-  );
+  // private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
+  //   new Rotation2d(), 
+  //   new Pose2d(), 
+  //   m_kinematics, 
+  //   new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01), 
+  //   new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.02), 
+  //   new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
+  // );
+
+  private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
+
   private Pose2d _robotPose = new Pose2d();
 
   private double _translationKp = 1;
@@ -225,10 +226,11 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
-    _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
+    //_robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
+    _robotPose = m_odometry.update(new Rotation2d(m_gyro.getYaw()), getSwerveModulePositions());
 
-    Telemetry.setValue("drivetrain/odometry/field/DSawaySpeed", -_robotPose.getX());
-    Telemetry.setValue("drivetrain/odometry/field/DSrightSpeed", _robotPose.getY());
+    Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
+    Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
   }
 
   @Override
@@ -362,9 +364,18 @@ public class Drivetrain extends SubsystemBase {
     return target;
   }
 
+  private SwerveModulePosition[] getSwerveModulePositions() {
+    SwerveModulePosition[] positions = new SwerveModulePosition[4];
+    positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, new Rotation2d(FL_Actual_Position));
+    positions[1] = new SwerveModulePosition((FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, new Rotation2d(FR_Actual_Position));
+    positions[2] = new SwerveModulePosition((BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, new Rotation2d(BL_Actual_Position));
+    positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, new Rotation2d(BR_Actual_Position));
+    return positions;
+  }
+
   public Command followTrajectoryCommand(PathPlannerTrajectory traj) {
 
-    m_odometry.resetPosition(traj.getInitialHolonomicPose(), new Rotation2d(Math.toRadians(m_gyro.getYaw())));
+    m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), traj.getInitialHolonomicPose());
 
     // HashMap<String, Command> eventMap = new HashMap<>();
     // eventMap.put("marker1", new PrintCommand("Passed marker 1"));
