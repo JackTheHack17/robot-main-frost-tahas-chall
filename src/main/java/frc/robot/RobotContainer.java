@@ -13,10 +13,10 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
-import frc.robot.subsystems.Photonvision;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Pigeon;
 import static frc.robot.Constants.CAN.*;
 
@@ -38,8 +38,8 @@ public class RobotContainer {
   private final XboxController driver = new XboxController(0);
   private final GenericHID copilot = new GenericHID(1);
   
-  JoystickButton aButton = new JoystickButton(driver, 1);
-  JoystickButton bButton = new JoystickButton(driver, 2);
+  Trigger aButton = new JoystickButton(driver, 1);
+  Trigger bButton = new JoystickButton(driver, 2);
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
@@ -60,8 +60,8 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    aButton.whenHeld(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
-    bButton.whenHeld(new InstantCommand(m_swerve::zeroGyro, m_swerve));
+    aButton.onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
+    bButton.onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
   }
 
   /**
