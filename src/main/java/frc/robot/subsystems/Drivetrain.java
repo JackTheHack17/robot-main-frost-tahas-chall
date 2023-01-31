@@ -367,9 +367,9 @@ public class Drivetrain extends SubsystemBase {
    * @return the corrected target position of the motor
   */
   private double optimizeAzimuthPath (double target, double actual) {
-    if (Math.min(Math.min(Math.abs(target - FL_Actual_Position), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target + 360) - actual))
+    if (Math.min(Math.min(Math.abs(target - actual), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target + 360) - actual))
       target += 360;
-    if (Math.min(Math.min(Math.abs(target - FL_Actual_Position), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target - 360) - actual))
+    if (Math.min(Math.min(Math.abs(target - actual), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target - 360) - actual))
       target -= 360;
     return target;
   }
