@@ -14,7 +14,7 @@ public class Pigeon extends SubsystemBase {
   private double yaw = 0;
   private double pitch = 0;
   private double roll = 0;
-  private double[] ypr;
+  private double[] ypr = new double[3];
 
     /** Creates a new ExampleSubsystem. */
   public Pigeon (int CAN_ID) {
