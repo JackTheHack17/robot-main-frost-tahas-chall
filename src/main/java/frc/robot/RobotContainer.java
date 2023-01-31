@@ -40,6 +40,8 @@ public class RobotContainer {
   
   Trigger aButton = new JoystickButton(driver, 1);
   Trigger bButton = new JoystickButton(driver, 2);
+  Trigger xButton = new JoystickButton(driver, 3);
+  Trigger yButton = new JoystickButton(driver, 4);
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
