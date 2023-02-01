@@ -1,62 +1,73 @@
 import cv2
 import numpy as np
-import apriltag
+from pupil_apriltags import Detector
 
-# Create an AprilTag detector object
-detector = apriltag.Detector()
+tag_id = None
+def runPipeline(frame):
+    # Convert the frame to grayscale
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-text = "APRILTAG"
-font = cv2.FONT_HERSHEY_SIMPLEX
-org = (50,50)
-fontScale = 1
-color = (0,255,0)
-thickness = 2
+    # Define the AprilTag detector with the 16h5 family
+    detector = Detector(families='16h5', nthreads=1, quad_decimate=1.0,
+                        quad_sigma=0.0, refine_edges=True, decode=True,
+                        Debug=False)
 
-# Load the Limelight camera parameters
-# Have to adjust these two for lemlight
-focal_length = 998.2  # focal length of the camera in pixels
-principal_point = (640/2, 480/2)  # principal point of the camera in pixels
+    # Detect AprilTags in the frame
+    tags = detector.detect(frame, gray, return_image=False, camera_params=None)
 
-def runPipeline():
-    # Open the camera
-    cap = cv2.VideoCapture(0)
+    if len(tags) > 0:
+        # Find the tag with the largest area
+        tag = max(tags, key=lambda x: x.area)
+        center = tag.center
+        tag_id = tags.tag_id
+        x, y = center[0], center[1]
 
-    while True:
-        # Read a frame from the camera
-        ret, frame = cap.read()
-        if not ret:
-            break
+        # Calculate the distance using the size of the tag in the frame
+        focal_length = 100
+        tag_size = 0.1  # meters
+        pixel_width = tag.corners[2][0] - tag.corners[0][0]
+        distance = (tag_size * focal_length) / pixel_width
 
-        # Convert the frame to grayscale
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # Calculate the position using the Limelight pipeline
+        x_image_center = frame.shape[1] / 2
+        y_image_center = frame.shape[0] / 2
+        x_offset = x - x_image_center
+        y_offset = y - y_image_center
+        position = np.array([x_offset, y_offset, distance])
 
-        # Detect AprilTags in the grayscale frame
-        result = detector.detect(gray)
+        return distance, position, tag_id, x, y
+    else:
+        return None, None
 
-        # Draw the AprilTag detections
-        for tag in result:
-            corners = tag.corners
-            cv2.polylines(frame, [np.int32(corners)], True, (0, 0, 255), 2)
 
-            # Estimate the distance and position of the AprilTag
-            tag_size = 0.1  # physical size of the tag in meters
-            center = np.mean(corners, axis=0)
-            x, y = center[0], center[1]
-            z = focal_length * tag_size / (2 * tag.tag_size)
-            position = np.array([x, y, z])
+# Capture video from a camera
+cap = cv2.VideoCapture(0)
 
-            # Print the position of the AprilTag
-            print("Position:", position)
-        
-        cv2.putText(frame, text, org, font, color, thickness)
-        # Display the frame with the AprilTag detections
-        cv2.imshow("AprilTag Detection", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+# Loop over the frames
+while True:
+    # Capture a frame
+    ret, frame = cap.read()
 
-    # Release the camera
-    cap.release()
-    cv2.destroyAllWindows()
+    # Run the Limelight pipeline on the frame
+    distance, position = runPipeline(frame)
 
-# Call the pipeline function - Don't need this for the lemlight
-runPipeline()
+    # Display the information of the AprilTag
+    # I don't understand why x,y shows as undefined - Have to find solution later
+    if distance is not None and position is not None:
+        cv2.putText(frame, f"ID: {tag_id}", (x, y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"Distance: {distance:.2f} m", (x,y + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"Position: ({position[0]:.2f}, {position[1]:.2f}, {position[2]:.2f})", (x, y + 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+    # Display the frame
+    cv2.imshow("Frame", frame)
+
+    # Break the loop if the 'q' key is pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release the video capture
+cap.release()
+
+# Destroy all windows
+cv2.destroyAllWindows()

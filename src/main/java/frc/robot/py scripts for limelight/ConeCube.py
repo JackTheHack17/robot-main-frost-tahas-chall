@@ -60,8 +60,7 @@ def runPipeline():
             if M["m00"] != 0:
                 cx = int(M["m10"] / M["m00"])
                 cy = int(M["m01"] / M["m00"])
-                z = focal_length * tag_size / (2 * tag.tag_size)
-                position = np.array([cx, cy, z])
+                position = np.array([cx, cy])
 
                 # Print the position of the largest contour
                 print("Position:", position)
