@@ -2,7 +2,9 @@ import cv2
 import numpy as np
 from pupil_apriltags import Detector
 
-tag_id = None
+tagId = None
+xPos = None
+yPos = None
 def runPipeline(frame):
     # Convert the frame to grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -35,7 +37,10 @@ def runPipeline(frame):
         y_offset = y - y_image_center
         position = np.array([x_offset, y_offset, distance])
 
-        return distance, position, tag_id, x, y
+        tagId = tag_id
+        xPos, yPos = x,y
+
+        return distance, position, tag_id, x, y, tagId, xPos, yPos
     else:
         return None, None
 
@@ -54,9 +59,9 @@ while True:
     # Display the information of the AprilTag
     # I don't understand why x,y shows as undefined - Have to find solution later
     if distance is not None and position is not None:
-        cv2.putText(frame, f"ID: {tag_id}", (x, y),
+        cv2.putText(frame, f"ID: {tagId}", (xPos, yPos),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(frame, f"Distance: {distance:.2f} m", (x,y + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"Distance: {distance:.2f} m", (xPos,yPos + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         cv2.putText(frame, f"Position: ({position[0]:.2f}, {position[1]:.2f}, {position[2]:.2f})", (x, y + 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     # Display the frame
