@@ -62,7 +62,7 @@ while True:
         cv2.putText(frame, f"ID: {tagId}", (xPos, yPos),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         cv2.putText(frame, f"Distance: {distance:.2f} m", (xPos,yPos + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(frame, f"Position: ({position[0]:.2f}, {position[1]:.2f}, {position[2]:.2f})", (x, y + 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"Position: ({position[0]:.2f}, {position[1]:.2f}, {position[2]:.2f})", (xPos, yPos + 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     # Display the frame
     cv2.imshow("Frame", frame)
