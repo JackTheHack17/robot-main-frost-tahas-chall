@@ -60,4 +60,9 @@ public final class Constants {
         public static final double DRIVE_kP = 0.044057;
         public static final double DRIVE_kF = 0.028998;
     }
+
+    public class LL {
+        public static final double SLOPE = 0;
+        public static final double YINT = 0;
+    }
 }

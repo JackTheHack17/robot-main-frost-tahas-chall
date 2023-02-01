@@ -1,11 +1,6 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
-
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Arm;
@@ -15,8 +10,6 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Pigeon;
 import static frc.robot.Constants.CAN.*;
 
@@ -35,18 +28,15 @@ public class RobotContainer {
   private final Limelight m_limelight = new Limelight();
   private final LEDs m_LEDs = new LEDs();
 
-  private final XboxController driver = new XboxController(0);
-  private final GenericHID copilot = new GenericHID(1);
-  
-  Trigger aButton = new JoystickButton(driver, 1);
-  Trigger bButton = new JoystickButton(driver, 2);
-  Trigger xButton = new JoystickButton(driver, 3);
-  Trigger yButton = new JoystickButton(driver, 4);
+  private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandGenericHID copilot = new CommandGenericHID(1);
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+
     m_gyro.zeroYaw();
 
     // Configure the button bindings
@@ -62,8 +52,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    aButton.onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
-    bButton.onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
+    driver.a().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
+    driver.x().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
+    driver.b().onTrue(new InstantCommand(m_limelight::switchPipeline));
   }
 
   /**
