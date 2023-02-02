@@ -40,8 +40,6 @@ Also not needed for the limelight pipeline
 
 cv2.destroyAllWindows() destroys the output windows we made earlier to display the output, this line is also not needed for the limelight pipeline
 
-
-
 """
 
 
