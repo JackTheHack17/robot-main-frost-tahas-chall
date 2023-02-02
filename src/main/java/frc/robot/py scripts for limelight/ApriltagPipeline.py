@@ -2,13 +2,16 @@
 
 This is 5411's custom pipeline for limelight v3
 
+This script is to detect apriltags, find its distance, and position relative to the camera
+
 runPipeline() function is to let limelight know that this is a pipeline
 
 In the function:
     Set global variables to be used outside the function
     Convert video to grayscale with cv2.cvtColor
     Use Detector from the pupil_apriltags library to to define the apriltag detection method
-    We use .detect to actually detect the apriltag in the frame
+    We use .detect to actually detect the apriltag in the 
+    
     In the if loop:
         Check for the biggest apriltag within the frame,
         We do this by checking which apriltag has the biggest area
