@@ -28,25 +28,32 @@ public class Limelight extends InstantCommand {
   }
 
   // You wanna check this out?
-  // https://github.com/STMARobotics/swerve-test
+  public boolean hastarget() {
+    double bool = limelight.getEntry("tv").getDouble(0);
+    if(bool == 0) {
+      return false;
+    }
+    return true;
+  }
+
   public double getyaw() {
-    return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
+    return limelight.getEntry("tx").getDouble(0);
   }
 
   public double getPitch() {
-    return NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
+    return limelight.getEntry("ty").getDouble(0);
   }
 
   public double getArea() {
-    return NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0);
+    return limelight.getEntry("ta").getDouble(0);
   }
 
   public Pose2d getPoseValues(String team) {
     if(team == "red") {
-      posevalues = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
+      posevalues = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
     }
     if(team == "red") {
-      posevalues = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpired").getDoubleArray(new double[6]);
+      posevalues = limelight.getEntry("botpose_wpired").getDoubleArray(new double[6]);
     }
     Translation2d translate = new Translation2d(posevalues[0], posevalues[1]);
     Rotation2d rotation = new Rotation2d(posevalues[3], posevalues[4]);
@@ -64,10 +71,17 @@ public class Limelight extends InstantCommand {
   /**
    * Align with a limelight target
    */
-  public double alignTapeTarget(Drivetrain Drive) {
+  public double alignTarget(double dist) {
     PIDController LLAlign = new PIDController(0, 0, 0);
-    return LLAlign.calculate(getTapeXDistance(), 0);
+    return LLAlign.calculate(dist, 0);
   }
+
+  public double movetotarget(double dist) {
+    PIDController move = new PIDController(0, 0, 0);
+    return move.calculate(dist, 0);
+  }
+
+
 
 }
 
