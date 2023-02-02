@@ -1,39 +1,37 @@
 package frc.robot.subsystems;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.Constants.LL;
-import frc.robot.Constants.DRIVETRAIN;
-
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 // Test code to change between pipelines on limelight
 public class Limelight extends InstantCommand {
   private NetworkTable limelight;
   private boolean pipelineIndex;
+  private double[] posevalues;
 
-  public Limelight(){
+  public Limelight() {
     limelight = NetworkTableInstance.getDefault().getTable("limelight");
     pipelineIndex = false;
   }
 
   public void switchPipeline() {
-    limelight.getEntry("pipeline").setNumber(!pipelineIndex? 1 : 0);
+    limelight.getEntry("pipeline").setNumber(!pipelineIndex ? 1 : 0);
   }
 
   public int getPipeLineIndex() {
-    return pipelineIndex? 1 : 0;
+    return pipelineIndex ? 1 : 0;
   }
+
   // You wanna check this out?
   // https://github.com/STMARobotics/swerve-test
-  // Actually working swerve code to stay alligned to apriltag
-  // Well A and B are used, Y for switching pipelines, You got options: X, Right Bumper, or left bumboer
-  // Which one you wanna do?
-  // Ok, you wanna do that? im sure bot pose requires math that im not willing to do, cody you can do the math... 
-  // ok we have to set up bot pose from limelight apis
   public double getyaw() {
     return NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx").getDouble(0);
   }
-  
 
   public double getPitch() {
     return NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty").getDouble(0);
@@ -43,23 +41,32 @@ public class Limelight extends InstantCommand {
     return NetworkTableInstance.getDefault().getTable("limelight").getEntry("ta").getDouble(0);
   }
 
-  public double getXDistance() {
+  public Pose2d getPoseValues(String team) {
+    if(team == "red") {
+      posevalues = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
+    }
+    if(team == "red") {
+      posevalues = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpired").getDoubleArray(new double[6]);
+    }
+    Translation2d translate = new Translation2d(posevalues[0], posevalues[1]);
+    Rotation2d rotation = new Rotation2d(posevalues[3], posevalues[4]);
+    return new Pose2d(translate, rotation);
+  }
+
+  public double getTapeXDistance() {
     return LL.SLOPE * getArea() + LL.YINT;
   }
 
-  public double getYDistance() {
-    return Math.tan(getyaw())* getXDistance();
+  public double getTapeYDistance() {
+    return Math.tan(getyaw()) * getTapeXDistance();
   }
+
   /**
    * Align with a limelight target
    */
-  public void alignTarget(Drivetrain Drive)
-  {
-    double L_X = (Math.tan(getPitch()) * getXDistance()) - (DRIVETRAIN.ROBOT_WIDTH/2);
-    double L_Y = 0.0;
-    double R_X = 0.0;
-    Drive.joystickDrive(L_X,L_Y,R_X);
-    //Comments Here: 
+  public double alignTapeTarget(Drivetrain Drive) {
+    PIDController LLAlign = new PIDController(0, 0, 0);
+    return LLAlign.calculate(getTapeXDistance(), 0);
   }
 
 }
