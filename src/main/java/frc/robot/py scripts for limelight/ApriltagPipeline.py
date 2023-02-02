@@ -1,11 +1,55 @@
+"""
+
+This is 5411's custom pipeline for limelight v3
+
+runPipeline() function is to let limelight know that this is a pipeline
+
+In the function:
+    Set global variables to be used outside the function
+    Convert video to grayscale with cv2.cvtColor
+    Use Detector from the pupil_apriltags library to to define the apriltag detection method
+    We use .detect to actually detect the apriltag in the frame
+    In the if loop:
+        Check for the biggest apriltag within the frame,
+        We do this by checking which apriltag has the biggest area
+        Then calculate distance of the apriltag from the camera
+        We then calculate the position the apriltag relative to the camera frame and set position in a numpy array
+        We then return our variables to be used outside the function
+        However, if the variables are empty, return None (null)
+        
+cv2.VideoCapture(0) is exactly what it sounds like, capture video input
+
+While loop to check every single frame
+
+ret, frame = cap.read() -> This is an interesting line, frame is each frame of the video, .read() reads each frame and treats it as an image
+ret is a dummy variable, it does essentially nothing, its only used to make sure that line is actually working, but it won't work without it
+
+cv2.putText writes text directly over the output video, in this case, it displays three items: tag id, distance, and position
+
+cv2.imshow() returns the video output, this line is probably not needed for the limelight pipeline, it displays the output
+in a separate window, the first string is the name of that window, the second part is the video itself
+
+if loop waits for the key press of q to quit the process, again this loop is also not needed for the limelight pipeline
+
+cap.release() stops using the camera and allows the camera to be used by other applications
+this is why you can only use the camera in only one application at a time
+Also not needed for the limelight pipeline
+
+cv2.destroyAllWindows() destroys the output windows we made earlier to display the output, this line is also not needed for the limelight pipeline
+
+
+
+"""
+
+
 import cv2
 import numpy as np
 from pupil_apriltags import Detector
 
-tagId = None
-xPos = None
-yPos = None
 def runPipeline(frame):
+    global x
+    global y
+    global tag_id
     # Convert the frame to grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -37,10 +81,8 @@ def runPipeline(frame):
         y_offset = y - y_image_center
         position = np.array([x_offset, y_offset, distance])
 
-        tagId = tag_id
-        xPos, yPos = x,y
 
-        return distance, position, tag_id, x, y, tagId, xPos, yPos
+        return distance, position, tag_id, x, y
     else:
         return None, None
 
@@ -58,11 +100,12 @@ while True:
 
     # Display the information of the AprilTag
     # I don't understand why x,y shows as undefined - Have to find solution later
+    # Possibly fixed?
     if distance is not None and position is not None:
-        cv2.putText(frame, f"ID: {tagId}", (xPos, yPos),
+        cv2.putText(frame, f"ID: {tag_id}", (x, y),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(frame, f"Distance: {distance:.2f} m", (xPos,yPos + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(frame, f"Position: ({position[0]:.2f}, {position[1]:.2f}, {position[2]:.2f})", (xPos, yPos + 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"Distance: {distance:.2f} m", (x,y + 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(frame, f"Position: ({position[0]:.2f}, {position[1]:.2f}, {position[2]:.2f})", (x, y + 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     # Display the frame
     cv2.imshow("Frame", frame)
