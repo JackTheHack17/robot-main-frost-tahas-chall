@@ -57,7 +57,7 @@ public class Limelight extends SubsystemBase {
       posevalues = limelight.getEntry("botpose_wpired").getDoubleArray(new double[6]);
     }
     Translation2d translate = new Translation2d(posevalues[0], posevalues[1]);
-    Rotation2d rotation = new Rotation2d(posevalues[3], posevalues[4]);
+    Rotation2d rotation = new Rotation2d(Math.toRadians(posevalues[3]));
     return new Pose2d(translate, rotation);
   }
 
