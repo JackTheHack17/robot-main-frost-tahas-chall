@@ -1,6 +1,5 @@
 package frc.robot;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
 import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Arm;
@@ -8,10 +7,13 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.Pigeon;
 import static frc.robot.Constants.CAN.*;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -53,8 +55,7 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     driver.a().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
-    driver.x().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
-    driver.b().onTrue(new InstantCommand(m_limelight::switchPipeline));
+    driver.b().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
   }
 
   /**
