@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import frc.robot.commands.DriveCommand;
@@ -11,13 +7,13 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
-import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.subsystems.Pigeon;
+import static frc.robot.Constants.CAN.*;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.Pigeon;
-import static frc.robot.Constants.CAN.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,6 +37,8 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+
     m_gyro.zeroYaw();
 
     // Configure the button bindings
@@ -56,7 +54,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-
     driver.a().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
     driver.b().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
   }
