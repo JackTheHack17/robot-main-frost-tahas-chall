@@ -126,26 +126,26 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("POP/Biscep/temp", M_Biscep.getMotorTemperature());
         Telemetry.setValue("POP/Biscep/voltage", M_Biscep.getAppliedOutput());
         Telemetry.setValue("POP/Biscep/statorcurrent", M_Biscep.getOutputCurrent());
-        Telemetry.setValue("POP/Biscep/speed2", M_Biscep2.get());
-        Telemetry.setValue("POP/Biscep/temp2", M_Biscep2.getMotorTemperature());
-        Telemetry.setValue("POP/Biscep/voltage2", M_Biscep2.getAppliedOutput());
-        Telemetry.setValue("POP/Biscpe/statorcurrent2", M_Biscep2.getOutputCurrent());
+        Telemetry.setValue("POP/BiscepFollower/speed2", M_Biscep2.get());
+        Telemetry.setValue("POP/BiscepFollower/temp2", M_Biscep2.getMotorTemperature());
+        Telemetry.setValue("POP/BiscepFollower/voltage2", M_Biscep2.getAppliedOutput());
+        Telemetry.setValue("POP/BiscepFollower/statorcurrent2", M_Biscep2.getOutputCurrent());
         Telemetry.setValue("POP/Elbow/speed", M_Elbow.get());
         Telemetry.setValue("POP/Elbow/temp", M_Elbow.getMotorTemperature());
         Telemetry.setValue("POP/Elbow/voltage", M_Elbow.getAppliedOutput());
         Telemetry.setValue("POP/Elbow/statorcurrent", M_Elbow.getOutputCurrent());
-        Telemetry.setValue("POP/Elbow/speed2", M_Elbow2.get());
-        Telemetry.setValue("POP/Elbow/temp2", M_Elbow2.getMotorTemperature());
-        Telemetry.setValue("POP/Elbow/voltage2", M_Elbow2.getAppliedOutput());
-        Telemetry.setValue("POP/Elbow/statorcurrent2", M_Elbow2.getOutputCurrent());
+        Telemetry.setValue("POP/ElbowFollower/speed2", M_Elbow2.get());
+        Telemetry.setValue("POP/ElbowFollower/temp2", M_Elbow2.getMotorTemperature());
+        Telemetry.setValue("POP/ElbowFollower/voltage2", M_Elbow2.getAppliedOutput());
+        Telemetry.setValue("POP/ElbowFollower/statorcurrent2", M_Elbow2.getOutputCurrent());
         Telemetry.setValue("POP/Claw/speed", M_Claw.get());
         Telemetry.setValue("POP/Claw/temp", M_Claw.getMotorTemperature());
         Telemetry.setValue("POP/Claw/voltage", M_Claw.getAppliedOutput());
         Telemetry.setValue("POP/Claw/statorcurrent", M_Claw.getOutputCurrent());
-        Telemetry.setValue("POP/Claw/speed2", M_Claw2.get());
-        Telemetry.setValue("POP/Claw/temp2", M_Claw2.getMotorTemperature());
-        Telemetry.setValue("POP/Claw/voltage2", M_Claw2.getAppliedOutput());
-        Telemetry.setValue("POP/Claw/statorcurrent2", M_Claw2.getOutputCurrent());
+        Telemetry.setValue("POP/ClawFollower/speed2", M_Claw2.get());
+        Telemetry.setValue("POP/ClawFollower/temp2", M_Claw2.getMotorTemperature());
+        Telemetry.setValue("POP/ClawFollower/voltage2", M_Claw2.getAppliedOutput());
+        Telemetry.setValue("POP/ClawFollower/statorcurrent2", M_Claw2.getOutputCurrent());
     }
     
     @Override  public void simulationPeriodic() {}

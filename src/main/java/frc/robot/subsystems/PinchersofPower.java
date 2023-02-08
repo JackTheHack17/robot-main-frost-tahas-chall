@@ -11,15 +11,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.Telemetry;
 import frc.robot.Constants.POP;
 
-public class Gripper extends SubsystemBase 
-{
+public class PinchersofPower extends SubsystemBase  {
   private final Compressor comp;
   private final DoubleSolenoid pusher;
   private final CANSparkMax spinner;
   private final CANSparkMax spinner2;
   private boolean m_cone;
 
-  public Gripper() {
+  public PinchersofPower() {
     comp = new Compressor(1, PneumaticsModuleType.CTREPCM);
     pusher = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 0);
     spinner = new CANSparkMax(25, MotorType.kBrushless);
@@ -93,28 +92,28 @@ public class Gripper extends SubsystemBase
     }
   }
 
-  public Command Intake(Gripper Claw) {
+  public Command Intake(PinchersofPower Claw) {
     return new InstantCommand(() -> intake(), Claw);
   }
 
-  public Command Outtake(Gripper Claw) {
+  public Command Outtake(PinchersofPower Claw) {
     return new InstantCommand(() -> outtake(), Claw);
   }
 
-  public Command Notake(Gripper Claw) {
+  public Command Notake(PinchersofPower Claw) {
     return new InstantCommand(() -> notake(), Claw);
   }
 
   @Override
   public void periodic() {
-    Telemetry.setValue("POP/motor/speed", spinner.get());
-    Telemetry.setValue("POP/motor/temp", spinner.getMotorTemperature());
-    Telemetry.setValue("POP/motor/voltage", spinner.getAppliedOutput());
-    Telemetry.setValue("POP/motor/statorcurrent", spinner.getOutputCurrent());
-    Telemetry.setValue("POP/motor/speed2", spinner2.get());
-    Telemetry.setValue("POP/motor/temp2", spinner2.getMotorTemperature());
-    Telemetry.setValue("POP/motor/voltage2", spinner2.getAppliedOutput());
-    Telemetry.setValue("POP/motor/statorcurrent2", spinner2.getOutputCurrent());
+    Telemetry.setValue("POP/Spinner/speed", spinner.get());
+    Telemetry.setValue("POP/Spinner/temp", spinner.getMotorTemperature());
+    Telemetry.setValue("POP/Spinner/voltage", spinner.getAppliedOutput());
+    Telemetry.setValue("POP/Spinner/statorcurrent", spinner.getOutputCurrent());
+    Telemetry.setValue("POP/SpinnerFollower/speed2", spinner2.get());
+    Telemetry.setValue("POP/SpinnerFollower/temp2", spinner2.getMotorTemperature());
+    Telemetry.setValue("POP/SpinnerFollower/voltage2", spinner2.getAppliedOutput());
+    Telemetry.setValue("POP/SpinnerFollower/statorcurrent2", spinner2.getOutputCurrent());
     Telemetry.setValue("POP/pneumatics/value", pusher.get());
   }
 }
