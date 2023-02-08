@@ -3,7 +3,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.Constants.LL;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -67,19 +66,6 @@ public class Limelight extends SubsystemBase {
 
   public double getTapeYDistance() {
     return Math.tan(getyaw()) * getTapeXDistance();
-  }
-
-  /**
-   * Align with a limelight target
-   */
-  public double alignTarget(double dist) {
-    PIDController LLAlign = new PIDController(0, 0, 0);
-    return LLAlign.calculate(dist, 0);
-  }
-
-  public double movetotarget(double dist) {
-    PIDController move = new PIDController(0, 0, 0);
-    return move.calculate(dist, 0);
   }
 
   @Override

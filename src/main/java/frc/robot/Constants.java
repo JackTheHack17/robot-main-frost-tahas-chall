@@ -65,4 +65,32 @@ public final class Constants {
         public static final double SLOPE = 0;
         public static final double YINT = 0;
     }
+
+    public class ARM {       
+         public static final double BISCEP_LENGTH = 20;        
+         public static final double ELBOW_LENGTH = 30;
+         public static final double LOW_ARM_ANG = 152.8;
+         public static final double LOW_ELBOW_ANG = 168.9;
+         public static final double LOW_CLAW_ANG = -14.5;
+         public static final double HIGH_ARM_ANG = 83;
+         public static final double HIGH_ELBOW_ANG = 168.9;
+         public static final double HIGH_CLAW_ANG = -142.5;
+         public static final double IDLE_ARM_ANG = 63.8;
+         public static final double IDLE_ELBOW_ANG = -38.4;
+         public static final double IDLE_CLAW_ANG = 96.9;
+ }
+
+     public class POP {
+         public static final double F = 0;
+         public static final double R = 0;
+         public static final double SPEED = 0.5;
+     }
+
+     public class LED {
+         public static final double YELLOW = 0.69;
+         public static final double PURPLE = 0.91;
+         public static final double RED = 0.61;
+         public static final double GREEN = 0.77;
+         public static final double RAINBOW = -0.99;
+     }
 }
