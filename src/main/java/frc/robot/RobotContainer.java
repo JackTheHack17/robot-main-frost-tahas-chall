@@ -1,5 +1,4 @@
 package frc.robot;
-
 import frc.robot.commands.DriveCommand;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Arm;
@@ -8,8 +7,9 @@ import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Pigeon;
-import static frc.robot.Constants.CAN.*;
+import frc.robot.subsystems.PinchersofPower;
 
+import static frc.robot.Constants.CAN.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -29,6 +29,7 @@ public class RobotContainer {
   private final Drivetrain m_swerve = new Drivetrain(m_gyro);
   private final Limelight m_limelight = new Limelight();
   private final LEDs m_LEDs = new LEDs();
+  private final PinchersofPower claw = new PinchersofPower();
 
   private final CommandXboxController driver = new CommandXboxController(0);
   private final CommandGenericHID copilot = new CommandGenericHID(1);
