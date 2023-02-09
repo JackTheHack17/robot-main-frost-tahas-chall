@@ -72,10 +72,8 @@ public class Arm extends SubsystemBase {
 
     public void movetopoint(double x, double y, double claw) {
         Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-        double angle1 = triangle.getAngleA() + (90 - Math.atan2(x, y));
-        double angle2 = triangle.getAngleB();
-        posArm(angle1);
-        posElbows(angle2);
+        posArm(triangle.getAngleA() + (90 - Math.atan2(x, y)));
+        posElbows(triangle.getAngleB());
         posClaws(claw);
     }
 
