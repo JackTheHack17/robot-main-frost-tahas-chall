@@ -1,15 +1,17 @@
 package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkMaxAbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import com.revrobotics.SparkMaxPIDController.AccelStrategy;
+import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Triangle;
 import frc.robot.Constants.*;
 import frc.lib.Telemetry;
+
+
 public class Arm extends SubsystemBase {
     private final CANSparkMax mBiscep;
     private final CANSparkMax mBiscep2;
@@ -17,18 +19,19 @@ public class Arm extends SubsystemBase {
     private final CANSparkMax mElbow2;
     private final CANSparkMax mClaw;
     private final CANSparkMax mClaw2;
-    private final SparkMaxAbsoluteEncoder biscepEncoder;  
-    private final SparkMaxAbsoluteEncoder elbowEncoder;
-    private final SparkMaxAbsoluteEncoder clawEncoder;
-    private final ProfiledPIDController biscepPID;  
-    private final ProfiledPIDController elbowPID;
-    private final ProfiledPIDController clawPID;
-    private final ArmFeedforward fBiscep;
+    private final RelativeEncoder biscepEncoder;  
+    private final RelativeEncoder elbowEncoder;
+    private final RelativeEncoder clawEncoder;
+    private final SparkMaxPIDController biscepPID;  
+    private final SparkMaxPIDController elbowPID;
+    private final SparkMaxPIDController clawPID;
+    private SparkMaxAlternateEncoder.Type kAltEncType;
+/*    private final ArmFeedforward fBiscep;
     private final ArmFeedforward fElbow;
     private final ArmFeedforward fClaw;
     private final TrapezoidProfile.Constraints biscepProfile;
     private final TrapezoidProfile.Constraints elbowProfile;
-    private final TrapezoidProfile.Constraints clawProfile;
+    private final TrapezoidProfile.Constraints clawProfile; */
 
     public Arm() {    
         //Motors
@@ -49,25 +52,32 @@ public class Arm extends SubsystemBase {
         mClaw2.follow(mClaw);
         mElbow2.follow(mElbow);
 
-        biscepEncoder = mBiscep.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
-        elbowEncoder = mElbow.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
-        clawEncoder = mClaw.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+        
+        kAltEncType = SparkMaxAlternateEncoder.Type.kQuadrature;
+
+        biscepEncoder = mBiscep.getAlternateEncoder(kAltEncType, 8192);
+        elbowEncoder = mElbow.getAlternateEncoder(kAltEncType, 8192);
+        clawEncoder = mClaw.getAlternateEncoder(kAltEncType, 8192);
 
         biscepEncoder.setPositionConversionFactor(360);
         elbowEncoder.setPositionConversionFactor(360);
         clawEncoder.setPositionConversionFactor(360);
-
+/*
         biscepProfile = new TrapezoidProfile.Constraints(0, 0);
         elbowProfile = new TrapezoidProfile.Constraints(0, 0);
         clawProfile = new TrapezoidProfile.Constraints(0, 0);
 
         fBiscep = new ArmFeedforward(0, 0, 0, 0);
         fElbow = new ArmFeedforward(0, 0, 0, 0);
-        fClaw = new ArmFeedforward(0, 0, 0, 0);
+        fClaw = new ArmFeedforward(0, 0, 0, 0); */
 
-        biscepPID = new ProfiledPIDController(0, 0, 0, biscepProfile);    
-        elbowPID = new ProfiledPIDController(0, 0, 0, elbowProfile);
-        clawPID = new ProfiledPIDController(0, 0, 0, clawProfile);
+        biscepPID = mBiscep.getPIDController(); 
+        elbowPID = mElbow.getPIDController();
+        clawPID = mClaw.getPIDController();
+
+        configPID(0, 0, 0, 0, 0, 0, biscepEncoder, biscepPID);
+        configPID(0, 0, 0, 0, 0, 0, elbowEncoder, elbowPID);
+        configPID(0, 0, 0, 0, 0, 0, clawEncoder, clawPID);
     }
 
     public void movetopoint(double x, double y, double claw) {
@@ -90,15 +100,16 @@ public class Arm extends SubsystemBase {
     }
 
     public void posArm(double angle) {
-        mBiscep.set(biscepPID.calculate(biscepEncoder.getPosition(), angle) + fBiscep.calculate(biscepEncoder.getPosition(), biscepEncoder.getVelocity()));  
+//        mBiscep.set(biscepPID.calculate(biscepEncoder.getPosition(), angle) + fBiscep.calculate(biscepEncoder.getPosition(), biscepEncoder.getVelocity()));
+        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void posElbows(double angle) {
-        mElbow.set(elbowPID.calculate(elbowEncoder.getPosition(), angle) + fElbow.calculate(elbowEncoder.getPosition(), elbowEncoder.getVelocity()));  
+        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void posClaws(double angle) {
-        mClaw.set(clawPID.calculate(clawEncoder.getPosition(), angle) + fClaw.calculate(clawEncoder.getPosition(), clawEncoder.getVelocity()));  
+        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void lowArmScore() {
@@ -150,4 +161,14 @@ public class Arm extends SubsystemBase {
     }
     
     @Override  public void simulationPeriodic() {}
+
+    public void configPID(double kp, double kd, double FF, double maxV, double maxA, int profile, RelativeEncoder encoder, SparkMaxPIDController controller) {
+        controller.setP(kp, profile);
+        controller.setD(kd, profile);
+        controller.setFF(FF, profile);
+        controller.setSmartMotionMaxAccel(maxA, profile);
+        controller.setSmartMotionMaxVelocity(maxV, profile);
+        controller.setSmartMotionAccelStrategy(AccelStrategy.kSCurve, profile);
+        controller.setFeedbackDevice(encoder);
+    }
 }
