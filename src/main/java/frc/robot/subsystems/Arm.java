@@ -24,15 +24,8 @@ public class Arm extends SubsystemBase {
     private final SparkMaxPIDController elbowPID;
     private final SparkMaxPIDController clawPID;
     private SparkMaxAlternateEncoder.Type kAltEncType;
-/*    private final ArmFeedforward fBiscep;
-    private final ArmFeedforward fElbow;
-    private final ArmFeedforward fClaw;
-    private final TrapezoidProfile.Constraints biscepProfile;
-    private final TrapezoidProfile.Constraints elbowProfile;
-    private final TrapezoidProfile.Constraints clawProfile; */
 
-    public Arm() {    
-        //Motors
+    public Arm() {
         mBiscep = new CANSparkMax(1, MotorType.kBrushless);
         mBiscep2 = new CANSparkMax(1, MotorType.kBrushless);   
         mElbow = new CANSparkMax(2, MotorType.kBrushless);
@@ -44,7 +37,6 @@ public class Arm extends SubsystemBase {
         mBiscep2.setIdleMode(IdleMode.kBrake);
         mBiscep2.follow(mBiscep);
 
-        
         kAltEncType = SparkMaxAlternateEncoder.Type.kQuadrature;
 
         biscepEncoder = mBiscep.getAlternateEncoder(kAltEncType, 8192);
@@ -84,7 +76,6 @@ public class Arm extends SubsystemBase {
     }
 
     public void posArm(double angle) {
-//        mBiscep.set(biscepPID.calculate(biscepEncoder.getPosition(), angle) + fBiscep.calculate(biscepEncoder.getPosition(), biscepEncoder.getVelocity()));
         biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
@@ -120,12 +111,11 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("POP/Biscep/voltage", mBiscep.getAppliedOutput());
         Telemetry.setValue("POP/Biscep/statorcurrent", mBiscep.getOutputCurrent());
         Telemetry.setValue("POP/Biscep/position", biscepEncoder.getPosition());
-        Telemetry.setValue("POP/Claw/velocity", biscepEncoder.getVelocity());
+        Telemetry.setValue("POP/Biscep/velocity", biscepEncoder.getVelocity());
         Telemetry.setValue("POP/BiscepFollower/speed2", mBiscep2.get());
         Telemetry.setValue("POP/BiscepFollower/temp2", mBiscep2.getMotorTemperature());
         Telemetry.setValue("POP/BiscepFollower/voltage2", mBiscep2.getAppliedOutput());
         Telemetry.setValue("POP/BiscepFollower/statorcurrent2", mBiscep2.getOutputCurrent());
-        Telemetry.setValue("POP/Claw/velocity", biscepEncoder.getVelocity());
         Telemetry.setValue("POP/Elbow/speed", mElbow.get());
         Telemetry.setValue("POP/Elbow/temp", mElbow.getMotorTemperature());
         Telemetry.setValue("POP/Elbow/voltage", mElbow.getAppliedOutput());
