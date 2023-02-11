@@ -16,9 +16,7 @@ public class Arm extends SubsystemBase {
     private final CANSparkMax mBiscep;
     private final CANSparkMax mBiscep2;
     private final CANSparkMax mElbow;
-    private final CANSparkMax mElbow2;
     private final CANSparkMax mClaw;
-    private final CANSparkMax mClaw2;
     private final RelativeEncoder biscepEncoder;  
     private final RelativeEncoder elbowEncoder;
     private final RelativeEncoder clawEncoder;
@@ -38,19 +36,13 @@ public class Arm extends SubsystemBase {
         mBiscep = new CANSparkMax(1, MotorType.kBrushless);
         mBiscep2 = new CANSparkMax(1, MotorType.kBrushless);   
         mElbow = new CANSparkMax(2, MotorType.kBrushless);
-        mElbow2 = new CANSparkMax(2, MotorType.kBrushless);
         mClaw = new CANSparkMax(3, MotorType.kBrushless);
-        mClaw2 = new CANSparkMax(3, MotorType.kBrushless);
 
         mBiscep.setIdleMode(IdleMode.kBrake);
         mElbow.setIdleMode(IdleMode.kBrake);
         mClaw.setIdleMode(IdleMode.kBrake);
         mBiscep2.setIdleMode(IdleMode.kBrake);
-        mElbow2.setIdleMode(IdleMode.kBrake);
-        mClaw2.setIdleMode(IdleMode.kBrake);
         mBiscep2.follow(mBiscep);
-        mClaw2.follow(mClaw);
-        mElbow2.follow(mElbow);
 
         
         kAltEncType = SparkMaxAlternateEncoder.Type.kQuadrature;
@@ -62,14 +54,6 @@ public class Arm extends SubsystemBase {
         biscepEncoder.setPositionConversionFactor(360);
         elbowEncoder.setPositionConversionFactor(360);
         clawEncoder.setPositionConversionFactor(360);
-/*
-        biscepProfile = new TrapezoidProfile.Constraints(0, 0);
-        elbowProfile = new TrapezoidProfile.Constraints(0, 0);
-        clawProfile = new TrapezoidProfile.Constraints(0, 0);
-
-        fBiscep = new ArmFeedforward(0, 0, 0, 0);
-        fElbow = new ArmFeedforward(0, 0, 0, 0);
-        fClaw = new ArmFeedforward(0, 0, 0, 0); */
 
         biscepPID = mBiscep.getPIDController(); 
         elbowPID = mElbow.getPIDController();
@@ -136,28 +120,24 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("POP/Biscep/voltage", mBiscep.getAppliedOutput());
         Telemetry.setValue("POP/Biscep/statorcurrent", mBiscep.getOutputCurrent());
         Telemetry.setValue("POP/Biscep/position", biscepEncoder.getPosition());
+        Telemetry.setValue("POP/Claw/velocity", biscepEncoder.getVelocity());
         Telemetry.setValue("POP/BiscepFollower/speed2", mBiscep2.get());
         Telemetry.setValue("POP/BiscepFollower/temp2", mBiscep2.getMotorTemperature());
         Telemetry.setValue("POP/BiscepFollower/voltage2", mBiscep2.getAppliedOutput());
         Telemetry.setValue("POP/BiscepFollower/statorcurrent2", mBiscep2.getOutputCurrent());
+        Telemetry.setValue("POP/Claw/velocity", biscepEncoder.getVelocity());
         Telemetry.setValue("POP/Elbow/speed", mElbow.get());
         Telemetry.setValue("POP/Elbow/temp", mElbow.getMotorTemperature());
         Telemetry.setValue("POP/Elbow/voltage", mElbow.getAppliedOutput());
         Telemetry.setValue("POP/Elbow/statorcurrent", mElbow.getOutputCurrent());
         Telemetry.setValue("POP/Elbow/position", elbowEncoder.getPosition());
-        Telemetry.setValue("POP/ElbowFollower/speed2", mElbow2.get());
-        Telemetry.setValue("POP/ElbowFollower/temp2", mElbow2.getMotorTemperature());
-        Telemetry.setValue("POP/ElbowFollower/voltage2", mElbow2.getAppliedOutput());
-        Telemetry.setValue("POP/ElbowFollower/statorcurrent2", mElbow2.getOutputCurrent());
+        Telemetry.setValue("POP/Elbow/velocity", elbowEncoder.getVelocity());
         Telemetry.setValue("POP/Claw/speed", mClaw.get());
         Telemetry.setValue("POP/Claw/temp", mClaw.getMotorTemperature());
         Telemetry.setValue("POP/Claw/voltage", mClaw.getAppliedOutput());
         Telemetry.setValue("POP/Claw/statorcurrent", mClaw.getOutputCurrent());
         Telemetry.setValue("POP/Claw/position", clawEncoder.getPosition());
-        Telemetry.setValue("POP/ClawFollower/speed2", mClaw2.get());
-        Telemetry.setValue("POP/ClawFollower/temp2", mClaw2.getMotorTemperature());
-        Telemetry.setValue("POP/ClawFollower/voltage2", mClaw2.getAppliedOutput());
-        Telemetry.setValue("POP/ClawFollower/statorcurrent2", mClaw2.getOutputCurrent());
+        Telemetry.setValue("POP/Claw/velocity", clawEncoder.getVelocity());
     }
     
     @Override  public void simulationPeriodic() {}
