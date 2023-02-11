@@ -6,6 +6,9 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 import com.revrobotics.SparkMaxPIDController;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Triangle;
 import frc.robot.Constants.*;
@@ -46,6 +49,10 @@ public class Arm extends SubsystemBase {
         biscepEncoder.setPositionConversionFactor(360);
         elbowEncoder.setPositionConversionFactor(360);
         clawEncoder.setPositionConversionFactor(360);
+
+        biscepEncoder.setVelocityConversionFactor(360);
+        elbowEncoder.setVelocityConversionFactor(360);
+        clawEncoder.setVelocityConversionFactor(360);
 
         biscepPID = mBiscep.getPIDController(); 
         elbowPID = mElbow.getPIDController();
@@ -103,6 +110,28 @@ public class Arm extends SubsystemBase {
         posArm(ARM.IDLE_ARM_ANG);
         posElbows(ARM.IDLE_ELBOW_ANG);  
         posClaws(ARM.IDLE_CLAW_ANG);
+    }
+
+    public void fetch() {
+        posArm(ARM.FETCH_ARM_ANG);
+        posElbows(ARM.FETCH_ELBOW_ANG);  
+        posClaws(ARM.FETCH_CLAW_ANG);
+    }
+
+    public Command midScore(Arm arm) {
+        return new InstantCommand(() -> lowArmScore(), arm);
+    }
+
+    public Command highScore(Arm arm) {
+        return new InstantCommand(() -> highArmScore(), arm);
+    }
+    
+    public Command lowScore(Arm arm) {
+        return new InstantCommand(() -> idleArmScore(), arm);
+    }
+    
+    public Command fetch(Arm arm) {
+        return new InstantCommand(() -> fetch(), arm);
     }
 
     @Override  public void periodic() {
