@@ -11,12 +11,10 @@ public class Limelight extends SubsystemBase {
   private NetworkTable limelight;
   private boolean pipelineIndex;
   private double[] posevalues;
-  private String team;
 
   public Limelight() {
     limelight = NetworkTableInstance.getDefault().getTable("limelight");
     pipelineIndex = false;
-    team = "blue";
   }
 
   public void switchPipeline() {
@@ -48,12 +46,7 @@ public class Limelight extends SubsystemBase {
   }
 
   public Pose2d getPose() {
-    if(team == "blue") {
-      posevalues = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
-    }
-    if(team == "red") {
-      posevalues = limelight.getEntry("botpose_wpired").getDoubleArray(new double[6]);
-    }
+    posevalues = limelight.getEntry("botpose").getDoubleArray(new double[6]);
     Translation2d translate = new Translation2d(posevalues[0], posevalues[1]);
     Rotation2d rotation = new Rotation2d(Math.toRadians(posevalues[3]));
     return new Pose2d(translate, rotation);
