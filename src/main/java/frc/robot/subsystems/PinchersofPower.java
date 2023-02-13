@@ -70,9 +70,7 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void outtake() {
-    if(m_cone != true) {
-      spinout();
-    }
+    spinout();
     if((m_cone == true) && (pusher.get() == Value.kForward)) {
       pusher.set(Value.kReverse);
     }
