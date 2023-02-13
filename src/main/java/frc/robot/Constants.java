@@ -78,6 +78,9 @@ public final class Constants {
          public static final double IDLE_ARM_ANG = 63.8;
          public static final double IDLE_ELBOW_ANG = -38.4;
          public static final double IDLE_CLAW_ANG = 96.9;
+         public static final double FETCH_ARM_ANG = 0;
+         public static final double FETCH_ELBOW_ANG = 0;
+         public static final double FETCH_CLAW_ANG = 0;
  }
 
      public class POP {
