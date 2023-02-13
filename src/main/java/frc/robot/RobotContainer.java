@@ -39,7 +39,6 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
-
     m_gyro.zeroYaw();
 
     // Configure the button bindings
@@ -55,8 +54,8 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driver.a().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
-    driver.b().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
+    driver.a().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
+    driver.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
   }
 
   /**
