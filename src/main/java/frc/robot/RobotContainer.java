@@ -29,7 +29,7 @@ public class RobotContainer {
   private final Drivetrain m_swerve = new Drivetrain(m_gyro);
   private final Limelight m_limelight = new Limelight();
   private final LEDs m_LEDs = new LEDs();
-  private final PinchersofPower claw = new PinchersofPower();
+  private final PinchersofPower m_claw = new PinchersofPower();
 
   private final CommandXboxController driver = new CommandXboxController(0);
   private final CommandGenericHID copilot = new CommandGenericHID(1);
