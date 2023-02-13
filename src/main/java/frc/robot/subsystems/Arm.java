@@ -8,59 +8,64 @@ import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Triangle;
-import frc.robot.Constants.*;
+import frc.robot.Constants.ARM;
+import frc.robot.Constants.CAN;
 import frc.lib.Telemetry;
 
 
 public class Arm extends SubsystemBase {
-    private final CANSparkMax mBiscep;
-    private final CANSparkMax mBiscep2;
-    private final CANSparkMax mElbow;
-    private final CANSparkMax mClaw;
-    private final RelativeEncoder biscepEncoder;  
-    private final RelativeEncoder elbowEncoder;
-    private final RelativeEncoder clawEncoder;
-    private final SparkMaxPIDController biscepPID;  
-    private final SparkMaxPIDController elbowPID;
-    private final SparkMaxPIDController clawPID;
+    private final CANSparkMax m_Biscep;
+    private final CANSparkMax m_Biscep2;
+    private final CANSparkMax m_Elbow;
+    private final CANSparkMax m_Claw;
+    private final RelativeEncoder m_biscepEncoder;  
+    private final RelativeEncoder m_elbowEncoder;
+    private final RelativeEncoder m_clawEncoder;
+    private final SparkMaxPIDController m_biscepPID;  
+    private final SparkMaxPIDController m_elbowPID;
+    private final SparkMaxPIDController m_clawPID;
     private SparkMaxAlternateEncoder.Type kAltEncType;
+    private PinchersofPower m_clawSubsystem;
 
-    public Arm() {
-        mBiscep = new CANSparkMax(1, MotorType.kBrushless);
-        mBiscep2 = new CANSparkMax(1, MotorType.kBrushless);   
-        mElbow = new CANSparkMax(2, MotorType.kBrushless);
-        mClaw = new CANSparkMax(3, MotorType.kBrushless);
+    public Arm(PinchersofPower m_claw) {
+        m_clawSubsystem = m_claw;
 
-        mBiscep.setIdleMode(IdleMode.kBrake);
-        mElbow.setIdleMode(IdleMode.kBrake);
-        mClaw.setIdleMode(IdleMode.kBrake);
-        mBiscep2.setIdleMode(IdleMode.kBrake);
-        mBiscep2.follow(mBiscep);
+        m_Biscep = new CANSparkMax(CAN.ARM_STAGE_1_ID, MotorType.kBrushless);
+        m_Biscep2 = new CANSparkMax(CAN.ARM_STAGE_1_FOLLOWER_ID, MotorType.kBrushless);   
+        m_Elbow = new CANSparkMax(CAN.ARM_STAGE_2_ID, MotorType.kBrushless);
+        m_Claw = new CANSparkMax(CAN.ARM_STAGE_3_ID, MotorType.kBrushless);
+
+        m_Biscep.setIdleMode(IdleMode.kBrake);
+        m_Elbow.setIdleMode(IdleMode.kBrake);
+        m_Claw.setIdleMode(IdleMode.kBrake);
+        m_Biscep2.setIdleMode(IdleMode.kBrake);
+        m_Biscep2.follow(m_Biscep);
 
         kAltEncType = SparkMaxAlternateEncoder.Type.kQuadrature;
 
-        biscepEncoder = mBiscep.getAlternateEncoder(kAltEncType, 8192);
-        elbowEncoder = mElbow.getAlternateEncoder(kAltEncType, 8192);
-        clawEncoder = mClaw.getAlternateEncoder(kAltEncType, 8192);
+        m_biscepEncoder = m_Biscep.getAlternateEncoder(kAltEncType, 8192);
+        m_elbowEncoder = m_Elbow.getAlternateEncoder(kAltEncType, 8192);
+        m_clawEncoder = m_Claw.getAlternateEncoder(kAltEncType, 8192);
 
-        biscepEncoder.setPositionConversionFactor(360);
-        elbowEncoder.setPositionConversionFactor(360);
-        clawEncoder.setPositionConversionFactor(360);
+        m_biscepEncoder.setPositionConversionFactor(360);
+        m_elbowEncoder.setPositionConversionFactor(360);
+        m_clawEncoder.setPositionConversionFactor(360);
 
-        biscepEncoder.setVelocityConversionFactor(360);
-        elbowEncoder.setVelocityConversionFactor(360);
-        clawEncoder.setVelocityConversionFactor(360);
+        m_biscepEncoder.setVelocityConversionFactor(360);
+        m_elbowEncoder.setVelocityConversionFactor(360);
+        m_clawEncoder.setVelocityConversionFactor(360);
 
-        biscepPID = mBiscep.getPIDController(); 
-        elbowPID = mElbow.getPIDController();
-        clawPID = mClaw.getPIDController();
+        m_biscepPID = m_Biscep.getPIDController(); 
+        m_elbowPID = m_Elbow.getPIDController();
+        m_clawPID = m_Claw.getPIDController();
 
-        configPID(0, 0, 0, 0, 0, 0, biscepEncoder, biscepPID);
-        configPID(0, 0, 0, 0, 0, 0, elbowEncoder, elbowPID);
-        configPID(0, 0, 0, 0, 0, 0, clawEncoder, clawPID);
+        configPID(0, 0, 0, 0, 0, 0, m_biscepEncoder, m_biscepPID);
+        configPID(0, 0, 0, 0, 0, 0, m_elbowEncoder, m_elbowPID);
+        configPID(0, 0, 0, 0, 0, 0, m_clawEncoder, m_clawPID);
     }
 
     public void moveToPoint(double x, double y, double claw) {
@@ -71,27 +76,27 @@ public class Arm extends SubsystemBase {
     }
 
     public void setArm(double speed) {
-        mBiscep.set(speed);
+        m_Biscep.set(speed);
     }
 
     public void setElbows(double speed) {    
-        mElbow.set(speed);  
+        m_Elbow.set(speed);  
     }
 
     public void setClaws(double speed) {    
-        mClaw.set(speed);  
+        m_Claw.set(speed);  
     }
 
     public void posArm(double angle) {
-        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
+        m_biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void posElbows(double angle) {
-        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
+        m_biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void posClaws(double angle) {
-        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
+        m_biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void lowArmScore() {
@@ -118,45 +123,50 @@ public class Arm extends SubsystemBase {
         posClaws(ARM.FETCH_CLAW_ANG);
     }
 
-    public Command midScore(Arm arm) {
-        return new InstantCommand(() -> lowArmScore(), arm);
+    public Command midScoreCommand() {
+        return new InstantCommand();
+        /*return new FunctionalCommand(
+            () -> {}, 
+            this::lowArmScore, 
+            interrupted -> 
+            this);*/
     }
 
-    public Command highScore(Arm arm) {
-        return new InstantCommand(() -> highArmScore(), arm);
+    public Command highScoreCommand() {
+        return new InstantCommand(() -> highArmScore(), this);
     }
     
-    public Command lowScore(Arm arm) {
-        return new InstantCommand(() -> idleArmScore(), arm);
+    public Command lowScoreCommand() {
+        return new InstantCommand(() -> idleArmScore(), this);
     }
     
-    public Command fetch(Arm arm) {
-        return new InstantCommand(() -> fetch(), arm);
+    public Command fetchCommand() {
+        return new InstantCommand(() -> fetch(), this);
     }
 
     @Override  public void periodic() {
-        Telemetry.setValue("POP/Biscep/speed", mBiscep.get());
-        Telemetry.setValue("POP/Biscep/temp", mBiscep.getMotorTemperature());
-        Telemetry.setValue("POP/Biscep/voltage", mBiscep.getAppliedOutput());
-        Telemetry.setValue("POP/Biscep/statorcurrent", mBiscep.getOutputCurrent());
-        Telemetry.setValue("POP/Biscep/position", biscepEncoder.getPosition());
-        Telemetry.setValue("POP/Biscep/velocity", biscepEncoder.getVelocity());
-        Telemetry.setValue("POP/BiscepFollower/speed2", mBiscep2.get());
-        Telemetry.setValue("POP/BiscepFollower/temp2", mBiscep2.getMotorTemperature());
-        Telemetry.setValue("POP/BiscepFollower/voltage2", mBiscep2.getAppliedOutput());
-        Telemetry.setValue("POP/BiscepFollower/statorcurrent2", mBiscep2.getOutputCurrent());
-        Telemetry.setValue("POP/Elbow/speed", mElbow.get());
-        Telemetry.setValue("POP/Elbow/temp", mElbow.getMotorTemperature());
-        Telemetry.setValue("POP/Elbow/voltage", mElbow.getAppliedOutput());
-        Telemetry.setValue("POP/Elbow/statorcurrent", mElbow.getOutputCurrent());
-        Telemetry.setValue("POP/Elbow/position", elbowEncoder.getPosition());
-        Telemetry.setValue("POP/Elbow/velocity", elbowEncoder.getVelocity());
-        Telemetry.setValue("POP/Claw/speed", mClaw.get());
-        Telemetry.setValue("POP/Claw/temp", mClaw.getMotorTemperature());
-        Telemetry.setValue("POP/Claw/voltage", mClaw.getAppliedOutput());
-        Telemetry.setValue("POP/Claw/statorcurrent", mClaw.getOutputCurrent());
-        Telemetry.setValue("POP/Claw/position", clawEncoder.getPosition());
-        Telemetry.setValue("POP/Claw/velocity", clawEncoder.getVelocity());
+        Telemetry.setValue("POP/Biscep/speed", m_Biscep.get());
+        Telemetry.setValue("POP/Biscep/temp", m_Biscep.getMotorTemperature());
+        Telemetry.setValue("POP/Biscep/voltage", m_Biscep.getAppliedOutput());
+        Telemetry.setValue("POP/Biscep/statorcurrent", m_Biscep.getOutputCurrent());
+        Telemetry.setValue("POP/Biscep/position", m_biscepEncoder.getPosition());
+        Telemetry.setValue("POP/Biscep/velocity", m_biscepEncoder.getVelocity());
+        Telemetry.setValue("POP/BiscepFollower/speed2", m_Biscep2.get());
+        Telemetry.setValue("POP/BiscepFollower/temp2", m_Biscep2.getMotorTemperature());
+        Telemetry.setValue("POP/BiscepFollower/voltage2", m_Biscep2.getAppliedOutput());
+        Telemetry.setValue("POP/BiscepFollower/statorcurrent2", m_Biscep2.getOutputCurrent());
+        Telemetry.setValue("POP/Elbow/speed", m_Elbow.get());
+        Telemetry.setValue("POP/Elbow/temp", m_Elbow.getMotorTemperature());
+        Telemetry.setValue("POP/Elbow/voltage", m_Elbow.getAppliedOutput());
+        Telemetry.setValue("POP/Elbow/statorcurrent", m_Elbow.getOutputCurrent());
+        Telemetry.setValue("POP/Elbow/position", m_elbowEncoder.getPosition());
+        Telemetry.setValue("POP/Elbow/velocity", m_elbowEncoder.getVelocity());
+        Telemetry.setValue("POP/Claw/speed", m_Claw.get());
+        Telemetry.setValue("POP/Claw/temp", m_Claw.getMotorTemperature());
+        Telemetry.setValue("POP/Claw/voltage", m_Claw.getAppliedOutput());
+        Telemetry.setValue("POP/Claw/statorcurrent", m_Claw.getOutputCurrent());
+        Telemetry.setValue("POP/Claw/position", m_clawEncoder.getPosition());
+        Telemetry.setValue("POP/Claw/velocity", m_clawEncoder.getVelocity());
     }
     
     @Override  public void simulationPeriodic() {}

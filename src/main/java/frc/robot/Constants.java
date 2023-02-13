@@ -15,12 +15,14 @@ package frc.robot;
 public final class Constants {
     public class CAN {
         //CAN Bus IDs
-        public static final int PIGEON_ID = 0;
+        public static final int PDH_ID = 1;
+        public static final int PCH_ID = 2;
+        public static final int PIGEON_ID = 3;
 
-        public static final int FL_CANCODER_ID = 5;
-        public static final int FR_CANCODER_ID = 6;
-        public static final int BL_CANCODER_ID = 7;
-        public static final int BR_CANCODER_ID = 8;
+        public static final int FL_CANCODER_ID = 4;
+        public static final int FR_CANCODER_ID = 5;
+        public static final int BL_CANCODER_ID = 6;
+        public static final int BR_CANCODER_ID = 7;
 
         public static final int FL_DRIVE_ID = 11;
         public static final int FR_DRIVE_ID = 12;
@@ -31,6 +33,14 @@ public final class Constants {
         public static final int FR_AZIMUTH_ID = 22;
         public static final int BL_AZIMUTH_ID = 23;
         public static final int BR_AZIMUTH_ID = 24;
+
+        public static final int ARM_STAGE_1_ID = 31;
+        public static final int ARM_STAGE_1_FOLLOWER_ID = 32;
+        public static final int ARM_STAGE_2_ID = 33;
+        public static final int ARM_STAGE_3_ID = 34;
+
+        public static final int GRIP_LEFT_ID = 41;
+        public static final int GRIP_RIGHT_ID = 31;
     }
 
     public class DRIVETRAIN {
