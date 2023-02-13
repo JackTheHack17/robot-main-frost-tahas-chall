@@ -63,7 +63,7 @@ public class Arm extends SubsystemBase {
         configPID(0, 0, 0, 0, 0, 0, clawEncoder, clawPID);
     }
 
-    public void movetopoint(double x, double y, double claw) {
+    public void moveToPoint(double x, double y, double claw) {
         Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
         posArm(triangle.getAngleA() + (90 - Math.atan2(x, y)));
         posElbows(triangle.getAngleB());
