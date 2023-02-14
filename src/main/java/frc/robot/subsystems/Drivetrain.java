@@ -100,15 +100,6 @@ public class Drivetrain extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 80, 80, 0);
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
 
-  // private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
-  //   new Rotation2d(), 
-  //   new Pose2d(), 
-  //   m_kinematics, 
-  //   new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01), 
-  //   new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.02), 
-  //   new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
-  // );
-
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
 
   private Pose2d _robotPose = new Pose2d();
