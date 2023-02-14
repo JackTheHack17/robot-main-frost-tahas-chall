@@ -3,16 +3,14 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /** An example command that uses an example subsystem. */
 public class DriveCommand extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Drivetrain m_swerve;
-  private final CommandXboxController m_driver;
   
   // controller axis values
   private double m_LX = 0.0;
@@ -24,8 +22,7 @@ public class DriveCommand extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public DriveCommand(Drivetrain drivetrain, CommandXboxController driver) {
-    m_driver = driver;
+  public DriveCommand(Drivetrain drivetrain) {
     m_swerve = drivetrain;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_swerve);
@@ -40,9 +37,9 @@ public class DriveCommand extends CommandBase {
   public void execute() {
     
     // fetch joystick axis values
-    m_LX = m_driver.getRawAxis(0); // left x axis (strafe)
-    m_LY = -m_driver.getRawAxis(1); // left y axis (strafe)
-    m_RX = m_driver.getRawAxis(4); // right x axis (rotation)
+    m_LX = RobotContainer.driverController.getRawAxis(0); // left x axis (strafe)
+    m_LY = -RobotContainer.driverController.getRawAxis(1); // left y axis (strafe)
+    m_RX = RobotContainer.driverController.getRawAxis(4); // right x axis (rotation)
 
     // deadzones
     m_LX = ( Math.abs(m_LX) < 0.2 ) ? 0 : m_LX;

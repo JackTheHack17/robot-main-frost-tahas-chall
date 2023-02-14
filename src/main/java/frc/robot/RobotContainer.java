@@ -43,7 +43,7 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController));
+    m_swerve.setDefaultCommand(new DriveCommand(m_swerve));
   }
 
   /**
