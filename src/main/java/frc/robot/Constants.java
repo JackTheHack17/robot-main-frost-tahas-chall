@@ -77,6 +77,7 @@ public final class Constants {
     }
 
     public class ARM {       
+         public static final double JOINT_ANGLE_DEADZONE = 2;
          public static final double BISCEP_LENGTH = 20;        
          public static final double ELBOW_LENGTH = 30;
          public static final double LOW_ARM_ANG = 152.8;

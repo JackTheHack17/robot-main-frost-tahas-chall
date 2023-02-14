@@ -9,13 +9,12 @@ import com.revrobotics.SparkMaxPIDController;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Triangle;
 import frc.robot.Constants.ARM;
+import static frc.robot.Constants.ARM.JOINT_ANGLE_DEADZONE;
 import frc.robot.Constants.CAN;
 import frc.lib.Telemetry;
-
 
 public class Arm extends SubsystemBase {
     private final CANSparkMax m_Biscep;
@@ -30,6 +29,9 @@ public class Arm extends SubsystemBase {
     private final SparkMaxPIDController m_clawPID;
     private SparkMaxAlternateEncoder.Type kAltEncType;
     private PinchersofPower m_clawSubsystem;
+    private double m_biscepTarget = 0;
+    private double m_elbowTarget = 0;
+    private double m_clawTarget = 0;
 
     public Arm(PinchersofPower m_claw) {
         m_clawSubsystem = m_claw;
@@ -75,6 +77,14 @@ public class Arm extends SubsystemBase {
         posClaws(claw);
     }
 
+    public Boolean isAtTarget () {
+        return (
+            Math.abs(m_biscepEncoder.getPosition() - m_biscepTarget) < JOINT_ANGLE_DEADZONE &&
+            Math.abs(m_elbowEncoder.getPosition() - m_elbowTarget) < JOINT_ANGLE_DEADZONE &&
+            Math.abs(m_clawEncoder.getPosition() - m_clawTarget) < JOINT_ANGLE_DEADZONE
+        );
+    }
+
     public void setArm(double speed) {
         m_Biscep.set(speed);
     }
@@ -88,15 +98,18 @@ public class Arm extends SubsystemBase {
     }
 
     public void posArm(double angle) {
+        m_biscepTarget = angle;
         m_biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void posElbows(double angle) {
-        m_biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
+        m_elbowTarget = angle;
+        m_elbowPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void posClaws(double angle) {
-        m_biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
+        m_clawTarget = angle;
+        m_clawPID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
     public void lowArmScore() {
@@ -124,24 +137,43 @@ public class Arm extends SubsystemBase {
     }
 
     public Command midScoreCommand() {
-        return new InstantCommand();
-        /*return new FunctionalCommand(
+        return new FunctionalCommand(
             () -> {}, 
             this::lowArmScore, 
-            interrupted -> 
-            this);*/
+            interrupted -> m_clawSubsystem.Notake(m_clawSubsystem),
+            () -> this.isAtTarget() == true,
+            this
+        );
     }
 
     public Command highScoreCommand() {
-        return new InstantCommand(() -> highArmScore(), this);
+        return new FunctionalCommand(
+            () -> {}, 
+            this::highArmScore, 
+            interrupted -> m_clawSubsystem.Notake(m_clawSubsystem),
+            () -> this.isAtTarget() == true,
+            this
+        );
     }
     
     public Command lowScoreCommand() {
-        return new InstantCommand(() -> idleArmScore(), this);
+        return new FunctionalCommand(
+            () -> {}, 
+            this::idleArmScore, 
+            interrupted -> m_clawSubsystem.Notake(m_clawSubsystem),
+            () -> this.isAtTarget() == true,
+            this
+        );
     }
     
     public Command fetchCommand() {
-        return new InstantCommand(() -> fetch(), this);
+        return new FunctionalCommand(
+            () -> {}, 
+            this::fetch, 
+            interrupted -> m_clawSubsystem.Notake(m_clawSubsystem),
+            () -> this.isAtTarget() == true,
+            this
+        );
     }
 
     @Override  public void periodic() {

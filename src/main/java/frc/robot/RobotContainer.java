@@ -9,7 +9,6 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PinchersofPower;
 
-import static frc.robot.Constants.CAN.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -24,15 +23,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final Pigeon m_gyro = new Pigeon(PIGEON_ID);
-  private final Arm m_arm = new Arm();
-  private final Drivetrain m_swerve = new Drivetrain(m_gyro);
-  private final Limelight m_limelight = new Limelight();
-  private final LEDs m_LEDs = new LEDs();
-  private final PinchersofPower m_claw = new PinchersofPower();
+  public final Pigeon m_gyro = new Pigeon();
+  public final Limelight m_limelight = new Limelight();
+  public final Drivetrain m_swerve = new Drivetrain(m_gyro);
+  public final LEDs m_LEDs = new LEDs();
+  public final PinchersofPower m_claw = new PinchersofPower();
+  public final Arm m_arm = new Arm(m_claw);
 
-  private final CommandXboxController driver = new CommandXboxController(0);
-  private final CommandGenericHID copilot = new CommandGenericHID(1);
+  public static final CommandXboxController driverController = new CommandXboxController(0);
+  public static final CommandGenericHID copilotController = new CommandGenericHID(1);
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
@@ -44,7 +43,7 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driver));
+    m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController));
   }
 
   /**
@@ -54,8 +53,16 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driver.a().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
-    driver.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
+    driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
+    driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
+
+    copilotController.button(0).onTrue(m_arm.highScoreCommand());
+    copilotController.button(1).onTrue(new InstantCommand(m_arm::fetch, m_arm));
+    copilotController.button(2).onTrue(new InstantCommand(m_arm::highArmScore, m_arm));
+    copilotController.button(3).onTrue(new InstantCommand(m_arm::fetch, m_arm));
+    copilotController.button(4).onTrue(new InstantCommand(m_arm::lowArmScore, m_arm));
+    copilotController.button(5).onTrue(new InstantCommand(m_arm::idleArmScore, m_arm));
+    copilotController.button(6).onTrue(new InstantCommand(m_claw::outtake, m_claw));
   }
 
   /**
