@@ -1,14 +1,19 @@
 package frc.robot;
+import frc.lib.Telemetry;
 import frc.robot.commands.DriveCommand;
-import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PinchersofPower;
 
+import java.io.File;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -22,7 +27,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   public final Pigeon m_gyro = new Pigeon();
   public final Limelight m_limelight = new Limelight();
   public final Drivetrain m_swerve = new Drivetrain(m_gyro);
@@ -33,10 +37,9 @@ public class RobotContainer {
   public static final CommandXboxController driverController = new CommandXboxController(0);
   public static final CommandGenericHID copilotController = new CommandGenericHID(1);
 
-  private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    Telemetry.setValue("general/autonomous/availableRoutines", Stream.of(new File("/home/lvuser/deploy/").listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).toArray());
 
     m_gyro.zeroYaw();
 
@@ -71,7 +74,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return m_autoCommand;
+    return m_swerve.getAutonomousCommand();
   }
 }

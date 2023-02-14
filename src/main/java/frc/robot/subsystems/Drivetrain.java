@@ -11,7 +11,11 @@ import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.server.PathPlannerServer;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.controller.PIDController;
@@ -24,10 +28,16 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import static frc.robot.Constants.DRIVETRAIN.*;
+
+import java.util.HashMap;
+import java.util.List;
+
 import static frc.robot.Constants.CAN.*;
 
 public class Drivetrain extends SubsystemBase {
@@ -371,22 +381,32 @@ public class Drivetrain extends SubsystemBase {
     return positions;
   }
 
-  public Command followTrajectoryCommand(PathPlannerTrajectory traj) {
-
-    m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), traj.getInitialHolonomicPose());
-
-    // HashMap<String, Command> eventMap = new HashMap<>();
-    // eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-
-    return new PPSwerveControllerCommand(
-      traj, 
-      () -> m_odometry.getEstimatedPosition(), // Pose supplier
-      this.m_kinematics, // SwerveDriveKinematics
-      new PIDController(_translationKp, _translationKi, _translationKd), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-      new PIDController(_translationKp, _translationKi, _translationKd), // Y controller (usually the same values as X controller)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-      modules -> driveFromModuleStates(modules), // Module states consumer
-      this // Requires this drive subsystem
+  public Command getAutonomousCommand () {
+    // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
+    // for every path in the group
+    List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
+      Telemetry.getValue("general/autonomous/selectedRoutine", "default"), 
+      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default"))
     );
+
+    // This is just an example event map. It would be better to have a constant, global event map
+    // in your code that will be used by all path following commands.
+    HashMap<String, Command> eventMap = new HashMap<>();
+    eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+
+    // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
+    SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
+      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
+        pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose), // Pose2d consumer, used to reset odometry at the beginning of auto
+        this.m_kinematics, // SwerveDriveKinematics
+        new PIDConstants(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+        new PIDConstants(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+        this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+        eventMap,
+        true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+        (Subsystem) this // The drive subsystem. Used to properly set the requirements of path following commands
+    );
+
+    return autoBuilder.fullAuto(pathGroup);
   }
 }
