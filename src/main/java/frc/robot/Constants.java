@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.lib.ArmPosition;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -13,6 +15,10 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+    public class PWM {
+        public static final int BLINKIN_ID = 0;
+    }
+
     public class CAN {
         //CAN Bus IDs
         public static final int PDH_ID = 1;
@@ -76,28 +82,35 @@ public final class Constants {
         public static final double YINT = 0;
     }
 
-    public class ARM {       
-         public static final double JOINT_ANGLE_DEADZONE = 2;
-         public static final double BISCEP_LENGTH = 20;        
-         public static final double ELBOW_LENGTH = 30;
-         public static final double LOW_ARM_ANG = 152.8;
-         public static final double LOW_ELBOW_ANG = 168.9;
-         public static final double LOW_CLAW_ANG = -14.5;
-         public static final double HIGH_ARM_ANG = 83;
-         public static final double HIGH_ELBOW_ANG = 168.9;
-         public static final double HIGH_CLAW_ANG = -142.5;
-         public static final double IDLE_ARM_ANG = 63.8;
-         public static final double IDLE_ELBOW_ANG = -38.4;
-         public static final double IDLE_CLAW_ANG = 96.9;
-         public static final double FETCH_ARM_ANG = 0;
-         public static final double FETCH_ELBOW_ANG = 0;
-         public static final double FETCH_CLAW_ANG = 0;
+    public static final class ARM {
+        public static final double JOINT_ANGLE_DEADZONE = 0;
+        public static final double JOINT_COORDINATE_DEADZONE = 0;
+
+        public static enum positions {
+            ScoreHigh,
+            ScoreMid,
+            ScoreLow,
+            Floor,
+            FloorAlt,
+            Substation,
+            Idle
+        };
+
+        public static ArmPosition scoreHighPosition  = new ArmPosition(0, 0, 0);
+        public static ArmPosition scoreMidPosition   = new ArmPosition(0, 0, 0);
+        public static ArmPosition scoreLowPosition   = new ArmPosition(0, 0, 0);
+        public static ArmPosition floorPosition      = new ArmPosition(0, 0, 0);
+        public static ArmPosition floorAltPosition   = new ArmPosition(0, 0, 0);
+        public static ArmPosition substationPosition = new ArmPosition(0, 0, 0);
+        public static ArmPosition idlePosition       = new ArmPosition(0, 0, 0);
  }
 
      public class POP {
          public static final double F = 0;
          public static final double R = 0;
          public static final double SPEED = 0.5;
+         public static final int FORWARD_PNEUMATIC_CHANNEL = 0;
+         public static final int BACKWARD_PNEUMATIC_CHANNEL = 0;
      }
 
      public class LED {

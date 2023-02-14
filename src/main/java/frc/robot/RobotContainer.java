@@ -1,5 +1,6 @@
 package frc.robot;
 import frc.lib.Telemetry;
+import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
@@ -26,26 +27,26 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  public final Pigeon m_gyro = new Pigeon();
-  public final Limelight m_limelight = new Limelight();
-  public final Drivetrain m_swerve = new Drivetrain(m_gyro);
-  public final LEDs m_LEDs = new LEDs();
-  public final PinchersofPower m_claw = new PinchersofPower();
-  public final Arm m_arm = new Arm(m_claw);
-
+  // Im leaving these ports as magic constants because there's no case where they are not these values
   public static final CommandXboxController driverController = new CommandXboxController(0);
   public static final CommandGenericHID copilotController = new CommandGenericHID(1);
+
+  // The robot's subsystems and commands are defined here...
+  private final Pigeon m_gyro = new Pigeon();
+  private final Limelight m_limelight = new Limelight();
+  private final Drivetrain m_swerve = new Drivetrain(m_gyro);
+  private final LEDs m_LEDs = new LEDs();
+  private final PinchersofPower m_claw = new PinchersofPower();
+  private final Arm m_arm = new Arm(m_claw, m_LEDs, driverController);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     Telemetry.setValue("general/autonomous/availableRoutines", Stream.of(new File("/home/lvuser/deploy/").listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).toArray());
 
-    m_gyro.zeroYaw();
-
     // Configure the button bindings
     configureButtonBindings();
 
+    m_LEDs.setDefaultCommand(m_LEDs.idle());
     m_swerve.setDefaultCommand(new DriveCommand(m_swerve));
   }
 
@@ -59,13 +60,15 @@ public class RobotContainer {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
 
-    copilotController.button(0).onTrue(m_arm.highScoreCommand());
-    copilotController.button(1).onTrue(new InstantCommand(m_arm::fetch, m_arm));
-    copilotController.button(2).onTrue(new InstantCommand(m_arm::highArmScore, m_arm));
-    copilotController.button(3).onTrue(new InstantCommand(m_arm::fetch, m_arm));
-    copilotController.button(4).onTrue(new InstantCommand(m_arm::lowArmScore, m_arm));
-    copilotController.button(5).onTrue(new InstantCommand(m_arm::idleArmScore, m_arm));
-    copilotController.button(6).onTrue(new InstantCommand(m_claw::outtake, m_claw));
+    copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
+    copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
+    copilotController.button(2).whileTrue(m_arm.moveToPositionCommand(positions.ScoreHigh));
+    copilotController.button(3).whileTrue(m_arm.moveToPositionCommand(positions.FloorAlt));
+    copilotController.button(4).whileTrue(m_arm.moveToPositionCommand(positions.ScoreMid));
+    copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
+    copilotController.button(6).onTrue(m_claw.Outtake(m_claw));
+    copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))));
+    copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))));
   }
 
   /**

@@ -1,204 +1,239 @@
 package frc.robot.subsystems;
+
+import static frc.robot.Constants.ARM.*;
+
+import java.util.HashMap;
+
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxPIDController.AccelStrategy;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.Triangle;
-import frc.robot.Constants.ARM;
-import static frc.robot.Constants.ARM.JOINT_ANGLE_DEADZONE;
-import frc.robot.Constants.CAN;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.ArmPosition;
 import frc.lib.Telemetry;
+import frc.lib.Triangle;
+import frc.robot.Constants.ARM.positions;
+import frc.robot.Constants.CAN;
+import frc.robot.RobotContainer;
 
 public class Arm extends SubsystemBase {
-    private final CANSparkMax m_Biscep;
-    private final CANSparkMax m_Biscep2;
-    private final CANSparkMax m_Elbow;
-    private final CANSparkMax m_Claw;
-    private final RelativeEncoder m_biscepEncoder;  
-    private final RelativeEncoder m_elbowEncoder;
-    private final RelativeEncoder m_clawEncoder;
-    private final SparkMaxPIDController m_biscepPID;  
-    private final SparkMaxPIDController m_elbowPID;
-    private final SparkMaxPIDController m_clawPID;
+    private final CANSparkMax m_stage1;
+    private final CANSparkMax m_stage1Follower;
+    private final CANSparkMax m_stage2;
+    private final CANSparkMax m_stage3;
+    private final RelativeEncoder m_stage1Encoder;  
+    private final RelativeEncoder m_stage2Encoder;
+    private final RelativeEncoder m_stage3Encoder;
+    private final SparkMaxPIDController m_stage1PID;  
+    private final SparkMaxPIDController m_stage2PID;
+    private final SparkMaxPIDController m_stage3PID;
     private SparkMaxAlternateEncoder.Type kAltEncType;
     private PinchersofPower m_clawSubsystem;
-    private double m_biscepTarget = 0;
-    private double m_elbowTarget = 0;
-    private double m_clawTarget = 0;
+    private LEDs m_LEDsSubsystem;
+    private CommandXboxController m_driverController;
+    private double m_stage1Target = 0;
+    private double m_stage2Target = 0;
+    private double m_stage3Target = 0;
+    private double m_manualTargetX = 0;
+    private double m_manualTargetY = 0;
+    private double m_manualTargetTheta = 0;
+    private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
 
-    public Arm(PinchersofPower m_claw) {
+    public Arm(PinchersofPower m_claw, LEDs m_LEDs, CommandXboxController driverController) {
+        // populate position map
+        positionMap.put(positions.ScoreHigh, scoreHighPosition);
+        positionMap.put(positions.ScoreMid, scoreMidPosition);
+        positionMap.put(positions.ScoreLow, scoreLowPosition);
+        positionMap.put(positions.Floor, floorPosition);
+        positionMap.put(positions.FloorAlt, floorAltPosition);
+        positionMap.put(positions.Substation, substationPosition);
+        positionMap.put(positions.Idle, idlePosition);
+
+        m_LEDsSubsystem = m_LEDs;
         m_clawSubsystem = m_claw;
+        m_driverController = driverController;
 
-        m_Biscep = new CANSparkMax(CAN.ARM_STAGE_1_ID, MotorType.kBrushless);
-        m_Biscep2 = new CANSparkMax(CAN.ARM_STAGE_1_FOLLOWER_ID, MotorType.kBrushless);   
-        m_Elbow = new CANSparkMax(CAN.ARM_STAGE_2_ID, MotorType.kBrushless);
-        m_Claw = new CANSparkMax(CAN.ARM_STAGE_3_ID, MotorType.kBrushless);
+        m_stage1 = new CANSparkMax(CAN.ARM_STAGE_1_ID, MotorType.kBrushless);
+        m_stage1Follower = new CANSparkMax(CAN.ARM_STAGE_1_FOLLOWER_ID, MotorType.kBrushless);   
+        m_stage2 = new CANSparkMax(CAN.ARM_STAGE_2_ID, MotorType.kBrushless);
+        m_stage3 = new CANSparkMax(CAN.ARM_STAGE_3_ID, MotorType.kBrushless);
 
-        m_Biscep.setIdleMode(IdleMode.kBrake);
-        m_Elbow.setIdleMode(IdleMode.kBrake);
-        m_Claw.setIdleMode(IdleMode.kBrake);
-        m_Biscep2.setIdleMode(IdleMode.kBrake);
-        m_Biscep2.follow(m_Biscep);
+        m_stage1.setIdleMode(IdleMode.kBrake);
+        m_stage2.setIdleMode(IdleMode.kBrake);
+        m_stage3.setIdleMode(IdleMode.kBrake);
+        m_stage1Follower.setIdleMode(IdleMode.kBrake);
+        m_stage1Follower.follow(m_stage1);
 
         kAltEncType = SparkMaxAlternateEncoder.Type.kQuadrature;
 
-        m_biscepEncoder = m_Biscep.getAlternateEncoder(kAltEncType, 8192);
-        m_elbowEncoder = m_Elbow.getAlternateEncoder(kAltEncType, 8192);
-        m_clawEncoder = m_Claw.getAlternateEncoder(kAltEncType, 8192);
+        m_stage1Encoder = m_stage1.getAlternateEncoder(kAltEncType, 8192);
+        m_stage2Encoder = m_stage2.getAlternateEncoder(kAltEncType, 8192);
+        m_stage3Encoder = m_stage3.getAlternateEncoder(kAltEncType, 8192);
 
-        m_biscepEncoder.setPositionConversionFactor(360);
-        m_elbowEncoder.setPositionConversionFactor(360);
-        m_clawEncoder.setPositionConversionFactor(360);
+        m_stage1Encoder.setPositionConversionFactor(360);
+        m_stage2Encoder.setPositionConversionFactor(360);
+        m_stage3Encoder.setPositionConversionFactor(360);
+        
+        m_stage1Encoder.setVelocityConversionFactor(360);
+        m_stage2Encoder.setVelocityConversionFactor(360);
+        m_stage3Encoder.setVelocityConversionFactor(360);
 
-        m_biscepEncoder.setVelocityConversionFactor(360);
-        m_elbowEncoder.setVelocityConversionFactor(360);
-        m_clawEncoder.setVelocityConversionFactor(360);
+        m_stage1PID = m_stage1.getPIDController(); 
+        m_stage2PID = m_stage2.getPIDController();
+        m_stage3PID = m_stage3.getPIDController();
 
-        m_biscepPID = m_Biscep.getPIDController(); 
-        m_elbowPID = m_Elbow.getPIDController();
-        m_clawPID = m_Claw.getPIDController();
-
-        configPID(0, 0, 0, 0, 0, 0, m_biscepEncoder, m_biscepPID);
-        configPID(0, 0, 0, 0, 0, 0, m_elbowEncoder, m_elbowPID);
-        configPID(0, 0, 0, 0, 0, 0, m_clawEncoder, m_clawPID);
+        configPID(0, 0, 0, 0, 0, 0, m_stage1Encoder, m_stage1PID);
+        configPID(0, 0, 0, 0, 0, 0, m_stage2Encoder, m_stage2PID);
+        configPID(0, 0, 0, 0, 0, 0, m_stage3Encoder, m_stage3PID);
     }
 
-    public void moveToPoint(double x, double y, double claw) {
+    private void moveToPoint(double x, double y, double claw) {
         Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-        posArm(triangle.getAngleA() + (90 - Math.atan2(x, y)));
-        posElbows(triangle.getAngleB());
-        posClaws(claw);
+        setStage1Target(triangle.getAngleA() + (90 - Math.atan2(x, y)));
+        setStage2Target(triangle.getAngleB());
+        setStage3Target(claw);
+    }
+
+    private double[] getCurrentPoint () {
+        // TODO forward kinematics
+        return new double[3];
+    }
+
+    private void moveToAngles (double stage1Angle, double stage2Angle, double stage3Angle) {
+        setStage1Target(stage1Angle);
+        setStage2Target(stage2Angle);
+        setStage3Target(stage3Angle);
+        m_manualTargetX = getCurrentPoint()[0];
+        m_manualTargetY = getCurrentPoint()[1];
+        m_manualTargetTheta = getCurrentPoint()[2];
+    }
+
+    private void moveToPosition (positions position) {
+        ArmPosition target = positionMap.get(position);
+        moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
     }
 
     public Boolean isAtTarget () {
-        return (
-            Math.abs(m_biscepEncoder.getPosition() - m_biscepTarget) < JOINT_ANGLE_DEADZONE &&
-            Math.abs(m_elbowEncoder.getPosition() - m_elbowTarget) < JOINT_ANGLE_DEADZONE &&
-            Math.abs(m_clawEncoder.getPosition() - m_clawTarget) < JOINT_ANGLE_DEADZONE
-        );
+        if (RobotContainer.copilotController.getHID().getRawButton(9)) {
+            return (
+                Math.abs(getCurrentPoint()[0] - m_manualTargetX) < JOINT_COORDINATE_DEADZONE &&
+                Math.abs(getCurrentPoint()[1] - m_manualTargetY) < JOINT_COORDINATE_DEADZONE &&
+                Math.abs(getCurrentPoint()[2] - m_manualTargetTheta) < JOINT_COORDINATE_DEADZONE
+            );
+        } else {
+            return (
+                Math.abs(m_stage1Encoder.getPosition() - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
+                Math.abs(m_stage2Encoder.getPosition() - m_stage2Target) < JOINT_ANGLE_DEADZONE &&
+                Math.abs(m_stage3Encoder.getPosition() - m_stage3Target) < JOINT_ANGLE_DEADZONE
+            );
+        }
     }
 
-    public void setArm(double speed) {
-        m_Biscep.set(speed);
+    public void setStage1Target(double angle) {
+        m_stage1Target = angle;
+        m_stage1PID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
-    public void setElbows(double speed) {    
-        m_Elbow.set(speed);  
+    public void setStage2Target(double angle) {
+        m_stage2Target = angle;
+        m_stage2PID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
-    public void setClaws(double speed) {    
-        m_Claw.set(speed);  
+    public void setStage3Target(double angle) {
+        m_stage3Target = angle;
+        m_stage3PID.setReference(angle, CANSparkMax.ControlType.kPosition);
     }
 
-    public void posArm(double angle) {
-        m_biscepTarget = angle;
-        m_biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
-    }
-
-    public void posElbows(double angle) {
-        m_elbowTarget = angle;
-        m_elbowPID.setReference(angle, CANSparkMax.ControlType.kPosition);
-    }
-
-    public void posClaws(double angle) {
-        m_clawTarget = angle;
-        m_clawPID.setReference(angle, CANSparkMax.ControlType.kPosition);
-    }
-
-    public void lowArmScore() {
-        posArm(ARM.LOW_ARM_ANG);
-        posElbows(ARM.LOW_ELBOW_ANG);  
-        posClaws(ARM.LOW_CLAW_ANG);
-    }
-
-    public void highArmScore() {
-        posArm(ARM.HIGH_ARM_ANG);
-        posElbows(ARM.HIGH_ELBOW_ANG);  
-        posClaws(ARM.HIGH_CLAW_ANG);
-    }
-    
-    public void idleArmScore() {
-        posArm(ARM.IDLE_ARM_ANG);
-        posElbows(ARM.IDLE_ELBOW_ANG);  
-        posClaws(ARM.IDLE_CLAW_ANG);
-    }
-
-    public void fetch() {
-        posArm(ARM.FETCH_ARM_ANG);
-        posElbows(ARM.FETCH_ELBOW_ANG);  
-        posClaws(ARM.FETCH_CLAW_ANG);
-    }
-
-    public Command midScoreCommand() {
+    public Command moveToPositionCommand (positions position) {
         return new FunctionalCommand(
-            () -> {}, 
-            this::lowArmScore, 
-            interrupted -> m_clawSubsystem.Notake(m_clawSubsystem),
-            () -> this.isAtTarget() == true,
+            () -> { // init
+                m_clawSubsystem.notake();
+            }, 
+            () -> { // execution
+                moveToPosition(position);
+            }, 
+            interrupted -> { // when should the command do when it ends?
+                if (!interrupted) {
+                    // arm is in position
+
+                    m_LEDsSubsystem.flashGreen().schedule();
+                    m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1);
+                    new SequentialCommandGroup(new WaitCommand(0.5), new InstantCommand( () -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))).schedule();
+                }
+            },
+            () -> { // should the command end?
+                return this.isAtTarget();
+            },
             this
         );
     }
 
-    public Command highScoreCommand() {
+    public Command moveToPointCommand (double x, double y, double theta) {
         return new FunctionalCommand(
-            () -> {}, 
-            this::highArmScore, 
-            interrupted -> m_clawSubsystem.Notake(m_clawSubsystem),
-            () -> this.isAtTarget() == true,
+            () -> { // init
+                m_clawSubsystem.notake();
+            }, 
+            () -> { // execution
+                moveToPoint(x, y, theta);
+            }, 
+            interrupted -> { // when should the command do when it ends?
+                if (!interrupted) {
+                    // arm is in position
+                }
+            },
+            () -> { // should the command end?
+                return this.isAtTarget();
+            },
             this
         );
     }
-    
-    public Command lowScoreCommand() {
-        return new FunctionalCommand(
-            () -> {}, 
-            this::idleArmScore, 
-            interrupted -> m_clawSubsystem.Notake(m_clawSubsystem),
-            () -> this.isAtTarget() == true,
-            this
-        );
-    }
-    
-    public Command fetchCommand() {
-        return new FunctionalCommand(
-            () -> {}, 
-            this::fetch, 
-            interrupted -> m_clawSubsystem.Notake(m_clawSubsystem),
-            () -> this.isAtTarget() == true,
-            this
-        );
+
+    public Command defaultCommand () {
+        if (RobotContainer.copilotController.getHID().getRawButton(9)) {
+            // the manual override is enabled
+            // TODO modify targets from buttons i cannot be bothered rn
+            return moveToPointCommand(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
+        } else {
+            return moveToPositionCommand(positions.Idle);
+        }
     }
 
     @Override  public void periodic() {
-        Telemetry.setValue("POP/Biscep/speed", m_Biscep.get());
-        Telemetry.setValue("POP/Biscep/temp", m_Biscep.getMotorTemperature());
-        Telemetry.setValue("POP/Biscep/voltage", m_Biscep.getAppliedOutput());
-        Telemetry.setValue("POP/Biscep/statorcurrent", m_Biscep.getOutputCurrent());
-        Telemetry.setValue("POP/Biscep/position", m_biscepEncoder.getPosition());
-        Telemetry.setValue("POP/Biscep/velocity", m_biscepEncoder.getVelocity());
-        Telemetry.setValue("POP/BiscepFollower/speed2", m_Biscep2.get());
-        Telemetry.setValue("POP/BiscepFollower/temp2", m_Biscep2.getMotorTemperature());
-        Telemetry.setValue("POP/BiscepFollower/voltage2", m_Biscep2.getAppliedOutput());
-        Telemetry.setValue("POP/BiscepFollower/statorcurrent2", m_Biscep2.getOutputCurrent());
-        Telemetry.setValue("POP/Elbow/speed", m_Elbow.get());
-        Telemetry.setValue("POP/Elbow/temp", m_Elbow.getMotorTemperature());
-        Telemetry.setValue("POP/Elbow/voltage", m_Elbow.getAppliedOutput());
-        Telemetry.setValue("POP/Elbow/statorcurrent", m_Elbow.getOutputCurrent());
-        Telemetry.setValue("POP/Elbow/position", m_elbowEncoder.getPosition());
-        Telemetry.setValue("POP/Elbow/velocity", m_elbowEncoder.getVelocity());
-        Telemetry.setValue("POP/Claw/speed", m_Claw.get());
-        Telemetry.setValue("POP/Claw/temp", m_Claw.getMotorTemperature());
-        Telemetry.setValue("POP/Claw/voltage", m_Claw.getAppliedOutput());
-        Telemetry.setValue("POP/Claw/statorcurrent", m_Claw.getOutputCurrent());
-        Telemetry.setValue("POP/Claw/position", m_clawEncoder.getPosition());
-        Telemetry.setValue("POP/Claw/velocity", m_clawEncoder.getVelocity());
+        Telemetry.setValue("POP/stage1/setpoint", m_stage1.get());
+        Telemetry.setValue("POP/stage1/temperature", m_stage1.getMotorTemperature());
+        Telemetry.setValue("POP/stage1/outputVoltage", m_stage1.getAppliedOutput());
+        Telemetry.setValue("POP/stage1/statorCurrent", m_stage1.getOutputCurrent());
+        Telemetry.setValue("POP/stage1/actualPosition", m_stage1Encoder.getPosition());
+        Telemetry.setValue("POP/stage1/targetPosition", m_stage1Target);
+        Telemetry.setValue("POP/stage1Follower/setpoint", m_stage1Follower.get());
+        Telemetry.setValue("POP/stage1Follower/temperature", m_stage1Follower.getMotorTemperature());
+        Telemetry.setValue("POP/stage1Follower/outputVoltage", m_stage1Follower.getAppliedOutput());
+        Telemetry.setValue("POP/stage1Follower/statorCurrent", m_stage1Follower.getOutputCurrent());
+        Telemetry.setValue("POP/stage2/setpoint", m_stage2.get());
+        Telemetry.setValue("POP/stage2/temperature", m_stage2.getMotorTemperature());
+        Telemetry.setValue("POP/stage2/outputVoltage", m_stage2.getAppliedOutput());
+        Telemetry.setValue("POP/stage2/statorcurrent", m_stage2.getOutputCurrent());
+        Telemetry.setValue("POP/stage2/actualPosition", m_stage2Encoder.getPosition());
+        Telemetry.setValue("POP/stage2/targetPosition", m_stage2Target);
+        Telemetry.setValue("POP/stage3/setpoint", m_stage3.get());
+        Telemetry.setValue("POP/stage3/temperature", m_stage3.getMotorTemperature());
+        Telemetry.setValue("POP/stage3/outputVoltage", m_stage3.getAppliedOutput());
+        Telemetry.setValue("POP/stage3/statorCurrent", m_stage3.getOutputCurrent());
+        Telemetry.setValue("POP/stage3/actualPosition", m_stage3Encoder.getPosition());
+        Telemetry.setValue("POP/stage3/targetPosition", m_stage3Target);
+
+        // TODO expose PIDs to Network Table
     }
     
     @Override  public void simulationPeriodic() {}

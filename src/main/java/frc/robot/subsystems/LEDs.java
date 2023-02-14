@@ -1,70 +1,75 @@
 package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.Telemetry;
-import frc.robot.Constants.*;
+import frc.robot.Constants;
+
+// https://www.revrobotics.com/content/docs/REV-11-1105-UM.pdf
 
 public class LEDs extends SubsystemBase {
-  PWMSparkMax LEDS;
-  String Mode;
-  boolean success;
-  int detect;
+  PWMSparkMax LEDsOutput = new PWMSparkMax(Constants.PWM.BLINKIN_ID);
+  double command = 0;
+  double lastColor = 0;
 
-  public LEDs() {
-    LEDS = new PWMSparkMax(0);
+  public Command turnYellow () {
+    return new InstantCommand( () -> command = 0.69 );
   }
 
-  public void setMode(String State) {
-    Mode = State;
+  public Command turnPurple () {
+    return new InstantCommand( () -> command = 0.91 );
   }
 
-  public void setdetect(int bool) {
-    detect = bool;
+  public Command flashRed () {
+    lastColor = LEDsOutput.get();
+    return new ParallelCommandGroup(
+      new InstantCommand( () -> command = -0.11 ), 
+      new SequentialCommandGroup(
+        new WaitCommand(1), 
+        new InstantCommand( () -> {
+          if (lastColor == 0.69) {
+            turnYellow().schedule();
+          } else if (lastColor == 0.91) {
+            turnPurple().schedule();
+          } else {
+            idle().schedule();
+          }
+        })
+      )
+    );
   }
 
-  public void setsuccess(boolean bool) {
-    success = bool;
+  public Command flashGreen () {
+    lastColor = LEDsOutput.get();
+    return new ParallelCommandGroup(
+      new InstantCommand( () -> command = 0.15 ), 
+      new SequentialCommandGroup(
+        new WaitCommand(1), 
+        new InstantCommand( () -> {
+          if (lastColor == 0.69) {
+            turnYellow().schedule();
+          } else if (lastColor == 0.91) {
+            turnPurple().schedule();
+          } else {
+            idle().schedule();
+          }
+        })
+      )
+    );
   }
 
-  public void detector() {
-    if(detect == 1) {
-      LEDS.set(LED.GREEN);
-      Telemetry.setValue("LEDS/Blinkin/color", "GREEN");
-    }
-    if(detect == -1) {
-      LEDS.set(LED.RED);
-      Telemetry.setValue("LEDS/Blinkin/color", "RED");
-    }
-    detect = 0;
+  public Command idle () {
+    return new InstantCommand( () -> command = 0.01 );
   }
-
-  public void state() {
-    if(Mode == "Cone") {
-      LEDS.set(LED.YELLOW);
-      Telemetry.setValue("LEDS/Blinkin/color", "YELLOW");
-    }
-    if(Mode == "Cube") {
-      LEDS.set(LED.PURPLE);
-      Telemetry.setValue("LEDS/Blinkin/color", "PURPLE");
-    }
-  }
-
-  public void succeed() {
-    if(success == true) {
-      LEDS.set(LED.RAINBOW);
-      Telemetry.setValue("LEDS/Blinkin/color", "RAINBOW");
-      Mode = "Neither";
-    }
-    LEDS.set(0);
-    Telemetry.setValue("LEDS/Blinkin/color", "NONE");
-  }
-
+  
   @Override
   public void periodic() {
-    detector();
-    state();
-    succeed();
-    Telemetry.setValue("LEDS/Blinkin/value", LEDS.get());
+    LEDsOutput.set(command);
+    Telemetry.setValue("LEDS/Blinkin/value", LEDsOutput.get());
   }
 
   @Override

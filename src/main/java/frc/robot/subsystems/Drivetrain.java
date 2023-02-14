@@ -24,6 +24,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -222,6 +224,10 @@ public class Drivetrain extends SubsystemBase {
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
+
+    Telemetry.setValue("general/FMSAlliance", DriverStation.getAlliance() == Alliance.Blue ? "Blue" : (DriverStation.getAlliance() == Alliance.Red ? "Red" : "Invalid") );
+    Telemetry.setValue("general/joystick0Name", DriverStation.getJoystickName(0));
+    Telemetry.setValue("general/joystick1Name", DriverStation.getJoystickName(1));
   }
 
   @Override
@@ -385,16 +391,18 @@ public class Drivetrain extends SubsystemBase {
     // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
       () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
-        pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose), // Pose2d consumer, used to reset odometry at the beginning of auto
-        this.m_kinematics, // SwerveDriveKinematics
-        new PIDConstants(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-        new PIDConstants(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-        this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
-        eventMap,
-        true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-        (Subsystem) this // The drive subsystem. Used to properly set the requirements of path following commands
+      pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose), // Pose2d consumer, used to reset odometry at the beginning of auto
+      this.m_kinematics, // SwerveDriveKinematics
+      new PIDConstants(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      new PIDConstants(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+      eventMap,
+      true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+      (Subsystem) this // The drive subsystem. Used to properly set the requirements of path following commands
     );
 
     return autoBuilder.fullAuto(pathGroup);
   }
 }
+
+// TODO targeting
