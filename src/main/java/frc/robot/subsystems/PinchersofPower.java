@@ -75,14 +75,13 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void outtake() {
     spinout();
-    if((m_cone == true) && (pusher.get() == Value.kForward)) {
+    if(pusher.get() == Value.kForward) {
       pusher.set(Value.kReverse);
     }
   }
 
   public void notake() {
     spinoff();
-    off();
   }
 
   public void setMode(String mode) {
@@ -94,16 +93,16 @@ public class PinchersofPower extends SubsystemBase  {
     }
   }
 
-  public Command Intake(PinchersofPower Claw) {
-    return new InstantCommand(() -> intake(), Claw);
+  public Command intakeCommand() {
+    return new InstantCommand(() -> intake(), this);
   }
 
-  public Command Outtake(PinchersofPower Claw) {
-    return new InstantCommand(() -> outtake(), Claw);
+  public Command outtakeCommand() {
+    return new InstantCommand(() -> outtake(), this);
   }
 
-  public Command Notake(PinchersofPower Claw) {
-    return new InstantCommand(() -> notake(), Claw);
+  public Command notakeCommand() {
+    return new InstantCommand(() -> notake(), this);
   }
 
   @Override

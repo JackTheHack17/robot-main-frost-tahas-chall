@@ -27,11 +27,15 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
+import frc.robot.Constants.ARM.positions;
+
 import static frc.robot.Constants.DRIVETRAIN.*;
 
 import java.util.HashMap;
@@ -40,7 +44,9 @@ import java.util.List;
 import static frc.robot.Constants.CAN.*;
 
 public class Drivetrain extends SubsystemBase {
-  private final Pigeon m_gyro;
+  private Pigeon m_gyro;
+  private Arm m_arm;
+  private PinchersofPower m_claw;
 
   private SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     new Translation2d(-ROBOT_WIDTH/2, ROBOT_WIDTH/2),
@@ -114,8 +120,10 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKd = 1;
 
   /** Creates a new ExampleSubsystem. */
-  public Drivetrain(Pigeon m_gyro) {
+  public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw) {
     this.m_gyro = m_gyro;
+    this.m_arm = m_arm;
+    this.m_claw = m_claw;
     
     Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
     Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
@@ -289,6 +297,10 @@ public class Drivetrain extends SubsystemBase {
     BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
   }
 
+  public Command moveToPositionCommand (Pose2d target) { // TODO move to position command
+    return new InstantCommand();
+  }
+
   /** Sets the gyroscope's current heading to 0 */
   public void zeroGyro() {
     m_gyro.zeroYaw();
@@ -387,6 +399,21 @@ public class Drivetrain extends SubsystemBase {
     // in your code that will be used by all path following commands.
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+    eventMap.put("placeHigh", m_arm.moveToPositionCommand(positions.ScoreHigh));
+    eventMap.put("release", m_claw.outtakeCommand());
+    eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.ScoreLow));
+    eventMap.put("intakeIn", new FunctionalCommand(null, () -> {
+      m_claw.intakeCommand();
+    }, 
+    null, 
+    () -> {
+      return false; // TODO color sensor
+    }, 
+    m_claw));
+    eventMap.put("autobalance", new InstantCommand()); // TODO balance command
+    eventMap.put("realign", moveToPositionCommand(new Pose2d())); // TODO align command
+    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode("cone"); } ));
+    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode("cube"); } ));
 
     // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(

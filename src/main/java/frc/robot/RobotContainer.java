@@ -34,10 +34,10 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Pigeon m_gyro = new Pigeon();
   private final Limelight m_limelight = new Limelight();
-  private final Drivetrain m_swerve = new Drivetrain(m_gyro);
   private final LEDs m_LEDs = new LEDs();
   private final PinchersofPower m_claw = new PinchersofPower();
   private final Arm m_arm = new Arm(m_claw, m_LEDs, driverController);
+  private final Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -66,7 +66,7 @@ public class RobotContainer {
     copilotController.button(3).whileTrue(m_arm.moveToPositionCommand(positions.FloorAlt));
     copilotController.button(4).whileTrue(m_arm.moveToPositionCommand(positions.ScoreMid));
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
-    copilotController.button(6).onTrue(m_claw.Outtake(m_claw));
+    copilotController.button(6).onTrue(m_claw.outtakeCommand());
     copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))));
     copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))));
   }
