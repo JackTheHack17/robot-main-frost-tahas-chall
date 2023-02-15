@@ -58,8 +58,8 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro, m_swerve));
-    driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient, m_swerve));
+    driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
+    driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
