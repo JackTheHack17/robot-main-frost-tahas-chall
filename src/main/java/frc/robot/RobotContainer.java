@@ -47,6 +47,7 @@ public class RobotContainer {
     configureButtonBindings();
 
     m_LEDs.setDefaultCommand(m_LEDs.idle());
+    m_arm.setDefaultCommand(m_arm.defaultCommand());
     m_swerve.setDefaultCommand(new DriveCommand(m_swerve));
   }
 

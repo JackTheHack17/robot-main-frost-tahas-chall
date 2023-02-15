@@ -166,7 +166,7 @@ public class Arm extends SubsystemBase {
             interrupted -> { // when should the command do when it ends?
                 if (!interrupted) {
                     // arm is in position
-
+                    if ( position == positions.Idle ) return; // idle position is exempt from driver notification
                     m_LEDsSubsystem.flashGreen().schedule();
                     m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1);
                     new SequentialCommandGroup(new WaitCommand(0.5), new InstantCommand( () -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))).schedule();
