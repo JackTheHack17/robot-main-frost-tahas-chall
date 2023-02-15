@@ -52,6 +52,11 @@ public class Limelight extends SubsystemBase {
     return new Pose2d(translate, rotation);
   }
 
+  /** returns latency in seconds (tl + cl) */
+  public double getLatency () {
+    return (limelight.getEntry("tl").getDouble(0) + limelight.getEntry("cl").getDouble(0))/1000.0;
+  }
+
   @Override
   public void periodic() {
     frc.lib.Telemetry.setValue("Limelight/2d/yaw", getyaw());
