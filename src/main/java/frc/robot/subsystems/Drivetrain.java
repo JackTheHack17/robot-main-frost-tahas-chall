@@ -110,7 +110,18 @@ public class Drivetrain extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 80, 80, 0);
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
 
+
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
+
+
+  // private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
+  //   new Rotation2d(), 
+  //   new Pose2d(), 
+  //   m_kinematics, 
+  //   new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01), 
+  //   new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.02), 
+  //   new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
+  // );
 
   private Pose2d _robotPose = new Pose2d();
 
@@ -237,9 +248,15 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
 
+   // _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
+
+
     Telemetry.setValue("general/FMSAlliance", DriverStation.getAlliance() == Alliance.Blue ? "Blue" : (DriverStation.getAlliance() == Alliance.Red ? "Red" : "Invalid") );
     Telemetry.setValue("general/joystick0Name", DriverStation.getJoystickName(0));
     Telemetry.setValue("general/joystick1Name", DriverStation.getJoystickName(1));
+  }
+  public void stop() {
+    joystickDrive(0, 0, 0);
   }
 
   @Override
@@ -382,6 +399,7 @@ public class Drivetrain extends SubsystemBase {
     return target;
   }
 
+
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, new Rotation2d(FL_Actual_Position));
@@ -438,3 +456,24 @@ public class Drivetrain extends SubsystemBase {
 
 // TODO targeting
 // TODO shwerve
+
+  // public Command followTrajectoryCommand(PathPlannerTrajectory traj) {
+
+  //   m_odometry.resetPosition(traj.getInitialHolonomicPose(), new Rotation2d(Math.toRadians(m_gyro.getYaw())));
+
+  //   // HashMap<String, Command> eventMap = new HashMap<>();
+  //   // eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+
+  //   return new PPSwerveControllerCommand(
+  //     traj, 
+  //     () -> m_odometry.getEstimatedPosition(), // Pose supplier
+  //     this.m_kinematics, // SwerveDriveKinematics
+  //     new PIDController(_translationKp, _translationKi, _translationKd), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+  //     new PIDController(_translationKp, _translationKi, _translationKd), // Y controller (usually the same values as X controller)
+  //     new PIDController(_rotationKp, _rotationKi, _rotationKd), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+  //     modules -> driveFromModuleStates(modules), // Module states consumer
+  //     this // Requires this drive subsystem
+  //   );
+  // }
+}
+
