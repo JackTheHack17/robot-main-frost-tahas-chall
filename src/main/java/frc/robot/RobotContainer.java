@@ -1,13 +1,6 @@
 package frc.robot;
-
 import frc.lib.Telemetry;
 import frc.robot.Constants.ARM.positions;
-
-
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
-//import frc.robot.commands.BalanceCommand;
-
 import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
@@ -24,14 +17,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.Pigeon;
-import static frc.robot.Constants.CAN.*;
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -48,20 +35,9 @@ public class RobotContainer {
   private final Pigeon m_gyro = new Pigeon();
   private final Limelight m_limelight = new Limelight();
   private final LEDs m_LEDs = new LEDs();
-
   private final PinchersofPower m_claw = new PinchersofPower();
   private final Arm m_arm = new Arm(m_claw, m_LEDs, driverController);
   private final Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw, m_limelight);
-
-
-  private final XboxController driver = new XboxController(0);
-  private final GenericHID copilot = new GenericHID(1);
-  
-  Trigger aButton = new JoystickButton(driver, 1);
-  
-
-  private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
-
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -82,7 +58,6 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
 
@@ -95,7 +70,6 @@ public class RobotContainer {
     copilotController.button(6).onTrue(m_claw.outtakeCommand());
     copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))));
     copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))));
-
   }
 
   /**
