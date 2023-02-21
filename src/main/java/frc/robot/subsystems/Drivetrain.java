@@ -13,9 +13,13 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -253,7 +257,6 @@ public class Drivetrain extends SubsystemBase {
     
     modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
 
-    // if joystick is idle, lock wheels to X formation to avoid pushing
     if ( LX == 0 && LY == 0 && RX == 0 ) {
       FL_Azimuth.set(ControlMode.PercentOutput, 0);
       FR_Azimuth.set(ControlMode.PercentOutput, 0);
@@ -302,7 +305,21 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command moveToPositionCommand (Pose2d target) { // TODO move to position command
-    return new InstantCommand();
+    PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
+      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default")),
+      new PathPoint(new Translation2d(m_odometry.getEstimatedPosition().getX(),m_odometry.getEstimatedPosition().getY()), new Rotation2d(m_gyro.getYaw()), Math.hypot(forwardKinematics.vxMetersPerSecond, forwardKinematics.vxMetersPerSecond)),
+      new PathPoint(new Translation2d(target.getX(), target.getY()), target.getRotation())
+    );
+    return new PPSwerveControllerCommand(
+      _toTarget,
+      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
+      this.m_kinematics, // SwerveDriveKinematics
+      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+      (Subsystem) this
+    );
   }
 
   /** Sets the gyroscope's current heading to 0 */
