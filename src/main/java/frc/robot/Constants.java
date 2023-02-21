@@ -46,7 +46,7 @@ public final class Constants {
         public static final int ARM_STAGE_3_ID = 34;
 
         public static final int GRIP_LEFT_ID = 41;
-        public static final int GRIP_RIGHT_ID = 31;
+        public static final int GRIP_RIGHT_ID = 42;
     }
 
     public class DRIVETRAIN {
