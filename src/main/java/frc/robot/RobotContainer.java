@@ -41,7 +41,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    Telemetry.setValue("general/autonomous/availableRoutines", Stream.of(new File("/home/lvuser/deploy/").listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).toArray());
+    Telemetry.setValue("general/autonomous/availableRoutines", (String[]) Stream.of(new File("/home/lvuser/deploy/").listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).toArray());
 
     // Configure the button bindings
     configureButtonBindings();
