@@ -162,6 +162,11 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
+    if (FL_Position.getPosition() < -360 || FL_Position.getPosition() > 360) { FL_Position.setPosition(FL_Position.getPosition() % 360); }
+    if (FR_Position.getPosition() < -360 || FR_Position.getPosition() > 360) { FR_Position.setPosition(FR_Position.getPosition() % 360); }
+    if (BL_Position.getPosition() < -360 || BL_Position.getPosition() > 360) { BL_Position.setPosition(BL_Position.getPosition() % 360); }
+    if (BR_Position.getPosition() < -360 || BR_Position.getPosition() > 360) { BR_Position.setPosition(BR_Position.getPosition() % 360); }
+
     // This method will be called once per scheduler run
 
     _translationKp = Telemetry.getValue("drivetrain/PathPlanner/translationKp", 0);
@@ -370,7 +375,7 @@ public class Drivetrain extends SubsystemBase {
     motor.configRemoteFeedbackFilter(position, 0);
     motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
     motor.configStatorCurrentLimit(AZIMUTH_CURRENT_LIMIT);
-    motor.setSelectedSensorPosition(FL_Position.getAbsolutePosition());
+    motor.setSelectedSensorPosition(position.getAbsolutePosition());
     motor.config_kP(0, AZIMUTH_kP);
     motor.config_kD(0, AZIMUTH_kD);
   }

@@ -59,9 +59,9 @@ public final class Constants {
 
         // encoder offsets (degrees)
         public static final double FL_ECODER_OFFSET = -313.682;
-        public static final double FR_ECODER_OFFSET = -166.553;
-        public static final double BL_ECODER_OFFSET = -246.006;
-        public static final double BR_ECODER_OFFSET = -204.258;
+        public static final double FR_ECODER_OFFSET = -166.553+90;
+        public static final double BL_ECODER_OFFSET = -246.006-45;
+        public static final double BR_ECODER_OFFSET = -204.258-45;
         
         /** maximum strafe speed (meters per second) */
         public static final double MAX_LINEAR_SPEED = 5.4;
@@ -69,7 +69,7 @@ public final class Constants {
         public static final double MAX_ROTATION_SPEED = Math.PI*2;
             
         // pid values
-        public static final double AZIMUTH_kP = 0.2;
+        public static final double AZIMUTH_kP = 0.65;
         public static final double AZIMUTH_kD = 0.1;
 
         // calculated via JVN calculator
