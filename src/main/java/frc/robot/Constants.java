@@ -58,10 +58,10 @@ public final class Constants {
         public static final double DRIVE_GEAR_RATIO = 6.75;
 
         // encoder offsets (degrees)
-        public static final double FL_ECODER_OFFSET = -313.682;
-        public static final double FR_ECODER_OFFSET = -166.553+90;
-        public static final double BL_ECODER_OFFSET = -246.006-45;
-        public static final double BR_ECODER_OFFSET = -204.258-45;
+        public static final double FL_ECODER_OFFSET = -313.682+2;
+        public static final double FR_ECODER_OFFSET = -166.553+90+2;
+        public static final double BL_ECODER_OFFSET = -246.006-45-2-3;
+        public static final double BR_ECODER_OFFSET = -204.258-45-2-3;
         
         /** maximum strafe speed (meters per second) */
         public static final double MAX_LINEAR_SPEED = 5.4;
