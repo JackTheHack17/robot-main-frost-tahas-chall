@@ -55,10 +55,10 @@ public class Drivetrain extends SubsystemBase {
   private Limelight m_limelight;
 
   private SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-    new Translation2d(-ROBOT_WIDTH/2, ROBOT_WIDTH/2),
     new Translation2d(ROBOT_WIDTH/2, ROBOT_WIDTH/2),
-    new Translation2d(-ROBOT_WIDTH/2, -ROBOT_WIDTH/2),
-    new Translation2d(ROBOT_WIDTH/2, -ROBOT_WIDTH/2)
+    new Translation2d(ROBOT_WIDTH/2, -ROBOT_WIDTH/2),
+    new Translation2d(-ROBOT_WIDTH/2, ROBOT_WIDTH/2),
+    new Translation2d(-ROBOT_WIDTH/2, -ROBOT_WIDTH/2)
   );
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds();
@@ -280,20 +280,97 @@ public class Drivetrain extends SubsystemBase {
   public void driveFromModuleStates ( SwerveModuleState[] modules ) {
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
 
-    FL_Target = modules[0].angle.getDegrees() % 360;
-    FR_Target = modules[1].angle.getDegrees() % 360;
-    BL_Target = modules[2].angle.getDegrees() % 360;
-    BR_Target = modules[3].angle.getDegrees() % 360;
+    //modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(FL_Position.getAbsolutePosition()));
+    //modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(FR_Position.getAbsolutePosition()));
+    //modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(BL_Position.getAbsolutePosition()));
+    //modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(BR_Position.getAbsolutePosition()));
+
+    FL_Target = modules[0].angle.getDegrees();
+    FR_Target = modules[1].angle.getDegrees();
+    BL_Target = modules[2].angle.getDegrees();
+    BR_Target = modules[3].angle.getDegrees();
     FL_Speed = modules[0].speedMetersPerSecond;
     FR_Speed = modules[1].speedMetersPerSecond;
     BL_Speed = modules[2].speedMetersPerSecond;
     BR_Speed = modules[3].speedMetersPerSecond;
 
+    if ( Math.abs(FL_Actual_Position - FL_Target) > Math.abs(FR_Actual_Position - FR_Target) && Math.abs(FL_Actual_Position - FL_Target) > Math.abs(BL_Actual_Position - BL_Target) && Math.abs(FL_Actual_Position - FL_Target) > Math.abs(BR_Actual_Position - BR_Target) ) {
+      if (Math.min(Math.min(Math.abs(FL_Target - FL_Actual_Position), Math.abs((FL_Target + 360) - FL_Actual_Position)), Math.abs((FL_Target - 360) - FL_Actual_Position)) == Math.abs((FL_Target + 360) - FL_Actual_Position)) {
+        if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target += 360;
+        if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target += 360;
+        if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target += 360;
+        if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target += 360;
+      }
+      if (Math.min(Math.min(Math.abs(FL_Target - FL_Actual_Position), Math.abs((FL_Target + 360) - FL_Actual_Position)), Math.abs((FL_Target - 360) - FL_Actual_Position)) == Math.abs((FL_Target - 360) - FL_Actual_Position)) {
+        if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target -= 360;
+        if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target -= 360;
+        if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target -= 360;
+        if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target -= 360;
+      }
+    } else if ( Math.abs(FR_Actual_Position - FR_Target) > Math.abs(BL_Actual_Position - BL_Target) && Math.abs(FR_Actual_Position - FR_Target) > Math.abs(BR_Actual_Position - BR_Target) ) {
+      if (Math.min(Math.min(Math.abs(FR_Target - FR_Actual_Position), Math.abs((FR_Target + 360) - FR_Actual_Position)), Math.abs((FR_Target - 360) - FR_Actual_Position)) == Math.abs((FR_Target + 360) - FR_Actual_Position)) {
+        if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target += 360;
+        if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target += 360;
+        if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target += 360;
+        if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target += 360;
+      }
+      if (Math.min(Math.min(Math.abs(FR_Target - FR_Actual_Position), Math.abs((FR_Target + 360) - FR_Actual_Position)), Math.abs((FR_Target - 360) - FR_Actual_Position)) == Math.abs((FR_Target - 360) - FR_Actual_Position)) {
+        if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target -= 360;
+        if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target -= 360;
+        if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target -= 360;
+        if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target -= 360;
+      }
+    } else if ( Math.abs(BL_Actual_Position - BL_Target) > Math.abs(BR_Actual_Position - BR_Target) ) {
+      if (Math.min(Math.min(Math.abs(BL_Target - BL_Actual_Position), Math.abs((BL_Target + 360) - BL_Actual_Position)), Math.abs((BL_Target - 360) - BL_Actual_Position)) == Math.abs((BL_Target + 360) - BL_Actual_Position)) {
+        if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target += 360;
+        if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target += 360;
+        if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target += 360;
+        if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target += 360;
+      }
+      if (Math.min(Math.min(Math.abs(BL_Target - BL_Actual_Position), Math.abs((BL_Target + 360) - BL_Actual_Position)), Math.abs((BL_Target - 360) - BL_Actual_Position)) == Math.abs((BL_Target - 360) - BL_Actual_Position)) {
+        if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target -= 360;
+        if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target -= 360;
+        if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target -= 360;
+        if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target -= 360;
+      }
+    } else {
+      if (Math.min(Math.min(Math.abs(BR_Target - BR_Actual_Position), Math.abs((BR_Target + 360) - BR_Actual_Position)), Math.abs((BR_Target - 360) - BR_Actual_Position)) == Math.abs((BR_Target + 360) - BR_Actual_Position)) {
+        if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target += 360;
+        if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target += 360;
+        if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target += 360;
+        if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target += 360;
+      }
+      if (Math.min(Math.min(Math.abs(BR_Target - BR_Actual_Position), Math.abs((BR_Target + 360) - BR_Actual_Position)), Math.abs((BR_Target - 360) - BR_Actual_Position)) == Math.abs((BR_Target - 360) - BR_Actual_Position)) {
+        if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target -= 360;
+        if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target -= 360;
+        if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target -= 360;
+        if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target -= 360;
+      }
+    }
+
     // find the shortest path to an equivalent position to prevent unneccesary full rotations
-    FL_Target = optimizeAzimuthPath(FL_Target, FL_Actual_Position);
-    FR_Target = optimizeAzimuthPath(FR_Target, FR_Actual_Position);
-    BL_Target = optimizeAzimuthPath(BL_Target, BL_Actual_Position);
-    BR_Target = optimizeAzimuthPath(BR_Target, BR_Actual_Position);
+    //FL_Target = optimizeAzimuthPath(FL_Target, FL_Actual_Position) % 360;
+    //FR_Target = optimizeAzimuthPath(FR_Target, FR_Actual_Position) % 360;
+    //BL_Target = optimizeAzimuthPath(BL_Target, BL_Actual_Position) % 360;
+    //BR_Target = optimizeAzimuthPath(BR_Target, BR_Actual_Position) % 360;
+
+    /*
+    if (Math.abs(FL_Target - FL_Actual_Position) > 90) {
+      FL_Speed *= -1;
+      FL_Target -= 180;
+    }
+    if (Math.abs(FR_Target - FR_Actual_Position) > 90) {
+      FR_Speed *= -1;
+      FR_Target -= 180;
+    }
+    if (Math.abs(BL_Target - BL_Actual_Position) > 90) {
+      BL_Speed *= -1;
+      BL_Target -= 180;
+    }
+    if (Math.abs(BR_Target - BR_Actual_Position) > 90) {
+      BR_Speed *= -1;
+      BR_Target -= 180;
+    }*/
 
     // correct the target positions so that they are close to the current position
     // then convert to sensor units and pass target positions to motor controllers
