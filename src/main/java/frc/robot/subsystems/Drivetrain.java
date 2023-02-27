@@ -469,19 +469,6 @@ public class Drivetrain extends SubsystemBase {
     encoder.setPositionToAbsolute();
   }
 
-  /** finds the closest equivalent position to the target 
-   * @param target - the target direction of the module (deg)
-   * @param actual - the current direction of the module (deg)
-   * @return the corrected target position of the motor
-  */
-  private double optimizeAzimuthPath (double target, double actual) {
-    if (Math.min(Math.min(Math.abs(target - actual), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target + 360) - actual))
-      target += 360;
-    if (Math.min(Math.min(Math.abs(target - actual), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target - 360) - actual))
-      target -= 360;
-    return target;
-  }
-
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, new Rotation2d(FL_Actual_Position));
