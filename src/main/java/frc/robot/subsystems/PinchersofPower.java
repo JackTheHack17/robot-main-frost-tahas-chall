@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ColorSensorV3;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -18,6 +21,7 @@ public class PinchersofPower extends SubsystemBase  {
   private final DoubleSolenoid pusher;
   private final CANSparkMax spinner;
   private final CANSparkMax spinner2;
+  private final ColorSensorV3 colorSensor;
   private boolean m_cone;
 
   public PinchersofPower() {
@@ -26,6 +30,7 @@ public class PinchersofPower extends SubsystemBase  {
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
     spinner2.follow(spinner);
+    colorSensor = new ColorSensorV3(I2C.Port.kMXP); // todo NavX MXP PORT DO NOT FORGET TO PLUG THIS IN! IMPORTANT!
     m_cone = false;
   }
 
@@ -59,6 +64,23 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void disable() {
     comp.disable();
+  }
+
+  public enum GamePieces {
+    Cone,
+    Cube,
+    None
+  }
+
+  public GamePieces whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment () {
+    Color actualColor = colorSensor.getColor();
+    if (actualColor.equals(Color.kPurple)) {
+      return GamePieces.Cube;
+    } else if (actualColor.equals(Color.kYellow)) {
+      return GamePieces.Cone;
+    } else {
+      return GamePieces.None;
+    }
   }
 
   public void intake() {
@@ -107,14 +129,14 @@ public class PinchersofPower extends SubsystemBase  {
 
   @Override
   public void periodic() {
-    Telemetry.setValue("POP/leftMotor/setpoint", spinner.get());
-    Telemetry.setValue("POP/leftMotor/temperature", spinner.getMotorTemperature());
-    Telemetry.setValue("POP/leftMotor/outputVoltage", spinner.getAppliedOutput());
-    Telemetry.setValue("POP/leftMotor/statorcurrent", spinner.getOutputCurrent());
-    Telemetry.setValue("POP/rightMotor/setpoint", spinner2.get());
-    Telemetry.setValue("POP/rightMotor/temperature", spinner2.getMotorTemperature());
-    Telemetry.setValue("POP/rightMotor/outputVoltage", spinner2.getAppliedOutput());
-    Telemetry.setValue("POP/rightMotor/statorCurrent", spinner2.getOutputCurrent());
-    Telemetry.setValue("POP/piston", pusher.get());
+    Telemetry.setValue("Pincher/leftMotor/setpoint", spinner.get());
+    Telemetry.setValue("Pincher/leftMotor/temperature", spinner.getMotorTemperature());
+    Telemetry.setValue("Pincher/leftMotor/outputVoltage", spinner.getAppliedOutput());
+    Telemetry.setValue("Pincher/leftMotor/statorcurrent", spinner.getOutputCurrent());
+    Telemetry.setValue("Pincher/rightMotor/setpoint", spinner2.get());
+    Telemetry.setValue("Pincher/rightMotor/temperature", spinner2.getMotorTemperature());
+    Telemetry.setValue("Pincher/rightMotor/outputVoltage", spinner2.getAppliedOutput());
+    Telemetry.setValue("Pincher/rightMotor/statorCurrent", spinner2.getOutputCurrent());
+    Telemetry.setValue("Pincher/piston", pusher.get());
   }
 }

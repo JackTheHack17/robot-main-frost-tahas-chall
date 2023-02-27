@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.ARM.positions;
+import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 import static frc.robot.Constants.DRIVETRAIN.*;
 
@@ -510,7 +511,7 @@ public class Drivetrain extends SubsystemBase {
     }, 
     null, 
     () -> {
-      return false; // TODO color sensor
+      return m_claw.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() != GamePieces.None;
     }, 
     m_claw));
     eventMap.put("autobalance", new InstantCommand()); // TODO balance command
