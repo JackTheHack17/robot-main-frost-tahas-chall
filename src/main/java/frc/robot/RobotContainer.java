@@ -1,4 +1,5 @@
 package frc.robot;
+import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.DriveCommand;
@@ -17,7 +18,6 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /**
@@ -29,14 +29,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class RobotContainer {
   // Im leaving these ports as magic constants because there's no case where they are not these values
   public static final CommandXboxController driverController = new CommandXboxController(0);
-  public static final CommandGenericHID copilotController = new CommandGenericHID(1);
+  public static final ButtonBoard copilotController = new ButtonBoard();
 
   // The robot's subsystems and commands are defined here...
   private final Pigeon m_gyro = new Pigeon();
   private final Limelight m_limelight = new Limelight();
   private final LEDs m_LEDs = new LEDs();
   private final PinchersofPower m_claw = new PinchersofPower();
-  private final Arm m_arm = new Arm(m_claw, m_LEDs, driverController);
+  private final Arm m_arm = new Arm(m_claw, m_LEDs, driverController, copilotController);
   private final Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw, m_limelight);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -48,7 +48,7 @@ public class RobotContainer {
 
     m_LEDs.setDefaultCommand(m_LEDs.idle());
     m_arm.setDefaultCommand(m_arm.defaultCommand());
-    m_swerve.setDefaultCommand(new DriveCommand(m_swerve));
+    m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController, copilotController));
   }
 
   /**
@@ -68,8 +68,8 @@ public class RobotContainer {
     copilotController.button(4).whileTrue(m_arm.moveToPositionCommand(positions.ScoreMid));
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
     copilotController.button(6).onTrue(m_claw.outtakeCommand());
-    copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))));
-    copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))));
+    copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
+    copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
   }
 
   /**

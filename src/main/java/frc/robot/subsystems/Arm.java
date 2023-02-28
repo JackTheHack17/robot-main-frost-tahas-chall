@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.ArmPosition;
+import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 import frc.lib.Triangle;
 import frc.robot.Constants.ARM.positions;
@@ -42,6 +43,7 @@ public class Arm extends SubsystemBase {
     private PinchersofPower m_clawSubsystem;
     private LEDs m_LEDsSubsystem;
     private CommandXboxController m_driverController;
+    private ButtonBoard m_copilotController;
     private double m_stage1Target = 0;
     private double m_stage2Target = 0;
     private double m_stage3Target = 0;
@@ -50,7 +52,7 @@ public class Arm extends SubsystemBase {
     private double m_manualTargetTheta = 0;
     private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
 
-    public Arm(PinchersofPower m_claw, LEDs m_LEDs, CommandXboxController driverController) {
+    public Arm(PinchersofPower m_claw, LEDs m_LEDs, CommandXboxController driverController, ButtonBoard copilotController) {
         // populate position map
         positionMap.put(positions.ScoreHigh, scoreHighPosition);
         positionMap.put(positions.ScoreMid, scoreMidPosition);
@@ -63,6 +65,7 @@ public class Arm extends SubsystemBase {
         m_LEDsSubsystem = m_LEDs;
         m_clawSubsystem = m_claw;
         m_driverController = driverController;
+        m_copilotController = copilotController;
 
         m_stage1 = new CANSparkMax(CAN.ARM_STAGE_1_ID, MotorType.kBrushless);
         m_stage1Follower = new CANSparkMax(CAN.ARM_STAGE_1_FOLLOWER_ID, MotorType.kBrushless);   
@@ -125,7 +128,7 @@ public class Arm extends SubsystemBase {
     }
 
     public Boolean isAtTarget () {
-        if (RobotContainer.copilotController.getHID().getRawButton(9)) {
+        if (RobotContainer.copilotController.getRawButton(9)) {
             return (
                 Math.abs(getCurrentPoint()[0] - m_manualTargetX) < JOINT_COORDINATE_DEADZONE &&
                 Math.abs(getCurrentPoint()[1] - m_manualTargetY) < JOINT_COORDINATE_DEADZONE &&
@@ -156,6 +159,35 @@ public class Arm extends SubsystemBase {
     }
 
     public Command moveToPositionCommand (positions position) {
+        m_copilotController.setLED(0, false);
+        m_copilotController.setLED(1, false);
+        m_copilotController.setLED(2, false);
+        m_copilotController.setLED(3, false);
+        m_copilotController.setLED(4, false);
+        m_copilotController.setLED(5, false);
+
+        switch (position) {
+            case ScoreHigh:
+                m_copilotController.setLED(2, false);
+                break;
+            case ScoreMid:
+                m_copilotController.setLED(4, false);
+                break;
+            case ScoreLow:
+                m_copilotController.setLED(5, false);
+                break;
+            case Floor:
+                m_copilotController.setLED(1, false);
+                break;
+            case FloorAlt:
+                m_copilotController.setLED(3, false);
+                break;
+            case Substation:
+                m_copilotController.setLED(0, false);
+                break;
+            case Idle:
+                break;
+        }
         return new FunctionalCommand(
             () -> { // init
                 m_clawSubsystem.notake();
@@ -200,11 +232,32 @@ public class Arm extends SubsystemBase {
     }
 
     public Command defaultCommand () {
-        if (RobotContainer.copilotController.getHID().getRawButton(9)) {
+        if (RobotContainer.copilotController.getRawButton(9)) {
+            m_copilotController.setLED(0, false);
+            m_copilotController.setLED(1, false);
+            m_copilotController.setLED(2, false);
+            m_copilotController.setLED(3, false);
+            m_copilotController.setLED(4, false);
+            m_copilotController.setLED(5, false);
+            m_copilotController.setLED(6, false);
+            m_copilotController.setLED(7, false);
+            m_copilotController.setLED(8, false);
+
+            m_copilotController.setLED(10, true);
+            m_copilotController.setLED(11, true);
+            m_copilotController.setLED(12, true);
+            m_copilotController.setLED(13, true);
+            m_copilotController.setLED(14, true);
+
             // the manual override is enabled
             // TODO modify targets from buttons i cannot be bothered rn
             return moveToPointCommand(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
         } else {
+            m_copilotController.setLED(10, false);
+            m_copilotController.setLED(11, false);
+            m_copilotController.setLED(12, false);
+            m_copilotController.setLED(13, false);
+            m_copilotController.setLED(14, false);
             return moveToPositionCommand(positions.Idle);
         }
     }

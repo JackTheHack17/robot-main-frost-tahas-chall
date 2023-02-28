@@ -3,9 +3,10 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
-import frc.robot.RobotContainer;
+import frc.lib.ButtonBoard;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 
 /** An example command that uses an example subsystem. */
 public class DriveCommand extends CommandBase {
@@ -17,13 +18,18 @@ public class DriveCommand extends CommandBase {
   private double m_LY = 0.0;
   private double m_RX = 0.0;
 
+  private CommandGenericHID driverController;
+  private ButtonBoard copilotController;
+
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public DriveCommand(Drivetrain drivetrain) {
+  public DriveCommand(Drivetrain drivetrain, CommandGenericHID driverController, ButtonBoard copilotController) {
     m_swerve = drivetrain;
+    this.driverController = driverController;
+    this.copilotController = copilotController;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_swerve);
   }
@@ -37,9 +43,9 @@ public class DriveCommand extends CommandBase {
   public void execute() {
     
     // fetch joystick axis values
-    m_LX = RobotContainer.driverController.getRawAxis(0); // left x axis (strafe)
-    m_LY = -RobotContainer.driverController.getRawAxis(1); // left y axis (strafe)
-    m_RX = RobotContainer.driverController.getRawAxis(4); // right x axis (rotation)
+    m_LX = driverController.getRawAxis(0); // left x axis (strafe)
+    m_LY = -driverController.getRawAxis(1); // left y axis (strafe)
+    m_RX = driverController.getRawAxis(4); // right x axis (rotation)
 
     // deadzones
     m_LX = ( Math.abs(m_LX) < 0.2 ) ? 0 : m_LX;
@@ -52,6 +58,14 @@ public class DriveCommand extends CommandBase {
     m_RX = m_RX * m_RX * ( Math.abs(m_RX) / (m_RX == 0 ? 1 : m_RX ) );
     
     m_swerve.joystickDrive(m_LX, m_LY, m_RX);
+
+    if ( copilotController.getRawButton(16) ) {
+      // shwerve engaged
+      copilotController.setLED(16, true);
+      m_swerve.shwerve(m_LX, m_LY);
+    } else {
+      copilotController.setLED(16, false);
+    }
   }
 
   // Called once the command ends or is interrupted.
