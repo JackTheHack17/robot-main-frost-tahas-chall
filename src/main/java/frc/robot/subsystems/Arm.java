@@ -285,8 +285,6 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("POP/stage3/statorCurrent", m_stage3.getOutputCurrent());
         Telemetry.setValue("POP/stage3/actualPosition", m_stage3Encoder.getPosition());
         Telemetry.setValue("POP/stage3/targetPosition", m_stage3Target);
-
-        // TODO expose PIDs to Network Table
     }
     
     @Override  public void simulationPeriodic() {}
