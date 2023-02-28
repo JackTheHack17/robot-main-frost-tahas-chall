@@ -387,7 +387,12 @@ public class Drivetrain extends SubsystemBase {
     BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
   }
 
-  public Command moveToPositionCommand (Pose2d target) {
+  public Command moveToPositionCommand ( Pose2d target ) {
+    return new InstantCommand();
+    // TODO align command
+  }
+
+  public Command pathToCommand (Pose2d target) {
     PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
       PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default")),
       new PathPoint(new Translation2d(m_odometry.getEstimatedPosition().getX(),m_odometry.getEstimatedPosition().getY()), new Rotation2d(m_gyro.getYaw()), Math.hypot(forwardKinematics.vxMetersPerSecond, forwardKinematics.vxMetersPerSecond)),
@@ -523,8 +528,6 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void shwerve ( double LX, double LY) {
-    // todo shwerve
+    // TODO shwerve
   }
 }
-
-// TODO targeting

@@ -94,7 +94,7 @@ public class Arm extends SubsystemBase {
     }
 
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
-        // todo forward kinematics
+        // TODO forward kinematics
         return new double[2];
     }
 
@@ -278,7 +278,7 @@ public class Arm extends SubsystemBase {
     @Override  public void simulationPeriodic() {}
 
     public void configPID(double kp, double kd, double FF, double maxV, double maxA, int profile, DutyCycleEncoder encoder, SparkMaxPIDController controller) {
-        // todo redo arm PID controllers to use PIDController
+        // TODO redo arm PID controllers to use PIDController
         controller.setP(kp, profile);
         controller.setD(kd, profile);
         controller.setFF(FF, profile);
