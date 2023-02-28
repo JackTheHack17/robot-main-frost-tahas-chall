@@ -7,11 +7,10 @@ import java.util.HashMap;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxPIDController.AccelStrategy;
 
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -26,20 +25,19 @@ import frc.lib.Telemetry;
 import frc.lib.Triangle;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.Constants.CAN;
+import frc.robot.Constants.DIO;
 import frc.robot.RobotContainer;
 
 public class Arm extends SubsystemBase {
     private final CANSparkMax m_stage1;
-    private final CANSparkMax m_stage1Follower;
     private final CANSparkMax m_stage2;
     private final CANSparkMax m_stage3;
-    private final RelativeEncoder m_stage1Encoder;  
-    private final RelativeEncoder m_stage2Encoder;
-    private final RelativeEncoder m_stage3Encoder;
+    private final DutyCycleEncoder m_stage1Encoder;  
+    private final DutyCycleEncoder m_stage2Encoder;
+    private final DutyCycleEncoder m_stage3Encoder;
     private final SparkMaxPIDController m_stage1PID;  
     private final SparkMaxPIDController m_stage2PID;
     private final SparkMaxPIDController m_stage3PID;
-    private SparkMaxAlternateEncoder.Type kAltEncType;
     private PinchersofPower m_clawSubsystem;
     private LEDs m_LEDsSubsystem;
     private CommandXboxController m_driverController;
@@ -68,29 +66,16 @@ public class Arm extends SubsystemBase {
         m_copilotController = copilotController;
 
         m_stage1 = new CANSparkMax(CAN.ARM_STAGE_1_ID, MotorType.kBrushless);
-        m_stage1Follower = new CANSparkMax(CAN.ARM_STAGE_1_FOLLOWER_ID, MotorType.kBrushless);   
         m_stage2 = new CANSparkMax(CAN.ARM_STAGE_2_ID, MotorType.kBrushless);
         m_stage3 = new CANSparkMax(CAN.ARM_STAGE_3_ID, MotorType.kBrushless);
 
         m_stage1.setIdleMode(IdleMode.kBrake);
         m_stage2.setIdleMode(IdleMode.kBrake);
         m_stage3.setIdleMode(IdleMode.kBrake);
-        m_stage1Follower.setIdleMode(IdleMode.kBrake);
-        m_stage1Follower.follow(m_stage1);
 
-        kAltEncType = SparkMaxAlternateEncoder.Type.kQuadrature;
-
-        m_stage1Encoder = m_stage1.getAlternateEncoder(kAltEncType, 8192);
-        m_stage2Encoder = m_stage2.getAlternateEncoder(kAltEncType, 8192);
-        m_stage3Encoder = m_stage3.getAlternateEncoder(kAltEncType, 8192);
-
-        m_stage1Encoder.setPositionConversionFactor(360);
-        m_stage2Encoder.setPositionConversionFactor(360);
-        m_stage3Encoder.setPositionConversionFactor(360);
-        
-        m_stage1Encoder.setVelocityConversionFactor(360);
-        m_stage2Encoder.setVelocityConversionFactor(360);
-        m_stage3Encoder.setVelocityConversionFactor(360);
+        m_stage1Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_1_ENCODER_ID);
+        m_stage2Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_2_ENCODER_ID);
+        m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
         m_stage1PID = m_stage1.getPIDController(); 
         m_stage2PID = m_stage2.getPIDController();
@@ -108,9 +93,13 @@ public class Arm extends SubsystemBase {
         setStage3Target(claw);
     }
 
+    private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
+        // todo forward kinematics
+        return new double[2];
+    }
+
     private double[] getCurrentPoint () {
-        // TODO forward kinematics
-        return new double[3];
+        return forwardKinematics(m_stage1Encoder.getAbsolutePosition(), m_stage2Encoder.getAbsolutePosition(), m_stage3Encoder.getAbsolutePosition());
     }
 
     private void moveToAngles (double stage1Angle, double stage2Angle, double stage3Angle) {
@@ -124,6 +113,9 @@ public class Arm extends SubsystemBase {
 
     private void moveToPosition (positions position) {
         ArmPosition target = positionMap.get(position);
+        m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
+        m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
+        m_manualTargetTheta = target.getStage3Angle();
         moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
     }
 
@@ -136,9 +128,9 @@ public class Arm extends SubsystemBase {
             );
         } else {
             return (
-                Math.abs(m_stage1Encoder.getPosition() - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
-                Math.abs(m_stage2Encoder.getPosition() - m_stage2Target) < JOINT_ANGLE_DEADZONE &&
-                Math.abs(m_stage3Encoder.getPosition() - m_stage3Target) < JOINT_ANGLE_DEADZONE
+                Math.abs(m_stage1Encoder.getAbsolutePosition() - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
+                Math.abs(m_stage2Encoder.getAbsolutePosition() - m_stage2Target) < JOINT_ANGLE_DEADZONE &&
+                Math.abs(m_stage3Encoder.getAbsolutePosition() - m_stage3Target) < JOINT_ANGLE_DEADZONE
             );
         }
     }
@@ -267,35 +259,31 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("POP/stage1/temperature", m_stage1.getMotorTemperature());
         Telemetry.setValue("POP/stage1/outputVoltage", m_stage1.getAppliedOutput());
         Telemetry.setValue("POP/stage1/statorCurrent", m_stage1.getOutputCurrent());
-        Telemetry.setValue("POP/stage1/actualPosition", m_stage1Encoder.getPosition());
+        Telemetry.setValue("POP/stage1/actualPosition", m_stage1Encoder.getAbsolutePosition());
         Telemetry.setValue("POP/stage1/targetPosition", m_stage1Target);
-        Telemetry.setValue("POP/stage1Follower/setpoint", m_stage1Follower.get());
-        Telemetry.setValue("POP/stage1Follower/temperature", m_stage1Follower.getMotorTemperature());
-        Telemetry.setValue("POP/stage1Follower/outputVoltage", m_stage1Follower.getAppliedOutput());
-        Telemetry.setValue("POP/stage1Follower/statorCurrent", m_stage1Follower.getOutputCurrent());
         Telemetry.setValue("POP/stage2/setpoint", m_stage2.get());
         Telemetry.setValue("POP/stage2/temperature", m_stage2.getMotorTemperature());
         Telemetry.setValue("POP/stage2/outputVoltage", m_stage2.getAppliedOutput());
         Telemetry.setValue("POP/stage2/statorcurrent", m_stage2.getOutputCurrent());
-        Telemetry.setValue("POP/stage2/actualPosition", m_stage2Encoder.getPosition());
+        Telemetry.setValue("POP/stage2/actualPosition", m_stage2Encoder.getAbsolutePosition());
         Telemetry.setValue("POP/stage2/targetPosition", m_stage2Target);
         Telemetry.setValue("POP/stage3/setpoint", m_stage3.get());
         Telemetry.setValue("POP/stage3/temperature", m_stage3.getMotorTemperature());
         Telemetry.setValue("POP/stage3/outputVoltage", m_stage3.getAppliedOutput());
         Telemetry.setValue("POP/stage3/statorCurrent", m_stage3.getOutputCurrent());
-        Telemetry.setValue("POP/stage3/actualPosition", m_stage3Encoder.getPosition());
+        Telemetry.setValue("POP/stage3/actualPosition", m_stage3Encoder.getAbsolutePosition());
         Telemetry.setValue("POP/stage3/targetPosition", m_stage3Target);
     }
     
     @Override  public void simulationPeriodic() {}
 
-    public void configPID(double kp, double kd, double FF, double maxV, double maxA, int profile, RelativeEncoder encoder, SparkMaxPIDController controller) {
+    public void configPID(double kp, double kd, double FF, double maxV, double maxA, int profile, DutyCycleEncoder encoder, SparkMaxPIDController controller) {
+        // todo redo arm PID controllers to use PIDController
         controller.setP(kp, profile);
         controller.setD(kd, profile);
         controller.setFF(FF, profile);
         controller.setSmartMotionMaxAccel(maxA, profile);
         controller.setSmartMotionMaxVelocity(maxV, profile);
         controller.setSmartMotionAccelStrategy(AccelStrategy.kSCurve, profile);
-        controller.setFeedbackDevice(encoder);
     }
 }

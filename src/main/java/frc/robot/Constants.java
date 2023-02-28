@@ -19,6 +19,12 @@ public final class Constants {
         public static final int BLINKIN_ID = 0;
     }
 
+    public class DIO {
+        public static final int ARM_STAGE_1_ENCODER_ID = 0;
+        public static final int ARM_STAGE_2_ENCODER_ID = 1;
+        public static final int ARM_STAGE_3_ENCODER_ID = 2;
+    }
+
     public class CAN {
         //CAN Bus IDs
         public static final int PDH_ID = 1;
