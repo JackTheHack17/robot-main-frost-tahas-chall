@@ -46,6 +46,10 @@ public class PinchersofPower extends SubsystemBase  {
     pusher.set(Value.kOff);
   }
 
+  public void toggle () {
+    pusher.toggle();
+  }
+
   public void spinin() {
     spinner.set(POP.SPEED);
   }

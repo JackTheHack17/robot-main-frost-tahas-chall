@@ -242,7 +242,26 @@ public class Arm extends SubsystemBase {
             m_copilotController.setLED(14, true);
 
             // the manual override is enabled
-            // TODO modify targets from buttons i cannot be bothered rn
+            
+            if ( m_copilotController.getRawButton(10) ) {
+                m_manualTargetTheta += thetaSpeed;
+            }
+            if ( m_copilotController.getRawButton(11) ) {
+                m_manualTargetTheta -= thetaSpeed;
+            }
+            m_manualTargetX += m_copilotController.getJoystick().getX() * xSpeed;
+            m_manualTargetY += m_copilotController.getJoystick().getY() * ySpeed;
+            if ( m_copilotController.getRawButton(13) ) {
+                m_clawSubsystem.outtake();
+            } else if ( m_copilotController.getRawButton(14) ) {
+                m_clawSubsystem.intake();
+            } else {
+                m_clawSubsystem.notake();
+            }
+            if ( m_copilotController.getRawButton(12) ) {
+                m_clawSubsystem.toggle();
+            }
+
             return moveToPointCommand(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
         } else {
             m_copilotController.setLED(10, false);

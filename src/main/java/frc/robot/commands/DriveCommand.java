@@ -64,6 +64,7 @@ public class DriveCommand extends CommandBase {
       copilotController.setLED(16, true);
       m_swerve.shwerve(m_LX, m_LY);
     } else {
+      m_swerve.noShwerve();
       copilotController.setLED(16, false);
     }
   }

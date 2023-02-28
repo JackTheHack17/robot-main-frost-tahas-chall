@@ -41,6 +41,8 @@ public final class Constants {
         public static final int BL_DRIVE_ID = 13;
         public static final int BR_DRIVE_ID = 14;
 
+        public static final int SHWERVE_DRIVE_ID = 15;
+
         public static final int FL_AZIMUTH_ID = 21;
         public static final int FR_AZIMUTH_ID = 22;
         public static final int BL_AZIMUTH_ID = 23;
@@ -81,6 +83,9 @@ public final class Constants {
         // calculated via JVN calculator
         public static final double DRIVE_kP = 0.044057;
         public static final double DRIVE_kF = 0.028998;
+
+        /* Maximum distance for a valid waypoint (meters) */
+        public static final double MAX_WAYPOINT_DISTANCE = 0.5;
     }
 
     public class LL {
@@ -109,6 +114,10 @@ public final class Constants {
         public static ArmPosition floorAltPosition   = new ArmPosition(0, 0, 0);
         public static ArmPosition substationPosition = new ArmPosition(0, 0, 0);
         public static ArmPosition idlePosition       = new ArmPosition(0, 0, 0);
+
+        public static final double thetaSpeed = 0.1;
+        public static final double xSpeed = 0.1;
+        public static final double ySpeed = 0.1;
  }
 
      public class POP {

@@ -18,6 +18,8 @@ import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -44,6 +46,7 @@ import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 import static frc.robot.Constants.DRIVETRAIN.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -78,6 +81,8 @@ public class Drivetrain extends SubsystemBase {
   private final TalonFX FR_Drive = new TalonFX(FR_DRIVE_ID);
   private final TalonFX BL_Drive = new TalonFX(BL_DRIVE_ID);
   private final TalonFX BR_Drive = new TalonFX(BR_DRIVE_ID);
+
+  private final CANSparkMax SHWERVE_DRIVE = new CANSparkMax(SHWERVE_DRIVE_ID, MotorType.kBrushless);
 
   // swerve module azimuth (steering) motors
   private final TalonFX FL_Azimuth = new TalonFX(FL_AZIMUTH_ID);
@@ -116,6 +121,8 @@ public class Drivetrain extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
+
+  private List<Pose2d> _waypoints = new ArrayList<Pose2d>();
 
   private Pose2d _robotPose = new Pose2d();
 
@@ -157,6 +164,19 @@ public class Drivetrain extends SubsystemBase {
     configAzimuth(FR_Azimuth, FR_Position);
     configAzimuth(BL_Azimuth, BL_Position);
     configAzimuth(BR_Azimuth, BR_Position);
+
+    // TODO declare scoring positions
+    // declare scoring positions
+    if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+      // red alliance waypoints
+      _waypoints.add(new Pose2d(0, 0, new Rotation2d(0)));
+    } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
+      // blue alliance waypoints
+      _waypoints.add(new Pose2d(0, 0, new Rotation2d(0)));
+    } else {
+      // no alliance waypoints
+      _waypoints.add(new Pose2d(0, 0, new Rotation2d(0)));
+    }
 
     PathPlannerServer.startServer(6969);
   }
@@ -387,9 +407,11 @@ public class Drivetrain extends SubsystemBase {
     BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
   }
 
-  public Command moveToPositionCommand ( Pose2d target ) {
-    return new InstantCommand();
-    // TODO align command
+  public Command moveToPositionCommand () {
+    Pose2d closest = m_odometry.getEstimatedPosition().nearest(_waypoints);
+    if (closest == null) return new InstantCommand();
+    if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) return new InstantCommand();
+    return pathToCommand( closest );
   }
 
   public Command pathToCommand (Pose2d target) {
@@ -507,7 +529,7 @@ public class Drivetrain extends SubsystemBase {
     }, 
     m_claw));
     eventMap.put("autobalance", new InstantCommand()); // TODO balance command
-    eventMap.put("realign", moveToPositionCommand(new Pose2d())); // TODO align command
+    eventMap.put("realign", moveToPositionCommand());
     eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode("cone"); } ));
     eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode("cube"); } ));
 
@@ -528,6 +550,10 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void shwerve ( double LX, double LY) {
-    // TODO shwerve
+    //TODO shwerve
+  }
+
+  public void noShwerve () {
+    SHWERVE_DRIVE.set(0);
   }
 }
