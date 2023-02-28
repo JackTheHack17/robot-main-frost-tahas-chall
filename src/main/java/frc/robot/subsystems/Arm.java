@@ -26,6 +26,7 @@ import frc.lib.Triangle;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DIO;
+import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
 public class Arm extends SubsystemBase {
@@ -94,8 +95,11 @@ public class Arm extends SubsystemBase {
     }
 
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
-        // TODO forward kinematics
-        return new double[2];
+        double[] output = new double[3];
+        output[0] = Math.cos(Math.toRadians(stage1)) * (Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2)) * (Constants.ARM.STAGE_2_LENGTH));
+        output[1] = Math.sin(Math.toRadians(stage1)) * (Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2)) * (Constants.ARM.STAGE_2_LENGTH));
+        output[2] = stage1 + stage2 + stage3;
+        return output;
     }
 
     private double[] getCurrentPoint () {

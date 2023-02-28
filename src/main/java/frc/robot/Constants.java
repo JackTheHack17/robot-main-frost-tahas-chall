@@ -118,6 +118,9 @@ public final class Constants {
         public static final double thetaSpeed = 0.1;
         public static final double xSpeed = 0.1;
         public static final double ySpeed = 0.1;
+
+        public static final double STAGE_1_LENGTH = 0;
+        public static final double STAGE_2_LENGTH = 0;
  }
 
      public class POP {
