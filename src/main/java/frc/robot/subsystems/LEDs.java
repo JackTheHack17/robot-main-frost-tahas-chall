@@ -1,9 +1,11 @@
 package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.Telemetry;
@@ -63,7 +65,13 @@ public class LEDs extends SubsystemBase {
   }
 
   public Command idle () {
-    return new InstantCommand( () -> command = 0.01 );
+    return new FunctionalCommand(
+      () -> command = 0.01,
+      () -> {},
+      (interrupted) -> {},
+      () -> true,
+      (Subsystem) this
+      );
   }
   
   @Override
