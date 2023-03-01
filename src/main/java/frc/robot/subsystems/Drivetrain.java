@@ -579,11 +579,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void shwerve ( double LX, double LY) {
-    //TODO shwerve
-    // DONT RUN THIS YET
-    // NEED TO REPLACE LY WITH THE ACTUAL SPEED THE WHEEL NEEDS TO BE GOING
-    // AND CONVERT THE VELOCITY TO THE WHEEL SURFACE SPEED
-    shwerveDrive.set(shwerveDrivePID.calculate(shwerveDriveEncoder.getVelocity(), LY));
+    //TODO shwerve gear ratios
+    shwerveDrive.set(shwerveDrivePID.calculate(shwerveDriveEncoder.getVelocity(), forwardKinematics.vxMetersPerSecond));
   }
 
   public void noShwerve () {
