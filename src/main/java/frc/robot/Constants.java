@@ -90,6 +90,9 @@ public final class Constants {
 
         public static final double SHWERVE_DRIVE_Kp = 0;
         public static final double SHWERVE_DRIVE_Kd = 0;
+
+        public static final double AUTO_BALANCE_Kp = 0;
+        public static final double AUTO_BALANCE_Kd = 0;
     }
 
     public class LL {

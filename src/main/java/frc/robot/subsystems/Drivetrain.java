@@ -16,6 +16,8 @@ import static frc.robot.Constants.CAN.FR_AZIMUTH_ID;
 import static frc.robot.Constants.CAN.FR_CANCODER_ID;
 import static frc.robot.Constants.CAN.FR_DRIVE_ID;
 import static frc.robot.Constants.CAN.SHWERVE_DRIVE_ID;
+import static frc.robot.Constants.DRIVETRAIN.AUTO_BALANCE_Kd;
+import static frc.robot.Constants.DRIVETRAIN.AUTO_BALANCE_Kp;
 import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kD;
 import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kP;
 import static frc.robot.Constants.DRIVETRAIN.BL_ECODER_OFFSET;
@@ -461,6 +463,24 @@ public class Drivetrain extends SubsystemBase {
     );
   }
 
+  public Command autoBalanceCommand () {
+    PIDController pitchPID = new PIDController(AUTO_BALANCE_Kp, 0, AUTO_BALANCE_Kd);
+    PIDController rollPID = new PIDController(AUTO_BALANCE_Kp, 0, AUTO_BALANCE_Kd);
+
+    return new FunctionalCommand(
+      () -> {}, 
+      () -> {
+        joystickDrive(pitchPID.calculate(m_gyro.getPitch(), 0), rollPID.calculate(m_gyro.getRoll(), 0), 0);
+      }, 
+      (interrupted) -> {
+        pitchPID.close();
+        rollPID.close();
+      }, 
+      () -> {return pitchPID.atSetpoint() && rollPID.atSetpoint();}, 
+      (Subsystem) this
+    );
+  }
+
   /** Sets the gyroscope's current heading to 0 */
   public void zeroGyro() {
     m_gyro.zeroYaw();
@@ -557,7 +577,7 @@ public class Drivetrain extends SubsystemBase {
       return m_claw.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() != GamePieces.None;
     }, 
     m_claw));
-    eventMap.put("autobalance", new InstantCommand()); // TODO balance command
+    eventMap.put("autobalance", autoBalanceCommand());
     eventMap.put("realign", moveToPositionCommand());
     eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode("cone"); } ));
     eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode("cube"); } ));
