@@ -180,22 +180,22 @@ public class Arm extends SubsystemBase {
 
         switch (position) {
             case ScoreHigh:
-                m_copilotController.setLED(2, false);
+                m_copilotController.setLED(2, true);
                 break;
             case ScoreMid:
-                m_copilotController.setLED(4, false);
+                m_copilotController.setLED(4, true);
                 break;
             case ScoreLow:
-                m_copilotController.setLED(5, false);
+                m_copilotController.setLED(5, true);
                 break;
             case Floor:
-                m_copilotController.setLED(1, false);
+                m_copilotController.setLED(1, true);
                 break;
             case FloorAlt:
-                m_copilotController.setLED(3, false);
+                m_copilotController.setLED(3, true);
                 break;
             case Substation:
-                m_copilotController.setLED(0, false);
+                m_copilotController.setLED(0, true);
                 break;
             case Idle:
                 break;
