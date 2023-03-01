@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -46,6 +47,12 @@ public class Robot extends TimedRobot {
     Telemetry.setValue("general/PDH/voltage", PDH.getVoltage());
     Telemetry.setValue("general/PDH/current", PDH.getTotalCurrent());
     Telemetry.setValue("general/PDH/temperature", PDH.getTemperature());
+
+    if (!DriverStation.isEnabled()) {
+      if ( RobotContainer.copilotController.getRawButton(9) ) {
+        DriverStation.reportWarning("Manual Override Enabled! Do not Enable Robot without Disabling Manual Override!", false);
+      }
+    }
 
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
