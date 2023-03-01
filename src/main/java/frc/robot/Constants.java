@@ -75,6 +75,7 @@ public final class Constants {
         public static final double MAX_LINEAR_SPEED = 5.4;
         /** maximum rotation speed (radians per second) */
         public static final double MAX_ROTATION_SPEED = Math.PI*2;
+        public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.25;
             
         // pid values
         public static final double AZIMUTH_kP = 0.65;

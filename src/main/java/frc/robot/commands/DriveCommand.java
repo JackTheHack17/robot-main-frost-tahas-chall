@@ -3,6 +3,8 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
+import static frc.robot.Constants.DRIVETRAIN.SWERVE_SLOW_SPEED_PERCENTAGE;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.ButtonBoard;
@@ -56,6 +58,38 @@ public class DriveCommand extends CommandBase {
     m_LX = m_LX * m_LX * ( Math.abs(m_LX) / (m_LX == 0 ? 1 : m_LX ) );
     m_LY = m_LY * m_LY * ( Math.abs(m_LY) / (m_LY == 0 ? 1 : m_LY ) );
     m_RX = m_RX * m_RX * ( Math.abs(m_RX) / (m_RX == 0 ? 1 : m_RX ) );
+
+    // D-pad slow mode
+    switch (driverController.getHID().getPOV()) {
+      case 0:
+        m_LY += SWERVE_SLOW_SPEED_PERCENTAGE;
+        break;
+      case 45:
+        m_LX += SWERVE_SLOW_SPEED_PERCENTAGE;
+        m_LY += SWERVE_SLOW_SPEED_PERCENTAGE;
+        break;
+      case 90:
+        m_LX += SWERVE_SLOW_SPEED_PERCENTAGE;
+        break;
+      case 135:
+        m_LX += SWERVE_SLOW_SPEED_PERCENTAGE;
+        m_LY -= SWERVE_SLOW_SPEED_PERCENTAGE;
+        break;
+      case 180:
+        m_LY -= SWERVE_SLOW_SPEED_PERCENTAGE;
+        break;
+      case 225:
+        m_LX -= SWERVE_SLOW_SPEED_PERCENTAGE;
+        m_LY -= SWERVE_SLOW_SPEED_PERCENTAGE;
+        break;
+      case 270:
+        m_LX -= SWERVE_SLOW_SPEED_PERCENTAGE;
+        break;
+      case 315:
+        m_LX -= SWERVE_SLOW_SPEED_PERCENTAGE;
+        m_LY += SWERVE_SLOW_SPEED_PERCENTAGE;
+        break;
+    }
     
     m_swerve.joystickDrive(m_LX, m_LY, m_RX);
 
