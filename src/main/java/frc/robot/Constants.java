@@ -86,6 +86,9 @@ public final class Constants {
 
         /* Maximum distance for a valid waypoint (meters) */
         public static final double MAX_WAYPOINT_DISTANCE = 0.5;
+
+        public static final double SHWERVE_DRIVE_Kp = 0;
+        public static final double SHWERVE_DRIVE_Kd = 0;
     }
 
     public class LL {

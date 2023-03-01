@@ -19,6 +19,11 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.EncoderType;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxAbsoluteEncoder;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.SparkMaxRelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
@@ -82,7 +87,9 @@ public class Drivetrain extends SubsystemBase {
   private final TalonFX BL_Drive = new TalonFX(BL_DRIVE_ID);
   private final TalonFX BR_Drive = new TalonFX(BR_DRIVE_ID);
 
-  private final CANSparkMax SHWERVE_DRIVE = new CANSparkMax(SHWERVE_DRIVE_ID, MotorType.kBrushless);
+  private final CANSparkMax shwerveDrive = new CANSparkMax(SHWERVE_DRIVE_ID, MotorType.kBrushless);
+  private final RelativeEncoder shwerveDriveEncoder = shwerveDrive.getEncoder();
+  private final PIDController shwerveDrivePID = new PIDController(SHWERVE_DRIVE_Kp, 0, SHWERVE_DRIVE_Kd);
 
   // swerve module azimuth (steering) motors
   private final TalonFX FL_Azimuth = new TalonFX(FL_AZIMUTH_ID);
@@ -551,9 +558,13 @@ public class Drivetrain extends SubsystemBase {
 
   public void shwerve ( double LX, double LY) {
     //TODO shwerve
+    // DONT RUN THIS YET
+    // NEED TO REPLACE LY WITH THE ACTUAL SPEED THE WHEEL NEEDS TO BE GOING
+    // AND CONVERT THE VELOCITY TO THE WHEEL SURFACE SPEED
+    shwerveDrive.set(shwerveDrivePID.calculate(shwerveDriveEncoder.getVelocity(), LY));
   }
 
   public void noShwerve () {
-    SHWERVE_DRIVE.set(0);
+    shwerveDrive.set(0);
   }
 }
