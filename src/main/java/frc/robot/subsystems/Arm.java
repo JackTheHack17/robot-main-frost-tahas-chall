@@ -101,9 +101,9 @@ public class Arm extends SubsystemBase {
         m_stage2Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_2_ENCODER_ID);
         m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
-        m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd, STAGE_1_Kf);
-        m_stage2PID = new PIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd, STAGE_2_Kf);
-        m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd, STAGE_3_Kf);
+        m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
+        m_stage2PID = new PIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd);
+        m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
     }
 
     private void moveToPoint(double x, double y, double claw) {
@@ -314,9 +314,9 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("POP/stage3/targetPosition", m_stage3Target);
 
         if ( DriverStation.isEnabled() ) {
-            m_stage1.set(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition(), m_stage1Target));
-            m_stage2.set(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition(), m_stage2Target));
-            m_stage3.set(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition(), m_stage3Target));
+            m_stage1.set(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition(), m_stage1Target));
+            m_stage2.set(STAGE_2_Kf + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition(), m_stage2Target));
+            m_stage3.set(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition(), m_stage3Target));
         }
     }
     
