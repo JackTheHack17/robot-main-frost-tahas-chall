@@ -142,6 +142,6 @@ public class PinchersofPower extends SubsystemBase  {
     Telemetry.setValue("Pincher/rightMotor/temperature", spinner2.getMotorTemperature());
     Telemetry.setValue("Pincher/rightMotor/outputVoltage", spinner2.getAppliedOutput());
     Telemetry.setValue("Pincher/rightMotor/statorCurrent", spinner2.getOutputCurrent());
-    Telemetry.setValue("Pincher/piston", pusher.get());
+    Telemetry.setValue("Pincher/piston", pusher.get() == DoubleSolenoid.Value.kForward ? "Forward" : "Reverse");
   }
 }
