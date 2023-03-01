@@ -27,8 +27,8 @@ import frc.robot.subsystems.PinchersofPower;
  */
 public class RobotContainer {
   // Im leaving these ports as magic constants because there's no case where they are not these values
-  public static final CommandXboxController driverController = new CommandXboxController(0);
-  public static final ButtonBoard copilotController = new ButtonBoard();
+  public static final CommandXboxController driverController = new CommandXboxController(1);
+  public static final ButtonBoard copilotController = new ButtonBoard(2, 3);
 
   // The robot's subsystems and commands are defined here...
   private final Pigeon m_gyro = new Pigeon();

@@ -5,10 +5,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ButtonBoard {
-    CommandGenericHID leftBoard = new CommandGenericHID(1);
-    CommandGenericHID rightBoard = new CommandGenericHID(2);
+    CommandGenericHID leftBoard;
+    CommandGenericHID rightBoard;
 
-    public ButtonBoard () {
+    public ButtonBoard (int leftBoardPort, int rightBoardPort) {
+        leftBoard = new CommandGenericHID(leftBoardPort);
+        rightBoard = new CommandGenericHID(rightBoardPort);
+
         Telemetry.setValue("buttonBoard/0", false);
         Telemetry.setValue("buttonBoard/1", false);
         Telemetry.setValue("buttonBoard/2", false);
