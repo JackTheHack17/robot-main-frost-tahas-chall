@@ -599,8 +599,8 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void shwerve ( double LX, double LY) {
-    //TODO shwerve gear ratios
-    shwerveDrive.set(shwerveDrivePID.calculate(shwerveDriveEncoder.getVelocity(), forwardKinematics.vxMetersPerSecond));
+    // 6in diameter wheels, 10:1 gearbox
+    shwerveDrive.set(shwerveDrivePID.calculate((shwerveDriveEncoder.getVelocity()/10)*(Math.PI * 2 * 6), forwardKinematics.vxMetersPerSecond));
   }
 
   public void noShwerve () {
