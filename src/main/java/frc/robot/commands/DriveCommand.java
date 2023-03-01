@@ -3,10 +3,10 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
-import frc.lib.ButtonBoard;
-import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+import frc.lib.ButtonBoard;
+import frc.robot.subsystems.Drivetrain;
 
 /** An example command that uses an example subsystem. */
 public class DriveCommand extends CommandBase {

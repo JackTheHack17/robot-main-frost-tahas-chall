@@ -3,6 +3,40 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import static frc.robot.Constants.CAN.BL_AZIMUTH_ID;
+import static frc.robot.Constants.CAN.BL_CANCODER_ID;
+import static frc.robot.Constants.CAN.BL_DRIVE_ID;
+import static frc.robot.Constants.CAN.BR_AZIMUTH_ID;
+import static frc.robot.Constants.CAN.BR_CANCODER_ID;
+import static frc.robot.Constants.CAN.BR_DRIVE_ID;
+import static frc.robot.Constants.CAN.FL_AZIMUTH_ID;
+import static frc.robot.Constants.CAN.FL_CANCODER_ID;
+import static frc.robot.Constants.CAN.FL_DRIVE_ID;
+import static frc.robot.Constants.CAN.FR_AZIMUTH_ID;
+import static frc.robot.Constants.CAN.FR_CANCODER_ID;
+import static frc.robot.Constants.CAN.FR_DRIVE_ID;
+import static frc.robot.Constants.CAN.SHWERVE_DRIVE_ID;
+import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kD;
+import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kP;
+import static frc.robot.Constants.DRIVETRAIN.BL_ECODER_OFFSET;
+import static frc.robot.Constants.DRIVETRAIN.BR_ECODER_OFFSET;
+import static frc.robot.Constants.DRIVETRAIN.DRIVE_GEAR_RATIO;
+import static frc.robot.Constants.DRIVETRAIN.DRIVE_kF;
+import static frc.robot.Constants.DRIVETRAIN.DRIVE_kP;
+import static frc.robot.Constants.DRIVETRAIN.FL_ECODER_OFFSET;
+import static frc.robot.Constants.DRIVETRAIN.FR_ECODER_OFFSET;
+import static frc.robot.Constants.DRIVETRAIN.MAX_LINEAR_SPEED;
+import static frc.robot.Constants.DRIVETRAIN.MAX_ROTATION_SPEED;
+import static frc.robot.Constants.DRIVETRAIN.MAX_WAYPOINT_DISTANCE;
+import static frc.robot.Constants.DRIVETRAIN.ROBOT_WIDTH;
+import static frc.robot.Constants.DRIVETRAIN.SHWERVE_DRIVE_Kd;
+import static frc.robot.Constants.DRIVETRAIN.SHWERVE_DRIVE_Kp;
+import static frc.robot.Constants.DRIVETRAIN.WHEEL_DIAMETER;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -19,12 +53,8 @@ import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.EncoderType;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxAbsoluteEncoder;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.SparkMaxRelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -36,8 +66,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -48,14 +78,6 @@ import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.subsystems.PinchersofPower.GamePieces;
-
-import static frc.robot.Constants.DRIVETRAIN.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import static frc.robot.Constants.CAN.*;
 
 public class Drivetrain extends SubsystemBase {
   private Pigeon m_gyro;

@@ -1,4 +1,13 @@
 package frc.robot;
+import java.io.File;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 import frc.robot.Constants.ARM.positions;
@@ -9,16 +18,6 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PinchersofPower;
-
-import java.io.File;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a

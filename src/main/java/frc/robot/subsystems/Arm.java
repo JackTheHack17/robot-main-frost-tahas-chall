@@ -1,6 +1,29 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.ARM.*;
+import static frc.robot.Constants.ARM.JOINT_ANGLE_DEADZONE;
+import static frc.robot.Constants.ARM.JOINT_COORDINATE_DEADZONE;
+import static frc.robot.Constants.ARM.STAGE_1_Kd;
+import static frc.robot.Constants.ARM.STAGE_1_Kf;
+import static frc.robot.Constants.ARM.STAGE_1_Ki;
+import static frc.robot.Constants.ARM.STAGE_1_Kp;
+import static frc.robot.Constants.ARM.STAGE_2_Kd;
+import static frc.robot.Constants.ARM.STAGE_2_Kf;
+import static frc.robot.Constants.ARM.STAGE_2_Ki;
+import static frc.robot.Constants.ARM.STAGE_2_Kp;
+import static frc.robot.Constants.ARM.STAGE_3_Kd;
+import static frc.robot.Constants.ARM.STAGE_3_Kf;
+import static frc.robot.Constants.ARM.STAGE_3_Ki;
+import static frc.robot.Constants.ARM.STAGE_3_Kp;
+import static frc.robot.Constants.ARM.floorAltPosition;
+import static frc.robot.Constants.ARM.floorPosition;
+import static frc.robot.Constants.ARM.idlePosition;
+import static frc.robot.Constants.ARM.scoreHighPosition;
+import static frc.robot.Constants.ARM.scoreLowPosition;
+import static frc.robot.Constants.ARM.scoreMidPosition;
+import static frc.robot.Constants.ARM.substationPosition;
+import static frc.robot.Constants.ARM.thetaSpeed;
+import static frc.robot.Constants.ARM.xSpeed;
+import static frc.robot.Constants.ARM.ySpeed;
 
 import java.util.HashMap;
 
@@ -23,10 +46,10 @@ import frc.lib.ArmPosition;
 import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 import frc.lib.Triangle;
+import frc.robot.Constants;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DIO;
-import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
 public class Arm extends SubsystemBase {
