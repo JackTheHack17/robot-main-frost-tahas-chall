@@ -31,7 +31,7 @@ public class PinchersofPower extends SubsystemBase  {
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
     spinner2.follow(spinner);
-    colorSensor = new ColorSensorV3(I2C.Port.kMXP); // TODO NavX MXP PORT DO NOT FORGET TO PLUG THIS IN! IMPORTANT!
+    colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = false;
   }
 
