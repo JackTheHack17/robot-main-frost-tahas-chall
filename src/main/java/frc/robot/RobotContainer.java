@@ -36,7 +36,7 @@ public class RobotContainer {
   private final LEDs m_LEDs = new LEDs();
   private final PinchersofPower m_claw = new PinchersofPower();
   private final Arm m_arm = new Arm(m_claw, m_LEDs, driverController, copilotController);
-  private final Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw, m_limelight);
+  private final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

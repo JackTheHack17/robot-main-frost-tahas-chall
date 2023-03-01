@@ -68,7 +68,9 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RuntimeType;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -76,6 +78,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.ARM.positions;
@@ -86,6 +90,8 @@ public class Drivetrain extends SubsystemBase {
   private Arm m_arm;
   private PinchersofPower m_claw;
   private Limelight m_limelight;
+  private LEDs m_LEDs;
+  private CommandGenericHID m_driverController;
 
   private SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     new Translation2d(ROBOT_WIDTH/2, ROBOT_WIDTH/2),
@@ -165,11 +171,13 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKd = 1;
 
   /** Creates a new ExampleSubsystem. */
-  public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight) {
+  public Drivetrain(CommandGenericHID driverController, Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight, LEDs m_LEDs) {
     this.m_gyro = m_gyro;
     this.m_arm = m_arm;
     this.m_claw = m_claw;
     this.m_limelight = m_limelight;
+    this.m_LEDs = m_LEDs;
+    this.m_driverController = driverController;
     
     Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
     Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
@@ -441,7 +449,11 @@ public class Drivetrain extends SubsystemBase {
   public Command moveToPositionCommand () {
     Pose2d closest = m_odometry.getEstimatedPosition().nearest(_waypoints);
     if (closest == null) return new InstantCommand();
-    if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) return new InstantCommand();
+    if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
+      m_LEDs.flashRed();
+      m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
+      return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
+    }
     return pathToCommand( closest );
   }
 
@@ -460,7 +472,10 @@ public class Drivetrain extends SubsystemBase {
       new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
-    );
+    ).andThen(() -> {
+      m_LEDs.flashGreen();
+      m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1);
+    }).alongWith(new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)));
   }
 
   public Command autoBalanceCommand () {
