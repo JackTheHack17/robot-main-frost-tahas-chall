@@ -121,6 +121,19 @@ public final class Constants {
 
         public static final double STAGE_1_LENGTH = 0;
         public static final double STAGE_2_LENGTH = 0;
+
+        public static final double STAGE_1_Kp = 0;
+        public static final double STAGE_1_Ki = 0;
+        public static final double STAGE_1_Kd = 0;
+        public static final double STAGE_1_Kf = 0;
+        public static final double STAGE_2_Kp = 0;
+        public static final double STAGE_2_Ki = 0;
+        public static final double STAGE_2_Kd = 0;
+        public static final double STAGE_2_Kf = 0;
+        public static final double STAGE_3_Kp = 0;
+        public static final double STAGE_3_Ki = 0;
+        public static final double STAGE_3_Kd = 0;
+        public static final double STAGE_3_Kf = 0;
  }
 
      public class POP {
