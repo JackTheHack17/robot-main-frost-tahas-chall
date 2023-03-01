@@ -46,6 +46,7 @@ public class Limelight extends SubsystemBase {
   }
 
   public Pose2d getPose() {
+    // TODO setup limelight botpose
     posevalues = limelight.getEntry("botpose").getDoubleArray(new double[6]);
     Translation2d translate = new Translation2d(posevalues[0], posevalues[1]);
     Rotation2d rotation = new Rotation2d(Math.toRadians(posevalues[3]));
