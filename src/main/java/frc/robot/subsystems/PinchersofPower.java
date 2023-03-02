@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorSensorV3;
+import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -34,6 +35,22 @@ public class PinchersofPower extends SubsystemBase  {
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = false;
     pusher.set(Value.kReverse);
+
+    spinner.restoreFactoryDefaults();
+    spinner2.restoreFactoryDefaults();
+
+    spinner.clearFaults();
+    spinner2.clearFaults();
+
+    spinner.setIdleMode(IdleMode.kBrake);
+    spinner2.setIdleMode(IdleMode.kBrake);
+
+    spinner.setSmartCurrentLimit(40);
+    spinner2.setSmartCurrentLimit(40);
+
+    spinner.burnFlash();
+    spinner2.burnFlash();
+
   }
 
   /* Close */

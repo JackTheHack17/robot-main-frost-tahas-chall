@@ -203,6 +203,12 @@ public class Drivetrain extends SubsystemBase {
     configAzimuth(BL_Azimuth, BL_Position);
     configAzimuth(BR_Azimuth, BR_Position);
 
+    shwerveDrive.restoreFactoryDefaults();
+    shwerveDrive.clearFaults();
+    shwerveDrive.setSmartCurrentLimit(40);
+    shwerveDrive.setSecondaryCurrentLimit(40);
+    shwerveDrive.burnFlash();
+
     // TODO declare scoring positions
     // declare scoring positions
     if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {

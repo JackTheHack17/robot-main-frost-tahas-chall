@@ -111,7 +111,25 @@ public class Arm extends SubsystemBase {
         //m_stage2PID.enableContinuousInput(0, 360);
         m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
         //m_stage3PID.enableContinuousInput(0, 360);
-        
+
+        m_stage1.restoreFactoryDefaults();
+        m_stage1.clearFaults();
+        m_stage1.setSmartCurrentLimit(40);
+        m_stage1.setSecondaryCurrentLimit(40);
+        m_stage1.burnFlash();
+
+        m_stage2.restoreFactoryDefaults();
+        m_stage2.clearFaults();
+        m_stage2.setSmartCurrentLimit(40);
+        m_stage2.setSecondaryCurrentLimit(40);
+        m_stage2.burnFlash();
+
+        m_stage3.restoreFactoryDefaults();
+        m_stage3.clearFaults();
+        m_stage3.setSmartCurrentLimit(40);
+        m_stage3.setSecondaryCurrentLimit(40);
+        m_stage3.burnFlash();
+
         m_copilotController.button(10).whileTrue(new RepeatCommand( new InstantCommand(() -> {
             if (m_copilotController.getRawButton(9)) m_manualTargetTheta += thetaSpeed;
         })));
