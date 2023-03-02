@@ -18,6 +18,10 @@ public class LEDs extends SubsystemBase {
   double command = 0;
   double lastColor = 0;
 
+  public LEDs () {
+    command = 0;
+  }
+
   public Command turnYellow () {
     return new InstantCommand( () -> command = 0.69 );
   }
@@ -66,8 +70,8 @@ public class LEDs extends SubsystemBase {
 
   public Command idle () {
     return new FunctionalCommand(
-      () -> command = 0.01,
       () -> {},
+      () -> command = 0.01,
       (interrupted) -> {},
       () -> true,
       (Subsystem) this

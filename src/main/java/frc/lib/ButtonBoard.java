@@ -58,6 +58,9 @@ public class ButtonBoard {
     }
 
     private double getAxis ( int axisNumber ) {
+        if( Math.abs(rightBoard.getRawAxis(axisNumber)) < 0.5 ) {
+            return 0;
+        }
         return rightBoard.getRawAxis(axisNumber);
     }
 

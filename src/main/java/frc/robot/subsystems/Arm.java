@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -97,20 +98,31 @@ public class Arm extends SubsystemBase {
         m_stage2.setIdleMode(IdleMode.kBrake);
         m_stage3.setIdleMode(IdleMode.kBrake);
 
+        m_stage2.setInverted(false);
+        m_stage3.setInverted(false);
+
         m_stage1Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_1_ENCODER_ID);
         m_stage2Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_2_ENCODER_ID);
         m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
         m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
+        m_stage1PID.enableContinuousInput(0, 360);
         m_stage2PID = new PIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd);
+        //m_stage2PID.enableContinuousInput(0, 360);
         m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
+        //m_stage3PID.enableContinuousInput(0, 360);
+        
+        m_copilotController.button(10).whileTrue(new RepeatCommand( new InstantCommand(() -> {
+            if (m_copilotController.getRawButton(9)) m_manualTargetTheta += thetaSpeed;
+        })));
+        m_copilotController.button(11).whileTrue(new RepeatCommand( new InstantCommand(() -> {
+            if (m_copilotController.getRawButton(9)) m_manualTargetTheta -= thetaSpeed;
+        })));
     }
 
     private void moveToPoint(double x, double y, double claw) {
         Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-        setStage1Target(triangle.getAngleA() + (90 - Math.atan2(x, y)));
-        setStage2Target(triangle.getAngleB());
-        setStage3Target(claw);
+        moveToAngles(triangle.getAngleA() + (90 - Math.atan2(x, y)), triangle.getAngleB(), claw);
     }
 
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
@@ -129,15 +141,12 @@ public class Arm extends SubsystemBase {
         setStage1Target(stage1Angle);
         setStage2Target(stage2Angle);
         setStage3Target(stage3Angle);
-        m_manualTargetX = forwardKinematics(stage1Angle, stage2Angle, stage3Angle)[0];
-        m_manualTargetY = forwardKinematics(stage1Angle, stage2Angle, stage3Angle)[1];
-        m_manualTargetTheta = stage3Angle;
     }
 
     private void moveToPosition (positions position) {
         ArmPosition target = positionMap.get(position);
-        m_manualTargetX = getCurrentPoint()[0];
-        m_manualTargetY = getCurrentPoint()[1];
+        m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
+        m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
         m_manualTargetTheta = target.getStage3Angle();
         moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
     }
@@ -171,6 +180,13 @@ public class Arm extends SubsystemBase {
     }
 
     public Command moveToPositionCommand (positions position) {
+        if (!m_copilotController.getRawButton(9)) {
+            m_copilotController.setLED(10, false);
+            m_copilotController.setLED(11, false);
+            m_copilotController.setLED(12, false);
+            m_copilotController.setLED(13, false);
+            m_copilotController.setLED(14, false);
+        }
         m_copilotController.setLED(0, false);
         m_copilotController.setLED(1, false);
         m_copilotController.setLED(2, false);
@@ -223,14 +239,33 @@ public class Arm extends SubsystemBase {
         );
     }
 
-    public Command moveToPointCommand (double x, double y, double theta) {
+    public Command moveToPointCommand () {
         return new FunctionalCommand(
             () -> { // init
                 m_clawSubsystem.notake();
             }, 
             () -> { // execution
-                moveToPoint(x, y, theta);
+                m_copilotController.setLED(0, false);
+                m_copilotController.setLED(1, false);
+                m_copilotController.setLED(2, false);
+                m_copilotController.setLED(3, false);
+                m_copilotController.setLED(4, false);
+                m_copilotController.setLED(5, false);
+                m_copilotController.setLED(6, false);
+                m_copilotController.setLED(7, false);
+                m_copilotController.setLED(8, false);
+
+                m_copilotController.setLED(10, true);
+                m_copilotController.setLED(11, true);
+                m_copilotController.setLED(12, true);
+                m_copilotController.setLED(13, true);
+                m_copilotController.setLED(14, true);
+
+                m_manualTargetX += m_copilotController.getJoystick().getX() * xSpeed;
+                m_manualTargetY += m_copilotController.getJoystick().getY() * ySpeed;
+                moveToPoint(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
             }, 
+
             interrupted -> { // when should the command do when it ends?
                 if (!interrupted) {
                     // arm is in position
@@ -245,55 +280,19 @@ public class Arm extends SubsystemBase {
 
     public Command defaultCommand () {
         if (RobotContainer.copilotController.getRawButton(9)) {
-            m_copilotController.setLED(0, false);
-            m_copilotController.setLED(1, false);
-            m_copilotController.setLED(2, false);
-            m_copilotController.setLED(3, false);
-            m_copilotController.setLED(4, false);
-            m_copilotController.setLED(5, false);
-            m_copilotController.setLED(6, false);
-            m_copilotController.setLED(7, false);
-            m_copilotController.setLED(8, false);
-
-            m_copilotController.setLED(10, true);
-            m_copilotController.setLED(11, true);
-            m_copilotController.setLED(12, true);
-            m_copilotController.setLED(13, true);
-            m_copilotController.setLED(14, true);
-
-            // the manual override is enabled
-            
-            if ( m_copilotController.getRawButton(10) ) {
-                m_manualTargetTheta += thetaSpeed;
-            }
-            if ( m_copilotController.getRawButton(11) ) {
-                m_manualTargetTheta -= thetaSpeed;
-            }
-            m_manualTargetX += m_copilotController.getJoystick().getX() * xSpeed;
-            m_manualTargetY += m_copilotController.getJoystick().getY() * ySpeed;
-            if ( m_copilotController.getRawButton(13) ) {
-                m_clawSubsystem.outtake();
-            } else if ( m_copilotController.getRawButton(14) ) {
-                m_clawSubsystem.intake();
-            } else {
-                m_clawSubsystem.notake();
-            }
-            if ( m_copilotController.getRawButton(12) ) {
-                m_clawSubsystem.toggle();
-            }
-
-            return moveToPointCommand(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
+            return moveToPointCommand();
         } else {
-            m_copilotController.setLED(10, false);
-            m_copilotController.setLED(11, false);
-            m_copilotController.setLED(12, false);
-            m_copilotController.setLED(13, false);
-            m_copilotController.setLED(14, false);
             return moveToPositionCommand(positions.Idle);
         }
     }
 
     @Override  public void periodic() {
+        Telemetry.setValue("Arm/currentPoint/x", getCurrentPoint()[0]);
+        Telemetry.setValue("Arm/currentPoint/y", getCurrentPoint()[1]);
+        Telemetry.setValue("Arm/currentPoint/theta", getCurrentPoint()[2]);
+        Telemetry.setValue("Arm/manualTarget/manualTargetX", m_manualTargetX);
+        Telemetry.setValue("Arm/manualTarget/manualTargetY", m_manualTargetY);
+        Telemetry.setValue("Arm/manualTarget/manualTargetTheta", m_manualTargetTheta);
         Telemetry.setValue("Arm/stage1/setpoint", m_stage1.get());
         Telemetry.setValue("Arm/stage1/temperature", m_stage1.getMotorTemperature());
         Telemetry.setValue("Arm/stage1/outputVoltage", m_stage1.getAppliedOutput());

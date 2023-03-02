@@ -30,7 +30,7 @@ public class PinchersofPower extends SubsystemBase  {
     pusher = new DoubleSolenoid(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH, Constants.POP.FORWARD_PNEUMATIC_CHANNEL, Constants.POP.BACKWARD_PNEUMATIC_CHANNEL);
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
-    spinner2.follow(spinner);
+    spinner2.follow(spinner, true);
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = false;
     pusher.set(Value.kReverse);

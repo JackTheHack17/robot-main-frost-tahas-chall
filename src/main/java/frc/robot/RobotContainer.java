@@ -74,6 +74,18 @@ public class RobotContainer {
         m_claw.toggle();
       }
     }));
+    copilotController.button(14).whileTrue(new InstantCommand( () -> {
+      if (copilotController.getRawButton(9)) {
+        m_claw.outtake();
+      }
+    }));
+    copilotController.button(14).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.notake();}));
+    copilotController.button(13).whileTrue(new InstantCommand( () -> {
+      if (copilotController.getRawButton(9)) {
+        m_claw.intake();
+      }
+    }));
+    copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.notake();}));
   }
 
   /**

@@ -48,6 +48,8 @@ public class Robot extends TimedRobot {
     Telemetry.setValue("general/PDH/current", PDH.getTotalCurrent());
     Telemetry.setValue("general/PDH/temperature", PDH.getTemperature());
 
+    Telemetry.setValue("buttonBoard/joystick", "" + RobotContainer.copilotController.getJoystick().getX() + ", " + RobotContainer.copilotController.getJoystick().getY());
+
     if (!DriverStation.isEnabled()) {
       if ( RobotContainer.copilotController.getRawButton(9) ) {
         DriverStation.reportWarning("Manual Override Enabled! Do not Enable Robot without Disabling Manual Override!", false);
