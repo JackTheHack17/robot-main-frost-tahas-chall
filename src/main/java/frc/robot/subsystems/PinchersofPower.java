@@ -26,19 +26,22 @@ public class PinchersofPower extends SubsystemBase  {
   private boolean m_cone;
 
   public PinchersofPower() {
-    comp = new Compressor(Constants.CAN.PCH_ID, PneumaticsModuleType.CTREPCM);
-    pusher = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Constants.POP.FORWARD_PNEUMATIC_CHANNEL, Constants.POP.BACKWARD_PNEUMATIC_CHANNEL);
+    comp = new Compressor(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH);
+    pusher = new DoubleSolenoid(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH, Constants.POP.FORWARD_PNEUMATIC_CHANNEL, Constants.POP.BACKWARD_PNEUMATIC_CHANNEL);
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
     spinner2.follow(spinner);
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = false;
+    pusher.set(Value.kReverse);
   }
 
+  /* Close */
   public void forward() {
     pusher.set(Value.kForward);
   }
 
+  /* Open */
   public void reverse() {
     pusher.set(Value.kReverse);
   }
@@ -48,7 +51,11 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void toggle () {
-    pusher.toggle();
+    if (pusher.get() == Value.kReverse) {
+      pusher.set(Value.kForward);
+    } else {
+      pusher.set(Value.kReverse);
+    }
   }
 
   public void spinin() {
@@ -143,5 +150,6 @@ public class PinchersofPower extends SubsystemBase  {
     Telemetry.setValue("Pincher/rightMotor/outputVoltage", spinner2.getAppliedOutput());
     Telemetry.setValue("Pincher/rightMotor/statorCurrent", spinner2.getOutputCurrent());
     Telemetry.setValue("Pincher/piston", pusher.get() == DoubleSolenoid.Value.kForward ? "Forward" : "Reverse");
+    Telemetry.setValue("Pincher/compressor/pressure", comp.getPressure());
   }
 }

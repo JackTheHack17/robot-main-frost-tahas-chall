@@ -122,7 +122,7 @@ public class Arm extends SubsystemBase {
     }
 
     private double[] getCurrentPoint () {
-        return forwardKinematics(m_stage1Encoder.getAbsolutePosition(), m_stage2Encoder.getAbsolutePosition(), m_stage3Encoder.getAbsolutePosition());
+        return forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360);
     }
 
     private void moveToAngles (double stage1Angle, double stage2Angle, double stage3Angle) {
@@ -151,9 +151,9 @@ public class Arm extends SubsystemBase {
             );
         } else {
             return (
-                Math.abs(m_stage1Encoder.getAbsolutePosition() - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
-                Math.abs(m_stage2Encoder.getAbsolutePosition() - m_stage2Target) < JOINT_ANGLE_DEADZONE &&
-                Math.abs(m_stage3Encoder.getAbsolutePosition() - m_stage3Target) < JOINT_ANGLE_DEADZONE
+                Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
+                Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE &&
+                Math.abs(m_stage3Encoder.getAbsolutePosition()*360 - m_stage3Target) < JOINT_ANGLE_DEADZONE
             );
         }
     }
@@ -294,29 +294,29 @@ public class Arm extends SubsystemBase {
     }
 
     @Override  public void periodic() {
-        Telemetry.setValue("POP/stage1/setpoint", m_stage1.get());
-        Telemetry.setValue("POP/stage1/temperature", m_stage1.getMotorTemperature());
-        Telemetry.setValue("POP/stage1/outputVoltage", m_stage1.getAppliedOutput());
-        Telemetry.setValue("POP/stage1/statorCurrent", m_stage1.getOutputCurrent());
-        Telemetry.setValue("POP/stage1/actualPosition", m_stage1Encoder.getAbsolutePosition());
-        Telemetry.setValue("POP/stage1/targetPosition", m_stage1Target);
-        Telemetry.setValue("POP/stage2/setpoint", m_stage2.get());
-        Telemetry.setValue("POP/stage2/temperature", m_stage2.getMotorTemperature());
-        Telemetry.setValue("POP/stage2/outputVoltage", m_stage2.getAppliedOutput());
-        Telemetry.setValue("POP/stage2/statorcurrent", m_stage2.getOutputCurrent());
-        Telemetry.setValue("POP/stage2/actualPosition", m_stage2Encoder.getAbsolutePosition());
-        Telemetry.setValue("POP/stage2/targetPosition", m_stage2Target);
-        Telemetry.setValue("POP/stage3/setpoint", m_stage3.get());
-        Telemetry.setValue("POP/stage3/temperature", m_stage3.getMotorTemperature());
-        Telemetry.setValue("POP/stage3/outputVoltage", m_stage3.getAppliedOutput());
-        Telemetry.setValue("POP/stage3/statorCurrent", m_stage3.getOutputCurrent());
-        Telemetry.setValue("POP/stage3/actualPosition", m_stage3Encoder.getAbsolutePosition());
-        Telemetry.setValue("POP/stage3/targetPosition", m_stage3Target);
+        Telemetry.setValue("Arm/stage1/setpoint", m_stage1.get());
+        Telemetry.setValue("Arm/stage1/temperature", m_stage1.getMotorTemperature());
+        Telemetry.setValue("Arm/stage1/outputVoltage", m_stage1.getAppliedOutput());
+        Telemetry.setValue("Arm/stage1/statorCurrent", m_stage1.getOutputCurrent());
+        Telemetry.setValue("Arm/stage1/actualPosition", m_stage1Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage1/targetPosition", m_stage1Target);
+        Telemetry.setValue("Arm/stage2/setpoint", m_stage2.get());
+        Telemetry.setValue("Arm/stage2/temperature", m_stage2.getMotorTemperature());
+        Telemetry.setValue("Arm/stage2/outputVoltage", m_stage2.getAppliedOutput());
+        Telemetry.setValue("Arm/stage2/statorcurrent", m_stage2.getOutputCurrent());
+        Telemetry.setValue("Arm/stage2/actualPosition", m_stage2Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage2/targetPosition", m_stage2Target);
+        Telemetry.setValue("Arm/stage3/setpoint", m_stage3.get());
+        Telemetry.setValue("Arm/stage3/temperature", m_stage3.getMotorTemperature());
+        Telemetry.setValue("Arm/stage3/outputVoltage", m_stage3.getAppliedOutput());
+        Telemetry.setValue("Arm/stage3/statorCurrent", m_stage3.getOutputCurrent());
+        Telemetry.setValue("Arm/stage3/actualPosition", m_stage3Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage3/targetPosition", m_stage3Target);
 
         if ( DriverStation.isEnabled() ) {
-            m_stage1.set(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition(), m_stage1Target));
-            m_stage2.set(STAGE_2_Kf + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition(), m_stage2Target));
-            m_stage3.set(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition(), m_stage3Target));
+            m_stage1.set(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360, m_stage1Target));
+            m_stage2.set(STAGE_2_Kf + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, m_stage2Target));
+            m_stage3.set(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360, m_stage3Target));
         }
     }
     

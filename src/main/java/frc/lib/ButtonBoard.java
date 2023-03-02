@@ -50,11 +50,11 @@ public class ButtonBoard {
     }
 
     public Trigger button ( int buttonNumber ) {
-        return (buttonNumber < 9) ? leftBoard.button(buttonNumber) : rightBoard.button(buttonNumber - 9);
+        return (buttonNumber < 9) ? leftBoard.button(buttonNumber + 1) : rightBoard.button(buttonNumber - 9 + 1);
     }
 
     public boolean getRawButton ( int buttonNumber ) {
-        return (buttonNumber < 9) ? leftBoard.getHID().getRawButton(buttonNumber) : rightBoard.getHID().getRawButton(buttonNumber - 9);
+        return (buttonNumber < 9) ? leftBoard.getHID().getRawButton(buttonNumber + 1) : rightBoard.getHID().getRawButton(buttonNumber - 9 + 1);
     }
 
     private double getAxis ( int axisNumber ) {

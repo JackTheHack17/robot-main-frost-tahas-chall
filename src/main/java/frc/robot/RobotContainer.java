@@ -27,8 +27,8 @@ import frc.robot.subsystems.PinchersofPower;
  */
 public class RobotContainer {
   // Im leaving these ports as magic constants because there's no case where they are not these values
-  public static final CommandXboxController driverController = new CommandXboxController(1);
-  public static final ButtonBoard copilotController = new ButtonBoard(2, 3);
+  public static final CommandXboxController driverController = new CommandXboxController(0);
+  public static final ButtonBoard copilotController = new ButtonBoard(1, 2);
 
   // The robot's subsystems and commands are defined here...
   private final Pigeon m_gyro = new Pigeon();
@@ -40,7 +40,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    Telemetry.setValue("general/autonomous/availableRoutines", (String[]) Stream.of(new File("/home/lvuser/deploy/").listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).toArray());
+    //Telemetry.setValue("general/autonomous/availableRoutines", (String[]) Stream.of(new File("/home/lvuser/deploy/").listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).toArray());
 
     // Configure the button bindings
     configureButtonBindings();
@@ -69,6 +69,11 @@ public class RobotContainer {
     copilotController.button(6).onTrue(m_claw.outtakeCommand());
     copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
     copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
+    copilotController.button(12).onTrue(new InstantCommand( () -> {
+      if (copilotController.getRawButton(9)) {
+        m_claw.toggle();
+      }
+    }));
   }
 
   /**

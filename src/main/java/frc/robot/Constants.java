@@ -20,9 +20,9 @@ public final class Constants {
     }
 
     public class DIO {
-        public static final int ARM_STAGE_1_ENCODER_ID = 0;
-        public static final int ARM_STAGE_2_ENCODER_ID = 1;
-        public static final int ARM_STAGE_3_ENCODER_ID = 2;
+        public static final int ARM_STAGE_1_ENCODER_ID = 7;
+        public static final int ARM_STAGE_2_ENCODER_ID = 8;
+        public static final int ARM_STAGE_3_ENCODER_ID = 9;
     }
 
     public class CAN {
@@ -147,8 +147,8 @@ public final class Constants {
          public static final double F = 0;
          public static final double R = 0;
          public static final double SPEED = 0.5;
-         public static final int FORWARD_PNEUMATIC_CHANNEL = 0;
-         public static final int BACKWARD_PNEUMATIC_CHANNEL = 0;
+         public static final int FORWARD_PNEUMATIC_CHANNEL = 14;
+         public static final int BACKWARD_PNEUMATIC_CHANNEL = 15;
      }
 
      public class LED {
