@@ -31,6 +31,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.MathShared;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -108,7 +110,7 @@ public class Arm extends SubsystemBase {
         m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
         m_stage1PID.enableContinuousInput(0, 360);
         m_stage2PID = new PIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd);
-        //m_stage2PID.enableContinuousInput(0, 360);
+        m_stage2PID.enableContinuousInput(0, 360);
         m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
         //m_stage3PID.enableContinuousInput(0, 360);
 
@@ -329,11 +331,12 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("Arm/stage3/statorCurrent", m_stage3.getOutputCurrent());
         Telemetry.setValue("Arm/stage3/actualPosition", m_stage3Encoder.getAbsolutePosition()*360);
         Telemetry.setValue("Arm/stage3/targetPosition", m_stage3Target);
+        Telemetry.setValue("Arm/stage2/internalVelocity", m_stage2.getEncoder().getVelocity());
 
         if ( DriverStation.isEnabled() ) {
-            m_stage1.set(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360, m_stage1Target));
-            m_stage2.set(STAGE_2_Kf + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, m_stage2Target));
-            m_stage3.set(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360, m_stage3Target));
+            m_stage1.set(MathUtil.clamp(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360, m_stage1Target), -1, 1));
+            m_stage2.set(MathUtil.clamp(STAGE_2_Kf + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, m_stage2Target), -1, 1));
+            m_stage3.set(MathUtil.clamp(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360, m_stage3Target), -1, 1));
         }
     }
     

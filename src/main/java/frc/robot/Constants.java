@@ -120,7 +120,7 @@ public final class Constants {
         public static ArmPosition floorPosition      = new ArmPosition(0, 0, 0);
         public static ArmPosition floorAltPosition   = new ArmPosition(0, 0, 0);
         public static ArmPosition substationPosition = new ArmPosition(0, 0, 0);
-        public static ArmPosition idlePosition       = new ArmPosition(154, 216, 248);
+        public static ArmPosition idlePosition       = new ArmPosition(145, 240, 270);
 
         public static final double thetaSpeed = 0.1;
         public static final double xSpeed = 0.1;
@@ -129,18 +129,18 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 10;
         public static final double STAGE_2_LENGTH = 10;
 
-        public static final double STAGE_1_Kp = 0.01;
+        public static final double STAGE_1_Kp = 0.049912;
         public static final double STAGE_1_Ki = 0;
         public static final double STAGE_1_Kd = 0;
-        public static final double STAGE_1_Kf = 0.05;
-        public static final double STAGE_2_Kp = 0.001;
+        public static final double STAGE_1_Kf = 0.054861;
+        public static final double STAGE_2_Kp = 0.069912;
         public static final double STAGE_2_Ki = 0;
         public static final double STAGE_2_Kd = 0;
-        public static final double STAGE_2_Kf = 0.05;
-        public static final double STAGE_3_Kp = 0.001;
+        public static final double STAGE_2_Kf = 0.04534;
+        public static final double STAGE_3_Kp = 0;
         public static final double STAGE_3_Ki = 0;
         public static final double STAGE_3_Kd = 0;
-        public static final double STAGE_3_Kf = 0.05;
+        public static final double STAGE_3_Kf = 0.04766;
  }
 
      public class POP {

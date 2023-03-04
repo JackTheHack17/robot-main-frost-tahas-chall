@@ -31,10 +31,12 @@ public class PinchersofPower extends SubsystemBase  {
     pusher = new DoubleSolenoid(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH, Constants.POP.FORWARD_PNEUMATIC_CHANNEL, Constants.POP.BACKWARD_PNEUMATIC_CHANNEL);
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
-    spinner2.follow(spinner, true);
+    //spinner2.follow(spinner, true);
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = false;
     pusher.set(Value.kReverse);
+
+    //comp.disable();
 
     spinner.restoreFactoryDefaults();
     spinner2.restoreFactoryDefaults();
@@ -47,6 +49,8 @@ public class PinchersofPower extends SubsystemBase  {
 
     spinner.setSmartCurrentLimit(40);
     spinner2.setSmartCurrentLimit(40);
+
+    spinner2.setInverted(true);
 
     spinner.burnFlash();
     spinner2.burnFlash();
@@ -77,14 +81,18 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void spinin() {
     spinner.set(POP.SPEED);
+    spinner2.set(POP.SPEED);
   }
 
   public void spinout() {
-    spinner.set(-POP.SPEED);
+    spinner.set(POP.SPEED);
+    spinner2.set(-POP.SPEED);
   }
 
   public void spinoff() {
     spinner.set(0);
+    spinner2.set(0);
+
   }
 
   public void enable() {
@@ -121,7 +129,10 @@ public class PinchersofPower extends SubsystemBase  {
     }
 
     spinin();
-    new WaitCommand(1).andThen(new InstantCommand(() -> notake())).schedule();
+
+    if((pusher.get() != Value.kForward) && (m_cone == true)) {
+      // TODO until colorsensor spinin, then stop spinning
+    }
   }
 
   public void outtake() {
