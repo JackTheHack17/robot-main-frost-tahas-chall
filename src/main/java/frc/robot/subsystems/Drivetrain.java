@@ -239,10 +239,10 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (FL_Position.getPosition() < -360 || FL_Position.getPosition() > 360) { FL_Position.setPosition(FL_Position.getPosition() % 360); }
-    if (FR_Position.getPosition() < -360 || FR_Position.getPosition() > 360) { FR_Position.setPosition(FR_Position.getPosition() % 360); }
-    if (BL_Position.getPosition() < -360 || BL_Position.getPosition() > 360) { BL_Position.setPosition(BL_Position.getPosition() % 360); }
-    if (BR_Position.getPosition() < -360 || BR_Position.getPosition() > 360) { BR_Position.setPosition(BR_Position.getPosition() % 360); }
+    //if (FL_Position.getPosition() < -360 || FL_Position.getPosition() > 360) { FL_Position.setPosition(FL_Position.getPosition() % 360); }
+    //if (FR_Position.getPosition() < -360 || FR_Position.getPosition() > 360) { FR_Position.setPosition(FR_Position.getPosition() % 360); }
+    //if (BL_Position.getPosition() < -360 || BL_Position.getPosition() > 360) { BL_Position.setPosition(BL_Position.getPosition() % 360); }
+    //if (BR_Position.getPosition() < -360 || BR_Position.getPosition() > 360) { BR_Position.setPosition(BR_Position.getPosition() % 360); }
 
     // This method will be called once per scheduler run
 
@@ -266,10 +266,10 @@ public class Drivetrain extends SubsystemBase {
     BR_Actual_Speed = 2.0*(((BR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
 
     // dashboard data
-    Telemetry.setValue("drivetrain/modules/FL/azimuth/targetPosition", FL_Target);
-    Telemetry.setValue("drivetrain/modules/FR/azimuth/targetPosition", FR_Target);
-    Telemetry.setValue("drivetrain/modules/BL/azimuth/targetPosition", BL_Target);
-    Telemetry.setValue("drivetrain/modules/BR/azimuth/targetPosition", BR_Target);
+    Telemetry.setValue("drivetrain/modules/FL/azimuth/targetPosition", FL_Target % 360);
+    Telemetry.setValue("drivetrain/modules/FR/azimuth/targetPosition", FR_Target % 360);
+    Telemetry.setValue("drivetrain/modules/BL/azimuth/targetPosition", BL_Target % 360);
+    Telemetry.setValue("drivetrain/modules/BR/azimuth/targetPosition", BR_Target % 360);
     Telemetry.setValue("drivetrain/modules/FL/drive/targetSpeed", FL_Speed);
     Telemetry.setValue("drivetrain/modules/FR/drive/targetSpeed", FR_Speed);
     Telemetry.setValue("drivetrain/modules/BL/drive/targetSpeed", BL_Speed);
@@ -339,7 +339,7 @@ public class Drivetrain extends SubsystemBase {
     
     modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
 
-    if ( LX == 0 && LY == 0 && RX == 0 ) {
+    if ( LX == 0 && LY == 0 && RX == 0 && false ) {
       FL_Azimuth.set(ControlMode.PercentOutput, 0);
       FR_Azimuth.set(ControlMode.PercentOutput, 0);
       BL_Azimuth.set(ControlMode.PercentOutput, 0);
@@ -357,10 +357,10 @@ public class Drivetrain extends SubsystemBase {
   public void driveFromModuleStates ( SwerveModuleState[] modules ) {
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
 
-    modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(FL_Position.getAbsolutePosition()));
-    modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(FR_Position.getAbsolutePosition()));
-    modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(BL_Position.getAbsolutePosition()));
-    modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(BR_Position.getAbsolutePosition()));
+    modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
+    modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
+    modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
+    modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
 
     FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
     FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
@@ -456,10 +456,10 @@ public class Drivetrain extends SubsystemBase {
     //BL_Azimuth.set(ControlMode.Position, ((BL_Target + (BL_Actual_Position - (BL_Actual_Position % 360))) / 360) * 4096);
     //BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual_Position - (BR_Actual_Position % 360))) / 360) * 4096);
 
-    FL_Azimuth.set(ControlMode.PercentOutput, clamp(FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target), -1, 1));
-    FR_Azimuth.set(ControlMode.PercentOutput, clamp(FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target), -1, 1));
-    BL_Azimuth.set(ControlMode.PercentOutput, clamp(BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target), -1, 1));
-    BR_Azimuth.set(ControlMode.PercentOutput, clamp(BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target), -1, 1));
+    FL_Azimuth.set(ControlMode.PercentOutput, clamp(FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360), -1, 1));
+    FR_Azimuth.set(ControlMode.PercentOutput, clamp(FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360), -1, 1));
+    BL_Azimuth.set(ControlMode.PercentOutput, clamp(BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360), -1, 1));
+    BR_Azimuth.set(ControlMode.PercentOutput, clamp(BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360), -1, 1));
 
     // pass wheel speeds to motor controllers
     FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);

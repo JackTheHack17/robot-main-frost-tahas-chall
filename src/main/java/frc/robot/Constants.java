@@ -78,8 +78,8 @@ public final class Constants {
         public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.05;
             
         // pid values
-        public static final double AZIMUTH_kP = 0.2;//0.65; // sds: 0.2; rylan: 0.65
-        public static final double AZIMUTH_kD = 0.1;
+        public static final double AZIMUTH_kP = 0.01; // sds: 0.2; rylan: 0.65
+        public static final double AZIMUTH_kD = 0;
 
         // calculated via JVN calculator
         public static final double DRIVE_kP = 0.044057;
@@ -88,7 +88,7 @@ public final class Constants {
         /* Maximum distance for a valid waypoint (meters) */
         public static final double MAX_WAYPOINT_DISTANCE = 0.5;
 
-        public static final double SHWERVE_DRIVE_Kp = 0;
+        public static final double SHWERVE_DRIVE_Kp = 044057;
         public static final double SHWERVE_DRIVE_Kd = 0;
 
         public static final double AUTO_BALANCE_Kp = 0;
@@ -137,7 +137,7 @@ public final class Constants {
         public static final double STAGE_2_Ki = 0;
         public static final double STAGE_2_Kd = 0;
         public static final double STAGE_2_Kf = 0.04534;
-        public static final double STAGE_3_Kp = 0;
+        public static final double STAGE_3_Kp = 0.01;
         public static final double STAGE_3_Ki = 0;
         public static final double STAGE_3_Kd = 0;
         public static final double STAGE_3_Kf = 0.04766;
