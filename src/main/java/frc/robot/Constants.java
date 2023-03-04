@@ -75,10 +75,10 @@ public final class Constants {
         public static final double MAX_LINEAR_SPEED = 5.4;
         /** maximum rotation speed (radians per second) */
         public static final double MAX_ROTATION_SPEED = Math.PI*2;
-        public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.25;
+        public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.05;
             
         // pid values
-        public static final double AZIMUTH_kP = 0.65;
+        public static final double AZIMUTH_kP = 0.2;//0.65; // sds: 0.2; rylan: 0.65
         public static final double AZIMUTH_kD = 0.1;
 
         // calculated via JVN calculator
