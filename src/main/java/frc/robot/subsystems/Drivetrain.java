@@ -3,6 +3,8 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import static edu.wpi.first.math.MathUtil.clamp;
+import static edu.wpi.first.math.MathUtil.inputModulus;
 import static frc.robot.Constants.CAN.BL_AZIMUTH_ID;
 import static frc.robot.Constants.CAN.BL_CANCODER_ID;
 import static frc.robot.Constants.CAN.BL_DRIVE_ID;
@@ -150,6 +152,11 @@ public class Drivetrain extends SubsystemBase {
   private double BL_Actual_Speed = 0.0;
   private double BR_Actual_Speed = 0.0;
 
+  private PIDController FL_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
+  private PIDController FR_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
+  private PIDController BL_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
+  private PIDController BR_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
+
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = true;
   
@@ -177,6 +184,11 @@ public class Drivetrain extends SubsystemBase {
     this.m_limelight = m_limelight;
     this.m_LEDs = m_LEDs;
     this.m_driverController = driverController;
+
+    FL_PID.enableContinuousInput(0, 360);
+    FR_PID.enableContinuousInput(0, 360);
+    BL_PID.enableContinuousInput(0, 360);
+    BR_PID.enableContinuousInput(0, 360);
     
     Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
     Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
@@ -345,21 +357,21 @@ public class Drivetrain extends SubsystemBase {
   public void driveFromModuleStates ( SwerveModuleState[] modules ) {
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
 
-    //modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(FL_Position.getAbsolutePosition()));
-    //modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(FR_Position.getAbsolutePosition()));
-    //modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(BL_Position.getAbsolutePosition()));
-    //modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(BR_Position.getAbsolutePosition()));
+    modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(FL_Position.getAbsolutePosition()));
+    modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(FR_Position.getAbsolutePosition()));
+    modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(BL_Position.getAbsolutePosition()));
+    modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(BR_Position.getAbsolutePosition()));
 
-    FL_Target = modules[0].angle.getDegrees();
-    FR_Target = modules[1].angle.getDegrees();
-    BL_Target = modules[2].angle.getDegrees();
-    BR_Target = modules[3].angle.getDegrees();
+    FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
+    FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
+    BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
+    BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
     FL_Speed = modules[0].speedMetersPerSecond;
     FR_Speed = modules[1].speedMetersPerSecond;
     BL_Speed = modules[2].speedMetersPerSecond;
     BR_Speed = modules[3].speedMetersPerSecond;
 
-    if ( Math.abs(FL_Actual_Position - FL_Target) > Math.abs(FR_Actual_Position - FR_Target) && Math.abs(FL_Actual_Position - FL_Target) > Math.abs(BL_Actual_Position - BL_Target) && Math.abs(FL_Actual_Position - FL_Target) > Math.abs(BR_Actual_Position - BR_Target) ) {
+    /*if ( Math.abs(FL_Actual_Position - FL_Target) > Math.abs(FR_Actual_Position - FR_Target) && Math.abs(FL_Actual_Position - FL_Target) > Math.abs(BL_Actual_Position - BL_Target) && Math.abs(FL_Actual_Position - FL_Target) > Math.abs(BR_Actual_Position - BR_Target) ) {
       if (Math.min(Math.min(Math.abs(FL_Target - FL_Actual_Position), Math.abs((FL_Target + 360) - FL_Actual_Position)), Math.abs((FL_Target - 360) - FL_Actual_Position)) == Math.abs((FL_Target + 360) - FL_Actual_Position)) {
         if (Math.abs(FL_Target - FL_Actual_Position) > 180) FL_Target += 360;
         if (Math.abs(FR_Target - FR_Actual_Position) > 180) FR_Target += 360;
@@ -411,7 +423,7 @@ public class Drivetrain extends SubsystemBase {
         if (Math.abs(BL_Target - BL_Actual_Position) > 180) BL_Target -= 360;
         if (Math.abs(BR_Target - BR_Actual_Position) > 180) BR_Target -= 360;
       }
-    }
+    }*/
 
     // find the shortest path to an equivalent position to prevent unneccesary full rotations
     //FL_Target = optimizeAzimuthPath(FL_Target, FL_Actual_Position) % 360;
@@ -439,10 +451,15 @@ public class Drivetrain extends SubsystemBase {
 
     // correct the target positions so that they are close to the current position
     // then convert to sensor units and pass target positions to motor controllers
-    FL_Azimuth.set(ControlMode.Position, ((FL_Target + (FL_Actual_Position - (FL_Actual_Position % 360))) / 360) * 4096);
-    FR_Azimuth.set(ControlMode.Position, ((FR_Target + (FR_Actual_Position - (FR_Actual_Position % 360))) / 360) * 4096);
-    BL_Azimuth.set(ControlMode.Position, ((BL_Target + (BL_Actual_Position - (BL_Actual_Position % 360))) / 360) * 4096);
-    BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual_Position - (BR_Actual_Position % 360))) / 360) * 4096);
+    //FL_Azimuth.set(ControlMode.Position, ((FL_Target + (FL_Actual_Position - (FL_Actual_Position % 360))) / 360) * 4096);
+    //FR_Azimuth.set(ControlMode.Position, ((FR_Target + (FR_Actual_Position - (FR_Actual_Position % 360))) / 360) * 4096);
+    //BL_Azimuth.set(ControlMode.Position, ((BL_Target + (BL_Actual_Position - (BL_Actual_Position % 360))) / 360) * 4096);
+    //BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual_Position - (BR_Actual_Position % 360))) / 360) * 4096);
+
+    FL_Azimuth.set(ControlMode.PercentOutput, clamp(FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target), -1, 1));
+    FR_Azimuth.set(ControlMode.PercentOutput, clamp(FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target), -1, 1));
+    BL_Azimuth.set(ControlMode.PercentOutput, clamp(BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target), -1, 1));
+    BR_Azimuth.set(ControlMode.PercentOutput, clamp(BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target), -1, 1));
 
     // pass wheel speeds to motor controllers
     FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
