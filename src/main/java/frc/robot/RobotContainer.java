@@ -1,7 +1,5 @@
 package frc.robot;
 import java.io.File;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;

@@ -1,8 +1,8 @@
 package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorSensorV3;
-import com.revrobotics.CANSparkMax.IdleMode;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.POP;
@@ -137,9 +136,6 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void outtake() {
     spinout();
-    if(pusher.get() == Value.kForward) {
-      pusher.set(Value.kReverse);
-    }
   }
 
   public void notake() {
