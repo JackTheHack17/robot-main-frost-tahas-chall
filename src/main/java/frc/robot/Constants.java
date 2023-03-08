@@ -114,6 +114,10 @@ public final class Constants {
             Idle
         };
 
+        public static final double STAGE_1_OFFSET = 0;
+        public static final double STAGE_2_OFFSET = 0;
+        public static final double STAGE_3_OFFSET = 0;
+
         public static ArmPosition scoreHighPosition  = new ArmPosition(186, 311, 289);
         public static ArmPosition scoreMidPosition   = new ArmPosition(0, 0, 0);
         public static ArmPosition scoreLowPosition   = new ArmPosition(0, 0, 0);

@@ -6,14 +6,17 @@ import static frc.robot.Constants.ARM.STAGE_1_Kd;
 import static frc.robot.Constants.ARM.STAGE_1_Kf;
 import static frc.robot.Constants.ARM.STAGE_1_Ki;
 import static frc.robot.Constants.ARM.STAGE_1_Kp;
+import static frc.robot.Constants.ARM.STAGE_1_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_2_Kd;
 import static frc.robot.Constants.ARM.STAGE_2_Kf;
 import static frc.robot.Constants.ARM.STAGE_2_Ki;
 import static frc.robot.Constants.ARM.STAGE_2_Kp;
+import static frc.robot.Constants.ARM.STAGE_2_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_3_Kd;
 import static frc.robot.Constants.ARM.STAGE_3_Kf;
 import static frc.robot.Constants.ARM.STAGE_3_Ki;
 import static frc.robot.Constants.ARM.STAGE_3_Kp;
+import static frc.robot.Constants.ARM.STAGE_3_OFFSET;
 import static frc.robot.Constants.ARM.floorAltPosition;
 import static frc.robot.Constants.ARM.floorPosition;
 import static frc.robot.Constants.ARM.idlePosition;
@@ -31,7 +34,6 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.math.MathShared;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -42,6 +44,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -146,16 +149,15 @@ public class Arm extends SubsystemBase {
     }
 
     private void moveToPoint(double x, double y, double claw) {
-        return;
-        //Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-        //moveToAngles(triangle.getAngleA() + (90 - Math.atan2(x, y)), triangle.getAngleB(), claw);
+        Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+        moveToAngles(triangle.getAngleA() + (90 - Math.atan2(x, y)), triangle.getAngleB(), claw);
     }
 
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
         double[] output = new double[3];
-        output[0] = Math.cos(Math.toRadians(stage1)) * (Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2)) * (Constants.ARM.STAGE_2_LENGTH));
-        output[1] = Math.sin(Math.toRadians(stage1)) * (Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2)) * (Constants.ARM.STAGE_2_LENGTH));
-        output[2] = stage1 + stage2 + stage3;
+        output[0] = Math.cos(Math.toRadians(stage1 - STAGE_1_OFFSET)) * (Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH));
+        output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * (Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH));
+        output[2] = stage3 - STAGE_3_OFFSET;
         return output;
     }
 
@@ -312,12 +314,19 @@ public class Arm extends SubsystemBase {
     }
 
     public Command defaultCommand () {
-        // TODO replace with consistent command
-        if (RobotContainer.copilotController.getRawButton(9) && false) {
-            return moveToPointCommand();
-        } else {
-            return moveToPositionCommand(positions.Idle);
-        }
+        return new FunctionalCommand(
+            () -> {},
+            () -> {
+                if (RobotContainer.copilotController.getRawButton(9)) {
+                    moveToPointCommand().schedule();
+                } else {
+                    moveToPositionCommand(positions.Idle).schedule();;
+                }
+            }, 
+            (interrupted) -> {},
+            () -> false, 
+            (Subsystem) this
+        );
     }
 
     @Override  public void periodic() {
