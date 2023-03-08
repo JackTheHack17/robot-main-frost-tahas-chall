@@ -3,6 +3,7 @@ import java.io.File;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,8 +41,12 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // TODO map auton paths to telemetry
-    //Telemetry.setValue("general/autonomous/availableRoutines", (String[]) Stream.of(new File("/home/lvuser/deploy/").listFiles()).filter(file -> !file.isDirectory()).map(File::getName).collect(Collectors.toSet()).toArray());
+    File[] paths = Filesystem.getDeployDirectory().listFiles();
+    String pathsString = "";
+    for (int i = 0; i < paths.length; i++) {
+      pathsString += paths[i].getName() + ",";
+    }
+    Telemetry.setValue("general/autonomous/availableRoutines", pathsString);
 
     // Configure the button bindings
     configureButtonBindings();
