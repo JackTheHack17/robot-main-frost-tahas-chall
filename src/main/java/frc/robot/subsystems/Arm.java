@@ -114,6 +114,10 @@ public class Arm extends SubsystemBase {
         m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
         //m_stage3PID.enableContinuousInput(0, 360);
 
+        m_stage1PID.setTolerance(0);
+        m_stage2PID.setTolerance(1.5);
+        m_stage3PID.setTolerance(0);
+
         m_stage1.restoreFactoryDefaults();
         m_stage1.clearFaults();
         m_stage1.setSmartCurrentLimit(40);
@@ -141,8 +145,9 @@ public class Arm extends SubsystemBase {
     }
 
     private void moveToPoint(double x, double y, double claw) {
-        Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-        moveToAngles(triangle.getAngleA() + (90 - Math.atan2(x, y)), triangle.getAngleB(), claw);
+        return;
+        //Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+        //moveToAngles(triangle.getAngleA() + (90 - Math.atan2(x, y)), triangle.getAngleB(), claw);
     }
 
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
@@ -299,7 +304,7 @@ public class Arm extends SubsystemBase {
     }
 
     public Command defaultCommand () {
-        if (RobotContainer.copilotController.getRawButton(9)) {
+        if (RobotContainer.copilotController.getRawButton(9) && false) {
             return moveToPointCommand();
         } else {
             return moveToPositionCommand(positions.Idle);

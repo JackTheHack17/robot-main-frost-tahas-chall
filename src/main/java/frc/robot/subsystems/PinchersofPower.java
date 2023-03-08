@@ -85,7 +85,7 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void spinout() {
-    spinner.set(POP.SPEED);
+    spinner.set(-POP.SPEED);
     spinner2.set(-POP.SPEED);
   }
 
