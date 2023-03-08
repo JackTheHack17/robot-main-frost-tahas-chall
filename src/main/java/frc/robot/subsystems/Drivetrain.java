@@ -322,10 +322,6 @@ public class Drivetrain extends SubsystemBase {
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
-
-    Telemetry.setValue("general/FMSAlliance", DriverStation.getAlliance() == Alliance.Blue ? "Blue" : (DriverStation.getAlliance() == Alliance.Red ? "Red" : "Invalid") );
-    Telemetry.setValue("general/joystick0Name", DriverStation.getJoystickName(0));
-    Telemetry.setValue("general/joystick1Name", DriverStation.getJoystickName(1));
   }
 
   @Override

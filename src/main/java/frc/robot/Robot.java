@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.Telemetry;
@@ -49,6 +50,8 @@ public class Robot extends TimedRobot {
     Telemetry.setValue("general/PDH/temperature", PDH.getTemperature());
 
     Telemetry.setValue("buttonBoard/joystick", "" + RobotContainer.copilotController.getJoystick().getX() + ", " + RobotContainer.copilotController.getJoystick().getY());
+
+    Telemetry.setValue("general/FMSAlliance", DriverStation.getAlliance() == Alliance.Blue ? "Blue" : (DriverStation.getAlliance() == Alliance.Red ? "Red" : "Invalid") );
 
     if (!DriverStation.isEnabled()) {
       if ( RobotContainer.copilotController.getRawButton(9) ) {
