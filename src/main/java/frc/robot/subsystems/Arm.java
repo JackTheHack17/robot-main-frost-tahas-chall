@@ -76,6 +76,7 @@ public class Arm extends SubsystemBase {
     private double m_manualTargetY = 0;
     private double m_manualTargetTheta = 0;
     private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
+    private boolean movingToIdle = false;
 
     public Arm(PinchersofPower m_claw, LEDs m_LEDs, CommandXboxController driverController, ButtonBoard copilotController) {
         // populate position map
@@ -170,10 +171,18 @@ public class Arm extends SubsystemBase {
 
     private void moveToPosition (positions position) {
         ArmPosition target = positionMap.get(position);
-        m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
-        m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
-        m_manualTargetTheta = target.getStage3Angle();
-        moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
+        if ( position == positions.Idle ) {
+            moveToAngles(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle());
+            movingToIdle = true;
+            m_manualTargetX = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[0];
+            m_manualTargetY = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[1];
+            m_manualTargetTheta = target.getStage3Angle();
+        } else {
+            m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
+            m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
+            m_manualTargetTheta = target.getStage3Angle();
+            moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
+        }
     }
 
     public Boolean isAtTarget () {
@@ -339,6 +348,13 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("Arm/stage2/internalVelocity", m_stage2.getEncoder().getVelocity());
 
         if ( DriverStation.isEnabled() ) {
+            if (movingToIdle) {
+                if ( m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target < JOINT_ANGLE_DEADZONE ) {
+                    setStage2Target(idlePosition.getStage2Angle());
+                    movingToIdle = false;
+                }
+            }
+
             m_stage1.set(MathUtil.clamp(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360, m_stage1Target), -1, 1));
             m_stage2.set(MathUtil.clamp(STAGE_2_Kf + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, m_stage2Target), -1, 1));
             m_stage3.set(MathUtil.clamp(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360, m_stage3Target), -1, 1));
