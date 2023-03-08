@@ -101,7 +101,7 @@ public final class Constants {
     }
 
     public static final class ARM {
-        public static final double JOINT_ANGLE_DEADZONE = 0;
+        public static final double JOINT_ANGLE_DEADZONE = 2;
         public static final double JOINT_COORDINATE_DEADZONE = 0;
 
         public static enum positions {

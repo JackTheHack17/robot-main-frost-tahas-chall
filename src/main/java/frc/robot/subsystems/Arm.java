@@ -171,13 +171,13 @@ public class Arm extends SubsystemBase {
 
     private void moveToPosition (positions position) {
         ArmPosition target = positionMap.get(position);
-        if ( position == positions.Idle ) {
+        if ( position == positions.Idle && !movingToIdle && Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - target.getStage1Angle()) > JOINT_ANGLE_DEADZONE ) {
             moveToAngles(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle());
             movingToIdle = true;
             m_manualTargetX = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[0];
             m_manualTargetY = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[1];
             m_manualTargetTheta = target.getStage3Angle();
-        } else {
+        } else if ( !movingToIdle && m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target < JOINT_ANGLE_DEADZONE ) {
             m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
             m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
             m_manualTargetTheta = target.getStage3Angle();
@@ -349,7 +349,7 @@ public class Arm extends SubsystemBase {
 
         if ( DriverStation.isEnabled() ) {
             if (movingToIdle) {
-                if ( m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target < JOINT_ANGLE_DEADZONE ) {
+                if ( Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE ) {
                     setStage2Target(idlePosition.getStage2Angle());
                     movingToIdle = false;
                 }
