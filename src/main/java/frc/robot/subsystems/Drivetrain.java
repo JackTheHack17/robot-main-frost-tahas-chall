@@ -358,7 +358,7 @@ public class Drivetrain extends SubsystemBase {
     FR_Speed = modules[1].speedMetersPerSecond;
     BL_Speed = modules[2].speedMetersPerSecond;
     BR_Speed = modules[3].speedMetersPerSecond;
-    
+
     FL_Azimuth.set(ControlMode.PercentOutput, clamp(FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360), -1, 1));
     FR_Azimuth.set(ControlMode.PercentOutput, clamp(FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360), -1, 1));
     BL_Azimuth.set(ControlMode.PercentOutput, clamp(BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360), -1, 1));
@@ -509,14 +509,17 @@ public class Drivetrain extends SubsystemBase {
     eventMap.put("placeHigh", m_arm.moveToPositionCommand(positions.ScoreHigh));
     eventMap.put("release", m_claw.outtakeCommand());
     eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.ScoreLow));
-    eventMap.put("intakeIn", new FunctionalCommand(null, () -> {
-      m_claw.intakeCommand();
+    eventMap.put("intakeIn", new FunctionalCommand(
+      () -> {}, () -> {
+      m_claw.intake();
     }, 
-    null, 
+    (interrupt) -> {
+      m_claw.notake();
+    }, 
     () -> {
       return m_claw.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() != GamePieces.None;
     }, 
-    m_claw));
+    (Subsystem) m_claw));
     eventMap.put("autobalance", autoBalanceCommand());
     eventMap.put("realign", moveToPositionCommand());
     eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode("cone"); } ));

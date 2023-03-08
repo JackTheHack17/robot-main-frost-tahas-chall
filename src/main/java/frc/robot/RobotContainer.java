@@ -80,16 +80,16 @@ public class RobotContainer {
     }));
     copilotController.button(14).whileTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
-        m_claw.outtake();
+        m_claw.spinout();
       }
     }));
-    copilotController.button(14).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.notake();}));
+    copilotController.button(14).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinoff();}));
     copilotController.button(13).whileTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
-        m_claw.intake();
+        m_claw.spinin();
       }
     }));
-    copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.notake();}));
+    copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinoff();}));
   }
 
   /**

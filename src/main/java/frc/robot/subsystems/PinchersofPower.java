@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.POP;
@@ -56,12 +57,12 @@ public class PinchersofPower extends SubsystemBase  {
 
   }
 
-  /* Close */
+  /** Close */
   public void forward() {
     pusher.set(Value.kForward);
   }
 
-  /* Open */
+  /** Open */
   public void reverse() {
     pusher.set(Value.kReverse);
   }
@@ -110,27 +111,24 @@ public class PinchersofPower extends SubsystemBase  {
 
   public GamePieces whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment () {
     Color actualColor = colorSensor.getColor();
-    if (actualColor.equals(Color.kPurple)) {
-      return GamePieces.Cube;
-    } else if (actualColor.equals(Color.kYellow)) {
-      return GamePieces.Cone;
+    if ( colorSensor.getProximity() > 100 ) {
+      if (actualColor.green < actualColor.blue) { // cube
+        return GamePieces.Cube;
+      } else if (actualColor.green < actualColor.blue) { // cone
+        return GamePieces.Cone;
+      } else {
+        return GamePieces.None;
+      }
     } else {
       return GamePieces.None;
     }
   }
 
   public void intake() {
-    if((pusher.get() == Value.kForward)) {
-      reverse();
-    }
-    if((pusher.get() != Value.kForward) && (m_cone == true)) {
+    if (m_cone) {
       forward();
-    }
-
-    spinin();
-
-    if((pusher.get() != Value.kForward) && (m_cone == true)) {
-      // TODO until colorsensor spinin, then stop spinning
+    } else {
+      spinin();
     }
   }
 
@@ -156,6 +154,9 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public Command outtakeCommand() {
+    if ( m_cone ) {
+      return new InstantCommand(() -> outtake(), this).andThen(new WaitCommand(0.25).andThen(new InstantCommand( () -> reverse())));
+    }
     return new InstantCommand(() -> outtake(), this);
   }
 
