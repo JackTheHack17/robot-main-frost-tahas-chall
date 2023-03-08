@@ -44,7 +44,7 @@ public class RobotContainer {
     File[] paths = Filesystem.getDeployDirectory().listFiles();
     String pathsString = "";
     for (int i = 0; i < paths.length; i++) {
-      pathsString += paths[i].getName() + ",";
+      pathsString += paths[i].getName().substring(0, paths[i].getName().indexOf(".")) + ",";
     }
     Telemetry.setValue("general/autonomous/availableRoutines", pathsString);
 
