@@ -320,7 +320,7 @@ public class Arm extends SubsystemBase {
                 if (RobotContainer.copilotController.getRawButton(9)) {
                     moveToPointCommand().schedule();
                 } else {
-                    moveToPositionCommand(positions.Idle).schedule();;
+                    moveToPositionCommand(positions.Idle).schedule();
                 }
             }, 
             (interrupted) -> {},
