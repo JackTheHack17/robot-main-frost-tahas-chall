@@ -214,45 +214,45 @@ public class Arm extends SubsystemBase {
     }
 
     public Command moveToPositionCommand (positions position) {
-        if (!m_copilotController.getRawButton(9)) {
-            m_copilotController.setLED(10, false);
-            m_copilotController.setLED(11, false);
-            m_copilotController.setLED(12, false);
-            m_copilotController.setLED(13, false);
-            m_copilotController.setLED(14, false);
-        }
-        m_copilotController.setLED(0, false);
-        m_copilotController.setLED(1, false);
-        m_copilotController.setLED(2, false);
-        m_copilotController.setLED(3, false);
-        m_copilotController.setLED(4, false);
-        m_copilotController.setLED(5, false);
-
-        switch (position) {
-            case ScoreHigh:
-                m_copilotController.setLED(2, true);
-                break;
-            case ScoreMid:
-                m_copilotController.setLED(4, true);
-                break;
-            case ScoreLow:
-                m_copilotController.setLED(5, true);
-                break;
-            case Floor:
-                m_copilotController.setLED(1, true);
-                break;
-            case FloorAlt:
-                m_copilotController.setLED(3, true);
-                break;
-            case Substation:
-                m_copilotController.setLED(0, true);
-                break;
-            case Idle:
-                break;
-        }
         return new FunctionalCommand(
             () -> { // init
                 m_clawSubsystem.notake();
+                if (!m_copilotController.getRawButton(9)) {
+                    m_copilotController.setLED(10, false);
+                    m_copilotController.setLED(11, false);
+                    m_copilotController.setLED(12, false);
+                    m_copilotController.setLED(13, false);
+                    m_copilotController.setLED(14, false);
+                }
+                m_copilotController.setLED(0, false);
+                m_copilotController.setLED(1, false);
+                m_copilotController.setLED(2, false);
+                m_copilotController.setLED(3, false);
+                m_copilotController.setLED(4, false);
+                m_copilotController.setLED(5, false);
+        
+                switch (position) {
+                    case ScoreHigh:
+                        m_copilotController.setLED(2, true);
+                        break;
+                    case ScoreMid:
+                        m_copilotController.setLED(4, true);
+                        break;
+                    case ScoreLow:
+                        m_copilotController.setLED(5, true);
+                        break;
+                    case Floor:
+                        m_copilotController.setLED(1, true);
+                        break;
+                    case FloorAlt:
+                        m_copilotController.setLED(3, true);
+                        break;
+                    case Substation:
+                        m_copilotController.setLED(0, true);
+                        break;
+                    case Idle:
+                        break;
+                }
             }, 
             () -> { // execution
                 moveToPosition(position);
@@ -277,8 +277,6 @@ public class Arm extends SubsystemBase {
         return new FunctionalCommand(
             () -> { // init
                 m_clawSubsystem.notake();
-            }, 
-            () -> { // execution
                 m_copilotController.setLED(0, false);
                 m_copilotController.setLED(1, false);
                 m_copilotController.setLED(2, false);
@@ -294,7 +292,8 @@ public class Arm extends SubsystemBase {
                 m_copilotController.setLED(12, true);
                 m_copilotController.setLED(13, true);
                 m_copilotController.setLED(14, true);
-
+            }, 
+            () -> { // execution
                 m_manualTargetX += m_copilotController.getJoystick().getX() * xSpeed;
                 m_manualTargetY += m_copilotController.getJoystick().getY() * ySpeed;
                 moveToPoint(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
@@ -313,6 +312,7 @@ public class Arm extends SubsystemBase {
     }
 
     public Command defaultCommand () {
+        // TODO replace with consistent command
         if (RobotContainer.copilotController.getRawButton(9) && false) {
             return moveToPointCommand();
         } else {
