@@ -120,5 +120,24 @@
       }
     }
   ],
-  "markers": []
+  "markers": [
+    {
+      "position": 0.75,
+      "names": [
+        "event"
+      ]
+    },
+    {
+      "position": 1.0,
+      "names": [
+        "event"
+      ]
+    },
+    {
+      "position": 3.0,
+      "names": [
+        "event"
+      ]
+    }
+  ]
 }
