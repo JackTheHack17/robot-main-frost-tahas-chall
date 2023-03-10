@@ -35,7 +35,10 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -65,9 +68,12 @@ public class Arm extends SubsystemBase {
     private final DutyCycleEncoder m_stage1Encoder;  
     private final DutyCycleEncoder m_stage2Encoder;
     private final DutyCycleEncoder m_stage3Encoder;
-    private final PIDController m_stage1PID;  
-    private final PIDController m_stage2PID;
+    private final ProfiledPIDController m_stage1PID;  
+    private final ProfiledPIDController m_stage2PID;
     private final PIDController m_stage3PID;
+    private TrapezoidProfile profile1;
+    private final TrapezoidProfile profile2;
+    private final TrapezoidProfile profile3;
     private PinchersofPower m_clawSubsystem;
     private LEDs m_LEDsSubsystem;
     private CommandXboxController m_driverController;
@@ -80,6 +86,7 @@ public class Arm extends SubsystemBase {
     private double m_manualTargetTheta = 0;
     private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
     private boolean movingToIdle = false;
+    private ArmFeedforward stage2_armFF;
 
     public Arm(PinchersofPower m_claw, CommandXboxController driverController, ButtonBoard copilotController) {
         // populate position map
@@ -113,17 +120,21 @@ public class Arm extends SubsystemBase {
 
         //m_stage3Encoder.setPositionOffset(STAGE_3_OFFSET);
 
-        m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
+        m_stage1PID = new ProfiledPIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd, new TrapezoidProfile.Constraints(1500/5, 1579/5));
         m_stage1PID.enableContinuousInput(0, 360);
-        m_stage2PID = new PIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd);
+        m_stage2PID = new ProfiledPIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd, new TrapezoidProfile.Constraints(1500/5, 1579/5));
         m_stage2PID.enableContinuousInput(0, 360);
         m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
         m_stage3PID.enableContinuousInput(0, 360);
 
         m_stage1PID.setTolerance(0);
-        m_stage2PID.setTolerance(1.5);
+        m_stage2PID.setTolerance(4);
         m_stage3PID.setTolerance(0);
 
+        profile1 = new TrapezoidProfile(new TrapezoidProfile.Constraints(300, 315.8), new TrapezoidProfile.State(m_stage1Encoder.getAbsolutePosition()*360, 0), new TrapezoidProfile.State(m_stage1Encoder.getAbsolutePosition()*360, 0));
+        profile2 = new TrapezoidProfile(new TrapezoidProfile.Constraints(300, 315.8), new TrapezoidProfile.State(m_stage2Encoder.getAbsolutePosition()*360, 0), new TrapezoidProfile.State(m_stage1Encoder.getAbsolutePosition()*360, 0));
+        profile3 = new TrapezoidProfile(new TrapezoidProfile.Constraints(300, 315.8), new TrapezoidProfile.State(m_stage3Encoder.getAbsolutePosition()*360, 0), new TrapezoidProfile.State(m_stage1Encoder.getAbsolutePosition()*360, 0));
+       
         m_stage1.restoreFactoryDefaults();
         m_stage1.clearFaults();
         m_stage1.setSmartCurrentLimit(40);
@@ -366,11 +377,14 @@ public class Arm extends SubsystemBase {
                 }
             }
 
-            m_stage1.set(MathUtil.clamp(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360, m_stage1Target), -1, 1));
-            m_stage2.set(MathUtil.clamp((m_stage2Encoder.getAbsolutePosition()*360 < 120 ? STAGE_2_Kf : -STAGE_2_Kf) + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, m_stage2Target), -1, 1));
-            m_stage3.set(MathUtil.clamp(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360, m_stage3Target), -1, 1));
-        }
+        //     m_stage1.set(MathUtil.clamp(STAGE_1_Kf - m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360, new TrapezoidProfile.State(m_stage1Target, 0)), -1, 1));
+        //     m_stage2.set(MathUtil.clamp(STAGE_2_Kf + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, new TrapezoidProfile.State(m_stage2Target, 0)), -1, 1));
+        //     m_stage3.set(MathUtil.clamp(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360, m_stage3Target), -1, 1));
+        // }
+        double temp = profile1.calculate(m_stage1Target).velocity/314.3;
+        Telemetry.setValue("Arm/temp", temp);
+        //m_stage1.set(MathUtil.clamp(temp, -1, 1));
     }
-    
+}
     @Override  public void simulationPeriodic() {}
 }

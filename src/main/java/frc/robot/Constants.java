@@ -124,7 +124,8 @@ public final class Constants {
         public static ArmPosition floorPosition      = new ArmPosition(160, 202, 278);
         public static ArmPosition floorAltPosition   = new ArmPosition(0, 0, 0);
         public static ArmPosition substationPosition = new ArmPosition(142, 267, 345);
-        public static ArmPosition idlePosition      = new ArmPosition(200, 105, 310);
+        //public static ArmPosition idlePosition      = new ArmPosition(190, 80, 310);
+        public static ArmPosition idlePosition     = new ArmPosition(180, 210, 290);
 
         public static final double thetaSpeed = 0.1;
         public static final double xSpeed = 0.1;
@@ -137,10 +138,10 @@ public final class Constants {
         public static final double STAGE_1_Ki = 0;
         public static final double STAGE_1_Kd = 0;
         public static final double STAGE_1_Kf = 0.08;
-        public static final double STAGE_2_Kp = 0.012;
+        public static final double STAGE_2_Kp = 0.0485;
         public static final double STAGE_2_Ki = 0;
-        public static final double STAGE_2_Kd = 0;
-        public static final double STAGE_2_Kf = 0.08;
+        public static final double STAGE_2_Kd = 0.0045;
+        public static final double STAGE_2_Kf = 0.017;
 
         public static final double STAGE_3_Kp = 0.005;
         public static final double STAGE_3_Ki = 0;
