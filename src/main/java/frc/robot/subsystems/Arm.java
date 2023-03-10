@@ -81,7 +81,7 @@ public class Arm extends SubsystemBase {
     private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
     private boolean movingToIdle = false;
 
-    public Arm(PinchersofPower m_claw, LEDs m_LEDs, CommandXboxController driverController, ButtonBoard copilotController) {
+    public Arm(PinchersofPower m_claw, CommandXboxController driverController, ButtonBoard copilotController) {
         // populate position map
         positionMap.put(positions.ScoreHigh, scoreHighPosition);
         positionMap.put(positions.ScoreMid, scoreMidPosition);
@@ -91,7 +91,7 @@ public class Arm extends SubsystemBase {
         positionMap.put(positions.Substation, substationPosition);
         positionMap.put(positions.Idle, idlePosition);
 
-        m_LEDsSubsystem = m_LEDs;
+        //m_LEDsSubsystem = m_LEDs;
         m_clawSubsystem = m_claw;
         m_driverController = driverController;
         m_copilotController = copilotController;
@@ -111,12 +111,14 @@ public class Arm extends SubsystemBase {
         m_stage2Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_2_ENCODER_ID);
         m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
+        //m_stage3Encoder.setPositionOffset(STAGE_3_OFFSET);
+
         m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
         m_stage1PID.enableContinuousInput(0, 360);
         m_stage2PID = new PIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd);
         m_stage2PID.enableContinuousInput(0, 360);
         m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
-        //m_stage3PID.enableContinuousInput(0, 360);
+        m_stage3PID.enableContinuousInput(0, 360);
 
         m_stage1PID.setTolerance(0);
         m_stage2PID.setTolerance(1.5);
@@ -263,7 +265,7 @@ public class Arm extends SubsystemBase {
                 if (!interrupted) {
                     // arm is in position
                     if ( position == positions.Idle ) return; // idle position is exempt from driver notification
-                    m_LEDsSubsystem.flashGreen().schedule();
+                    m_LEDsSubsystem.flashGreen();
                     m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1);
                     new SequentialCommandGroup(new WaitCommand(0.5), new InstantCommand( () -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))).schedule();
                 }
@@ -365,7 +367,7 @@ public class Arm extends SubsystemBase {
             }
 
             m_stage1.set(MathUtil.clamp(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360, m_stage1Target), -1, 1));
-            m_stage2.set(MathUtil.clamp(STAGE_2_Kf + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, m_stage2Target), -1, 1));
+            m_stage2.set(MathUtil.clamp((m_stage2Encoder.getAbsolutePosition()*360 < 120 ? STAGE_2_Kf : -STAGE_2_Kf) + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, m_stage2Target), -1, 1));
             m_stage3.set(MathUtil.clamp(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360, m_stage3Target), -1, 1));
         }
     }

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -24,6 +26,11 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
   private PowerDistribution PDH = new PowerDistribution();
+  private AddressableLED m_led;
+  private AddressableLEDBuffer m_ledBuffer;
+  private int m_rainbowFirstPixelHue;
+
+  
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -34,7 +41,54 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    // PWM port 9
+    // Must be a PWM header, not MXP or DIO
+    m_led = new AddressableLED(0);
+
+    // Reuse buffer
+    // Default to a length of 60, start empty output
+    // Length is expensive to set, so only set it once, then just update data
+    m_ledBuffer = new AddressableLEDBuffer(500);
+    m_led.setLength(m_ledBuffer.getLength());
+
+    // Set the data
+    m_led.setData(m_ledBuffer);
+    m_led.start();
   }
+  
+  private void rainbow() {
+    // For every pixel
+    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+      // Calculate the hue - hue is easier for rainbows because the color
+      // shape is a circle so only one value needs to precess
+      final var hue = (m_rainbowFirstPixelHue + (i * 180 / m_ledBuffer.getLength())) % 180;
+      // Set the value
+      m_ledBuffer.setHSV(i, hue, 255, 128);
+    }
+    // Increase by to make the rainbow "move"
+    m_rainbowFirstPixelHue += 3;
+    // Check bounds
+    m_rainbowFirstPixelHue %= 180;
+  }
+
+  private void flashCone(){
+    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+      // Sets the specified LED to the HSV values for red
+      m_ledBuffer.setHSV(i, 60, 255, 255);
+   }
+  }
+
+  private void flashCube(){
+    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+      // Sets the specified LED to the HSV values for red
+      m_ledBuffer.setHSV(i, 60, 255, 255);
+   }
+  }
+
+  
+
+  
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
@@ -52,6 +106,25 @@ public class Robot extends TimedRobot {
     Telemetry.setValue("buttonBoard/joystick", "" + RobotContainer.copilotController.getJoystick().getX() + ", " + RobotContainer.copilotController.getJoystick().getY());
 
     Telemetry.setValue("general/FMSAlliance", DriverStation.getAlliance() == Alliance.Blue ? "Blue" : (DriverStation.getAlliance() == Alliance.Red ? "Red" : "Invalid") );
+
+    // rainbow();
+    // if(RobotContainer.copilotController.getRawButton(7)){
+    //   flashCube();
+    // }
+    // else if(RobotContainer.copilotController.getRawButton(8)){
+    //   flashCone();
+    // }
+
+    // m_led.setData(m_ledBuffer);
+
+    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
+      // Sets the specified LED to the RGB values for red
+      m_ledBuffer.setRGB(i, 0, 255, 0);
+   }
+   
+   m_led.setData(m_ledBuffer);
+
+    
 
     if (!DriverStation.isEnabled()) {
       if ( RobotContainer.copilotController.getRawButton(9) ) {

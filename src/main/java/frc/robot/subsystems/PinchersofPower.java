@@ -36,7 +36,7 @@ public class PinchersofPower extends SubsystemBase  {
     m_cone = false;
     pusher.set(Value.kReverse);
 
-    //comp.disable();
+    comp.disable();
 
     spinner.restoreFactoryDefaults();
     spinner2.restoreFactoryDefaults();

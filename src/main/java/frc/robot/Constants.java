@@ -101,7 +101,7 @@ public final class Constants {
     }
 
     public static final class ARM {
-        public static final double JOINT_ANGLE_DEADZONE = 2;
+        public static final double JOINT_ANGLE_DEADZONE = 10;
         public static final double JOINT_COORDINATE_DEADZONE = 0;
 
         public static enum positions {
@@ -123,8 +123,8 @@ public final class Constants {
         public static ArmPosition scoreLowPosition   = new ArmPosition(0, 0, 0);
         public static ArmPosition floorPosition      = new ArmPosition(160, 202, 278);
         public static ArmPosition floorAltPosition   = new ArmPosition(0, 0, 0);
-        public static ArmPosition substationPosition = new ArmPosition(150, 315, 280);
-        public static ArmPosition idlePosition      = new ArmPosition(150, 199, 278);
+        public static ArmPosition substationPosition = new ArmPosition(142, 267, 345);
+        public static ArmPosition idlePosition      = new ArmPosition(200, 105, 310);
 
         public static final double thetaSpeed = 0.1;
         public static final double xSpeed = 0.1;
@@ -133,15 +133,16 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 10;
         public static final double STAGE_2_LENGTH = 10;
 
-        public static final double STAGE_1_Kp = 0.005112;
+        public static final double STAGE_1_Kp = 0.0075;
         public static final double STAGE_1_Ki = 0;
         public static final double STAGE_1_Kd = 0;
-        public static final double STAGE_1_Kf = 0.054861;
-        public static final double STAGE_2_Kp = 0.009912;
+        public static final double STAGE_1_Kf = 0.08;
+        public static final double STAGE_2_Kp = 0.012;
         public static final double STAGE_2_Ki = 0;
         public static final double STAGE_2_Kd = 0;
-        public static final double STAGE_2_Kf = 0.04534;
-        public static final double STAGE_3_Kp = 0.015;
+        public static final double STAGE_2_Kf = 0.08;
+
+        public static final double STAGE_3_Kp = 0.005;
         public static final double STAGE_3_Ki = 0;
         public static final double STAGE_3_Kd = 0;
         public static final double STAGE_3_Kf = 0.04766;
