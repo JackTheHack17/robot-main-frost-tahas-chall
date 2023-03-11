@@ -113,7 +113,7 @@ public class Arm extends SubsystemBase {
         m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
         m_stage1FF = new ArmFeedforward(0.04, 0.87, 1.95,0.07);
-        m_stage2FF = new ArmFeedforward(0.12, 1.07, 1.95,0.13);
+        m_stage2FF = new ArmFeedforward(0.12, 1.2, 1.95,0.13);
         m_stage3FF = new ArmFeedforward(0.04, 0.52, 1.95,0.04);
 
         m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
@@ -269,13 +269,14 @@ public class Arm extends SubsystemBase {
                 if (!interrupted) {
                     // arm is in position
                     if ( position == positions.Idle ) return; // idle position is exempt from driver notification
-                    m_LEDsSubsystem.flashGreen();
+                    //m_LEDsSubsystem.flashGreen();
                     m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1);
                     new SequentialCommandGroup(new WaitCommand(0.5), new InstantCommand( () -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))).schedule();
                 }
             },
             () -> { // should the command end?
-                return this.isAtTarget();
+                //return this.isAtTarget();
+                return false;
             },
             this
         );

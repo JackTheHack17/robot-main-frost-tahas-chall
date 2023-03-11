@@ -17,23 +17,23 @@ import frc.robot.Constants.*;
 
 public class LEDs extends SubsystemBase {
  
-  AddressableLED m_leds = new AddressableLED(0);
+  /*AddressableLED m_leds = new AddressableLED(0);
   AddressableLEDBuffer m_ledBuffer = new AddressableLEDBuffer(500);
   int m_rainbowFirstPixelHue;
   double lastChange;
   boolean on = true;
-
+*/
 
 
   public LEDs () {
    
-    m_leds.setLength(m_ledBuffer.getLength());
+    //m_leds.setLength(m_ledBuffer.getLength());
 
     // Set the data
-    m_leds.setData(m_ledBuffer);
-    m_leds.start();
+    //m_leds.setData(m_ledBuffer);
+    //m_leds.start();
   }
-
+/* 
   public void rainbow() {
     // For every pixel
     for (var i = 0; i < m_ledBuffer.getLength(); i++) {
@@ -85,9 +85,12 @@ public class LEDs extends SubsystemBase {
   public void flashCube(){
     for (var i = 0; i < m_ledBuffer.getLength(); i++) {
       // Sets the specified LED to the HSV values for red
-      m_ledBuffer.setHSV(i, 60, 255, 255);
+      //m_ledBuffer.setHSV(i, 60, 255, 255);
    }
-  }
+  }*/
+
+  public Command turnPurple () { return new InstantCommand(); }
+  public Command turnYellow () { return new InstantCommand(); }
   
   @Override
   public void periodic() {
