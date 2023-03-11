@@ -78,6 +78,9 @@ public class Arm extends SubsystemBase {
     private double m_manualTargetTheta = 0;
     private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
     private boolean movingToIdle = false;
+    private positions target = positions.Idle;
+    private positions lastPosition;
+    private ArmPosition fromIdleTargetPosition;
     private ArmFeedforward m_stage1FF;
     private ArmFeedforward m_stage2FF;
     private ArmFeedforward m_stage3FF;
@@ -151,6 +154,8 @@ public class Arm extends SubsystemBase {
         m_copilotController.button(11).whileTrue(new RepeatCommand( new InstantCommand(() -> {
             if (m_copilotController.getRawButton(9)) m_manualTargetTheta -= thetaSpeed;
         })));
+
+        lastPosition = positions.Idle;
     }
 
 
@@ -178,8 +183,15 @@ public class Arm extends SubsystemBase {
     }
 
     private void moveToPosition (positions position) {
+        target = position;
         ArmPosition target = positionMap.get(position);
-        if ( position == positions.Idle && !movingToIdle && Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - target.getStage1Angle()) > JOINT_ANGLE_DEADZONE ) {
+        fromIdleTargetPosition = target;
+        if ( lastPosition == positions.Idle && position != positions.Idle && Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - target.getStage2Angle()) > JOINT_ANGLE_DEADZONE) {
+            moveToAngles(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle());
+            m_manualTargetX = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[0];
+            m_manualTargetY = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[1];
+            m_manualTargetTheta = target.getStage3Angle();
+        } else if ( position == positions.Idle && !movingToIdle && Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - target.getStage1Angle()) > JOINT_ANGLE_DEADZONE ) {
             moveToAngles(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle());
             movingToIdle = true;
             m_manualTargetX = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[0];
@@ -266,6 +278,8 @@ public class Arm extends SubsystemBase {
                 moveToPosition(position);
             }, 
             interrupted -> { // when should the command do when it ends?
+                lastPosition = position;
+                movingToIdle = false;
                 if (!interrupted) {
                     // arm is in position
                     if ( position == positions.Idle ) return; // idle position is exempt from driver notification
@@ -337,6 +351,7 @@ public class Arm extends SubsystemBase {
     }
 
     @Override  public void periodic() {
+        Telemetry.setValue("Arm/targetPosition", target.name());
         Telemetry.setValue("Arm/currentPoint/x", getCurrentPoint()[0]);
         Telemetry.setValue("Arm/currentPoint/y", getCurrentPoint()[1]);
         Telemetry.setValue("Arm/currentPoint/theta", getCurrentPoint()[2]);
@@ -368,6 +383,11 @@ public class Arm extends SubsystemBase {
                 if ( Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE ) {
                     setStage2Target(idlePosition.getStage2Angle());
                     movingToIdle = false;
+                }
+            }
+            if ( fromIdleTargetPosition != null && lastPosition == positions.Idle ) {
+                if ( Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE ) {
+                    setStage1Target(fromIdleTargetPosition.getStage1Angle());
                 }
             }
 
