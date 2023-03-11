@@ -22,4 +22,12 @@ public class ArmPosition {
     public double getStage3Angle () {
         return stage3Angle;
     }
+
+    public double getXPosition() {
+        return 19 * Math.cos(stage1Angle) + 30 * Math.cos(stage2Angle);
+    }
+
+    public double getYPosition() {
+        return 19 * Math.sin(stage1Angle) + 30 * Math.sin(stage2Angle);
+    }
 }
