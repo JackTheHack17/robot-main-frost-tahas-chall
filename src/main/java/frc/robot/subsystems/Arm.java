@@ -24,7 +24,6 @@ import static frc.robot.Constants.ARM.substationPosition;
 import static frc.robot.Constants.ARM.thetaSpeed;
 import static frc.robot.Constants.ARM.xSpeed;
 import static frc.robot.Constants.ARM.ySpeed;
-
 import java.util.HashMap;
 
 import com.revrobotics.CANSparkMax;
@@ -159,16 +158,36 @@ public class Arm extends SubsystemBase {
     }
 
 
-    private void moveToPoint(double x, double y, double claw) {
-        Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-        moveToAngles(triangle.getAngleA() + (90 - Math.atan2(x, y)), triangle.getAngleB(), claw);
+    private void moveToPoint( double stage1, double stage2, double stage3, double x_Inc, double y_Inc ) {        
+        double[] pos = forwardKinematics(Math.toRadians(stage1), Math.toRadians(stage2), Math.toRadians(stage3));
+        double x = pos[0] + x_Inc;
+        double y = pos[1] + y_Inc;
+        double dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        Triangle tri = new Triangle(19, 30, dist);
+        double angle1 = 360 - (Math.toDegrees(tri.getAngleB()) -Math.toDegrees(Math.atan2(y, x)));
+        double angle2 = 180 - ((90 - angle1) - (Math.toRadians(tri.getAngleC())));
+        moveToAngles(angle1, angle2, stage3);
     }
 
+    private void moveToPoint( double x_Inc, double y_Inc ) {        
+        double[] pos = forwardKinematics(Math.toRadians(m_stage1Target), Math.toRadians(m_stage2Target), Math.toRadians(m_stage3Target));
+        double x = pos[0] + x_Inc;
+        double y = pos[1] + y_Inc;
+        double dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        Triangle tri = new Triangle(19, 30, dist);
+        double angle1 = 360 - (Math.toDegrees(tri.getAngleB()) -Math.toDegrees(Math.atan2(y, x)));
+        double angle2 = 180 - ((90 - angle1) - (Math.toRadians(tri.getAngleC())));
+        moveToAngles(angle1, angle2, m_stage3Target);
+    }
+
+    /** all inputs in radians */
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
-        double[] output = new double[3];
-        output[0] = Math.cos(Math.toRadians(stage1 - STAGE_1_OFFSET)) * (Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH));
-        output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * (Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH));
-        output[2] = stage3 - STAGE_3_OFFSET;
+        // double[] output = new double[3];
+        // output[0] = Math.cos(Math.toRadians(stage1 - STAGE_1_OFFSET)) * Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH);
+        // output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH);
+        // output[2] = stage3 - STAGE_3_OFFSET;
+        ArmPosition armpos = new ArmPosition(stage1, stage2, stage3);
+        double[] output = {armpos.getXPosition(), armpos.getYPosition(), stage3};
         return output;
     }
 
@@ -319,7 +338,7 @@ public class Arm extends SubsystemBase {
             () -> { // execution
                 m_manualTargetX += m_copilotController.getJoystick().getX() * xSpeed;
                 m_manualTargetY += m_copilotController.getJoystick().getY() * ySpeed;
-                moveToPoint(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
+                moveToPoint(m_stage1Encoder.getAbsolutePosition()*360, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360, m_copilotController.getJoystick().getX() * xSpeed, m_copilotController.getJoystick().getY() * ySpeed);
             }, 
 
             interrupted -> { // when should the command do when it ends?
@@ -328,7 +347,7 @@ public class Arm extends SubsystemBase {
                 }
             },
             () -> { // should the command end?
-                return this.isAtTarget();
+                return false; //this.isAtTarget();
             },
             this
         );
