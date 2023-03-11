@@ -69,6 +69,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -322,6 +323,8 @@ public class Drivetrain extends SubsystemBase {
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
+  
+    Telemetry.setValue("drivetrai/shwervePower", shwerveDrive.get());
   }
 
   @Override
@@ -371,7 +374,7 @@ public class Drivetrain extends SubsystemBase {
     Pose2d closest = m_odometry.getEstimatedPosition().nearest(_waypoints);
     if (closest == null) return new InstantCommand();
     if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
-      //m_LEDs.flashRed();
+      m_LEDs.flashRed();
       m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
       return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
     }
@@ -394,7 +397,7 @@ public class Drivetrain extends SubsystemBase {
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
     ).andThen(() -> {
-      //m_LEDs.flashGreen();
+      m_LEDs.flashGreen();
       m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1);
     }).alongWith(new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)));
   }
@@ -539,7 +542,11 @@ public class Drivetrain extends SubsystemBase {
 
   public void shwerve ( double LX, double LY) {
     // 6in diameter wheels, 10:1 gearbox
-    shwerveDrive.set(shwerveDrivePID.calculate((shwerveDriveEncoder.getVelocity()/10)*(Math.PI * 2 * 6), forwardKinematics.vxMetersPerSecond));
+    if (isRobotOriented) {
+      shwerveDrive.set(-LX*10);
+    } else {
+      noShwerve();
+    }
   }
 
   public void noShwerve () {

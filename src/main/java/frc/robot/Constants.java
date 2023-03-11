@@ -88,7 +88,7 @@ public final class Constants {
         /* Maximum distance for a valid waypoint (meters) */
         public static final double MAX_WAYPOINT_DISTANCE = 0.5;
 
-        public static final double SHWERVE_DRIVE_Kp = 044057;
+        public static final double SHWERVE_DRIVE_Kp = .044057;
         public static final double SHWERVE_DRIVE_Kd = 0;
 
         public static final double AUTO_BALANCE_Kp = 0;
@@ -118,14 +118,16 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 176.5;
         public static final double STAGE_3_OFFSET = 346.0;
 
-        public static ArmPosition scoreHighPosition  = new ArmPosition(175, 180+5, 5);
-        public static ArmPosition scoreMidPosition   = new ArmPosition(105, 250+5, 350+5);
+        public static ArmPosition scoreHighPosition  = new ArmPosition(175, 245, 5);
+        public static ArmPosition scoreMidPosition   = new ArmPosition(207, 195, 353);
         public static ArmPosition scoreLowPosition   = new ArmPosition(135, 110+5, 350+5);
-        public static ArmPosition floorPosition      = new ArmPosition(135, 110+5, 350+5);
-        public static ArmPosition floorAltPosition   = new ArmPosition(0, 0, 0);
-        public static ArmPosition substationPosition = new ArmPosition(0, 0, 0);
+        public static ArmPosition floorPosition      = new ArmPosition(138, 153, 350);
+        public static ArmPosition floorAltPosition   = new ArmPosition(180, 156, 277);
+        public static ArmPosition substationPosition = new ArmPosition(160, 240, 355);
         //public static ArmPosition idlePosition       = new ArmPosition(195, 60, 315);
-        public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
+        //public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
+        public static ArmPosition idlePosition       = new ArmPosition(190, 105, 343);
+
 
 
         public static final double thetaSpeed = 0.1;
@@ -135,12 +137,12 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 10;
         public static final double STAGE_2_LENGTH = 10;
 
-        public static final double STAGE_1_Kp = 0.0065;
+        public static final double STAGE_1_Kp = 0.009;
         public static final double STAGE_1_Ki = 0;
-        public static final double STAGE_1_Kd = 0;
-        public static final double STAGE_2_Kp = 0.0035;
+        public static final double STAGE_1_Kd = 0.005;
+        public static final double STAGE_2_Kp = 0.005;
         public static final double STAGE_2_Ki = 0;
-        public static final double STAGE_2_Kd = 0.035;
+        public static final double STAGE_2_Kd = 0;
 
         public static final double STAGE_3_Kp = 0.005;
         public static final double STAGE_3_Ki = 0;
@@ -150,7 +152,7 @@ public final class Constants {
      public class POP {
          public static final double F = 0;
          public static final double R = 0;
-         public static final double SPEED = 0.5;
+         public static final double SPEED = 0.4;
          public static final int FORWARD_PNEUMATIC_CHANNEL = 14;
          public static final int BACKWARD_PNEUMATIC_CHANNEL = 15;
      }

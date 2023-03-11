@@ -47,7 +47,7 @@ public class DriveCommand extends CommandBase {
     // fetch joystick axis values
     m_LX = driverController.getRawAxis(0); // left x axis (strafe)
     m_LY = -driverController.getRawAxis(1); // left y axis (strafe)
-    m_RX = driverController.getRawAxis(3); // right x axis (rotation)
+    m_RX = driverController.getRawAxis(4); // right x axis (rotation)
 
     // deadzones
     m_LX = ( Math.abs(m_LX) < 0.2 ) ? 0 : m_LX;

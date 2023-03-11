@@ -26,8 +26,6 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
   private PowerDistribution PDH = new PowerDistribution();
-  private AddressableLED m_led;
-  private AddressableLEDBuffer m_ledBuffer;
   private int m_rainbowFirstPixelHue;
 
   
@@ -44,20 +42,15 @@ public class Robot extends TimedRobot {
 
     // PWM port 9
     // Must be a PWM header, not MXP or DIO
-    m_led = new AddressableLED(0);
+    
 
     // Reuse buffer
     // Default to a length of 60, start empty output
     // Length is expensive to set, so only set it once, then just update data
-    m_ledBuffer = new AddressableLEDBuffer(500);
-    m_led.setLength(m_ledBuffer.getLength());
 
-    // Set the data
-    m_led.setData(m_ledBuffer);
-    m_led.start();
   }
   
-  private void rainbow() {
+  /*private void rainbow() {
     // For every pixel
     for (var i = 0; i < m_ledBuffer.getLength(); i++) {
       // Calculate the hue - hue is easier for rainbows because the color
@@ -70,21 +63,7 @@ public class Robot extends TimedRobot {
     m_rainbowFirstPixelHue += 3;
     // Check bounds
     m_rainbowFirstPixelHue %= 180;
-  }
-
-  private void flashCone(){
-    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-      // Sets the specified LED to the HSV values for red
-      m_ledBuffer.setHSV(i, 60, 255, 255);
-   }
-  }
-
-  private void flashCube(){
-    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-      // Sets the specified LED to the HSV values for red
-      m_ledBuffer.setHSV(i, 60, 255, 255);
-   }
-  }
+  }*
 
   
 
@@ -117,13 +96,7 @@ public class Robot extends TimedRobot {
 
     // m_led.setData(m_ledBuffer);
 
-    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-      // Sets the specified LED to the RGB values for red
-      m_ledBuffer.setRGB(i, 90, 90, 170);
-   }
    
-   m_led.setData(m_ledBuffer);
-
     
 
     if (!DriverStation.isEnabled()) {
