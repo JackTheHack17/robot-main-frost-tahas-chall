@@ -3,17 +3,14 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.ARM.JOINT_ANGLE_DEADZONE;
 import static frc.robot.Constants.ARM.JOINT_COORDINATE_DEADZONE;
 import static frc.robot.Constants.ARM.STAGE_1_Kd;
-import static frc.robot.Constants.ARM.STAGE_1_Kf;
 import static frc.robot.Constants.ARM.STAGE_1_Ki;
 import static frc.robot.Constants.ARM.STAGE_1_Kp;
 import static frc.robot.Constants.ARM.STAGE_1_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_2_Kd;
-import static frc.robot.Constants.ARM.STAGE_2_Kf;
 import static frc.robot.Constants.ARM.STAGE_2_Ki;
 import static frc.robot.Constants.ARM.STAGE_2_Kp;
 import static frc.robot.Constants.ARM.STAGE_2_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_3_Kd;
-import static frc.robot.Constants.ARM.STAGE_3_Kf;
 import static frc.robot.Constants.ARM.STAGE_3_Ki;
 import static frc.robot.Constants.ARM.STAGE_3_Kp;
 import static frc.robot.Constants.ARM.STAGE_3_OFFSET;
@@ -35,6 +32,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -80,6 +78,9 @@ public class Arm extends SubsystemBase {
     private double m_manualTargetTheta = 0;
     private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
     private boolean movingToIdle = false;
+    private ArmFeedforward m_stage1FF;
+    private ArmFeedforward m_stage2FF;
+    private ArmFeedforward m_stage3FF;
 
     public Arm(PinchersofPower m_claw, CommandXboxController driverController, ButtonBoard copilotController) {
         // populate position map
@@ -111,7 +112,9 @@ public class Arm extends SubsystemBase {
         m_stage2Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_2_ENCODER_ID);
         m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
-        //m_stage3Encoder.setPositionOffset(STAGE_3_OFFSET);
+        m_stage1FF = new ArmFeedforward(0.04, 0.87, 1.95,0.07);
+        m_stage2FF = new ArmFeedforward(0.12, 1.2, 1.95,0.13);
+        m_stage3FF = new ArmFeedforward(0.04, 0.52, 1.95,0.04);
 
         m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
         m_stage1PID.enableContinuousInput(0, 360);
@@ -149,6 +152,7 @@ public class Arm extends SubsystemBase {
             if (m_copilotController.getRawButton(9)) m_manualTargetTheta -= thetaSpeed;
         })));
     }
+
 
     private void moveToPoint(double x, double y, double claw) {
         Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
@@ -265,13 +269,14 @@ public class Arm extends SubsystemBase {
                 if (!interrupted) {
                     // arm is in position
                     if ( position == positions.Idle ) return; // idle position is exempt from driver notification
-                    m_LEDsSubsystem.flashGreen();
+                    //m_LEDsSubsystem.flashGreen();
                     m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1);
                     new SequentialCommandGroup(new WaitCommand(0.5), new InstantCommand( () -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))).schedule();
                 }
             },
             () -> { // should the command end?
-                return this.isAtTarget();
+                //return this.isAtTarget();
+                return false;
             },
             this
         );
@@ -366,9 +371,14 @@ public class Arm extends SubsystemBase {
                 }
             }
 
-            m_stage1.set(MathUtil.clamp(STAGE_1_Kf + m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360, m_stage1Target), -1, 1));
-            m_stage2.set(MathUtil.clamp((m_stage2Encoder.getAbsolutePosition()*360 < 120 ? STAGE_2_Kf : -STAGE_2_Kf) + m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360, m_stage2Target), -1, 1));
-            m_stage3.set(MathUtil.clamp(STAGE_3_Kf + m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360, m_stage3Target), -1, 1));
+            
+            Telemetry.setValue( "Arm/stage1/theoreticalOutput", m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), (m_stage1.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
+            Telemetry.setValue( "Arm/stage2/theoreticalOutput", m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
+            Telemetry.setValue( "Arm/stage3/theoreticalOutput", m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), (m_stage3.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
+
+            m_stage1.setVoltage( m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), (m_stage1.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
+            m_stage2.setVoltage( m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
+            m_stage3.setVoltage( m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), (m_stage3.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
         }
     }
     

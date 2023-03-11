@@ -119,7 +119,7 @@ public class Robot extends TimedRobot {
 
     for (var i = 0; i < m_ledBuffer.getLength(); i++) {
       // Sets the specified LED to the RGB values for red
-      m_ledBuffer.setRGB(i, 0, 255, 0);
+      m_ledBuffer.setRGB(i, 90, 90, 170);
    }
    
    m_led.setData(m_ledBuffer);

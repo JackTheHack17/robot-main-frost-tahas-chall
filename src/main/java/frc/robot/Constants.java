@@ -114,17 +114,19 @@ public final class Constants {
             Idle
         };
 
-        public static final double STAGE_1_OFFSET = 0;
-        public static final double STAGE_2_OFFSET = 0;
-        public static final double STAGE_3_OFFSET = 0;
+        public static final double STAGE_1_OFFSET = 147.5;
+        public static final double STAGE_2_OFFSET = 176.5;
+        public static final double STAGE_3_OFFSET = 346.0;
 
-        public static ArmPosition scoreHighPosition  = new ArmPosition(186, 311, 289);
-        public static ArmPosition scoreMidPosition   = new ArmPosition(0, 0, 0);
-        public static ArmPosition scoreLowPosition   = new ArmPosition(0, 0, 0);
-        public static ArmPosition floorPosition      = new ArmPosition(160, 202, 278);
+        public static ArmPosition scoreHighPosition  = new ArmPosition(175, 180+5, 5);
+        public static ArmPosition scoreMidPosition   = new ArmPosition(105, 250+5, 350+5);
+        public static ArmPosition scoreLowPosition   = new ArmPosition(135, 110+5, 350+5);
+        public static ArmPosition floorPosition      = new ArmPosition(135, 110+5, 350+5);
         public static ArmPosition floorAltPosition   = new ArmPosition(0, 0, 0);
-        public static ArmPosition substationPosition = new ArmPosition(142, 267, 345);
-        public static ArmPosition idlePosition      = new ArmPosition(200, 105, 310);
+        public static ArmPosition substationPosition = new ArmPosition(0, 0, 0);
+        //public static ArmPosition idlePosition       = new ArmPosition(195, 60, 315);
+        public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
+
 
         public static final double thetaSpeed = 0.1;
         public static final double xSpeed = 0.1;
@@ -133,19 +135,16 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 10;
         public static final double STAGE_2_LENGTH = 10;
 
-        public static final double STAGE_1_Kp = 0.0075;
+        public static final double STAGE_1_Kp = 0.0065;
         public static final double STAGE_1_Ki = 0;
         public static final double STAGE_1_Kd = 0;
-        public static final double STAGE_1_Kf = 0.08;
-        public static final double STAGE_2_Kp = 0.012;
+        public static final double STAGE_2_Kp = 0.0035;
         public static final double STAGE_2_Ki = 0;
-        public static final double STAGE_2_Kd = 0;
-        public static final double STAGE_2_Kf = 0.08;
+        public static final double STAGE_2_Kd = 0.035;
 
         public static final double STAGE_3_Kp = 0.005;
         public static final double STAGE_3_Ki = 0;
         public static final double STAGE_3_Kd = 0;
-        public static final double STAGE_3_Kf = 0.04766;
  }
 
      public class POP {

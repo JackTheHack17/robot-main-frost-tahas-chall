@@ -26,13 +26,13 @@ import frc.robot.subsystems.PinchersofPower;
  */
 public class RobotContainer {
   // Im leaving these ports as magic constants because there's no case where they are not these values
-  public static final CommandXboxController driverController = new CommandXboxController(5);
-  public static final ButtonBoard copilotController = new ButtonBoard(0, 1);
+  public static final CommandXboxController driverController = new CommandXboxController(0);
+  public static final ButtonBoard copilotController = new ButtonBoard(1, 2);
 
   // The robot's subsystems and commands are defined here...
   private final Pigeon m_gyro = new Pigeon();
   private final Limelight m_limelight = new Limelight();
- // private final LEDs m_LEDs = new LEDs();
+  private final LEDs m_LEDs = new LEDs();
   private final PinchersofPower m_claw = new PinchersofPower();
   private final Arm m_arm = new Arm(m_claw, driverController, copilotController);
   private final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight);
@@ -64,22 +64,22 @@ public class RobotContainer {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
 
-    copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
-    copilotController.button(7).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
-    copilotController.button(8).whileTrue(m_arm.moveToPositionCommand(positions.ScoreHigh));
-    //copilotController.button(3).whileTrue(m_arm.moveToPositionCommand(positions.FloorAlt));
-    copilotController.button(9).whileTrue(m_arm.moveToPositionCommand(positions.ScoreMid));
-    //copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
-    //copilotController.button(6).onTrue(m_claw.outtakeCommand());
-    //copilotController.button(6).onFalse(m_claw.notakeCommand());
-    //copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
-    //copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
-    /*copilotController.button(12).onTrue(new InstantCommand( () -> {
+    copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
+    copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
+    copilotController.button(2).whileTrue(m_arm.moveToPositionCommand(positions.ScoreHigh));
+    copilotController.button(3).whileTrue(m_arm.moveToPositionCommand(positions.FloorAlt));
+    copilotController.button(4).whileTrue(m_arm.moveToPositionCommand(positions.ScoreMid));
+    copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
+    copilotController.button(6).onTrue(m_claw.outtakeCommand());
+    copilotController.button(6).onFalse(m_claw.notakeCommand());
+    copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
+    copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
+    copilotController.button(12).onTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
         m_claw.toggle();
       }
     }));
-    /*copilotController.button(14).whileTrue(new InstantCommand( () -> {
+    copilotController.button(14).whileTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
         m_claw.spinout();
       }
@@ -90,7 +90,7 @@ public class RobotContainer {
         m_claw.spinin();
       }
     }));
-    copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinoff();}));*/
+    copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinoff();}));
   }
 
   /**
