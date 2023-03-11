@@ -12,14 +12,14 @@ public class Triangle {
     }
 
     public double getAngleA() {
-        return Math.acos((Math.pow(m_sideb, 2) - Math.pow(m_sidea, 2) - Math.pow(m_sidec, 2)) / (-2 * m_sidea * m_sidec));
+        return Math.acos((Math.pow(m_sidea, 2) - Math.pow(m_sideb, 2) - Math.pow(m_sidec, 2)) / (-2 * m_sideb * m_sidec));
     }
 
     public double getAngleB() {
-        return Math.acos((Math.pow(m_sidec, 2) - Math.pow(m_sidea, 2) - Math.pow(m_sideb, 2)) / (-2 * m_sidea * m_sideb));
+        return Math.acos((Math.pow(m_sideb, 2) - Math.pow(m_sidea, 2) - Math.pow(m_sidec, 2)) / (-2 * m_sidea * m_sidec));
     }
 
     public double getAngleC() {
-        return Math.acos((Math.pow(m_sidea, 2) - Math.pow(m_sideb, 2) - Math.pow(m_sidec, 2)) / (-2 * m_sideb * m_sidec));
+        return Math.acos((Math.pow(m_sidec, 2) - Math.pow(m_sidea, 2) - Math.pow(m_sideb, 2)) / (-2 * m_sidea * m_sideb));
     }
 }
