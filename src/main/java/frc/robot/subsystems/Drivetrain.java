@@ -212,11 +212,10 @@ public class Drivetrain extends SubsystemBase {
 
     shwerveDrive.restoreFactoryDefaults();
     shwerveDrive.clearFaults();
-    shwerveDrive.setSmartCurrentLimit(40);
-    shwerveDrive.setSecondaryCurrentLimit(40);
+    shwerveDrive.setSmartCurrentLimit(60);
+    shwerveDrive.setSecondaryCurrentLimit(60);
     shwerveDrive.burnFlash();
 
-    // TODO declare scoring positions
     // declare scoring positions
     if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {
       // red alliance waypoints
