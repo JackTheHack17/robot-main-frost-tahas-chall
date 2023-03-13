@@ -87,6 +87,7 @@ public class Arm extends SubsystemBase {
     private ArmFeedforward m_stage1FF;
     private ArmFeedforward m_stage2FF;
     private ArmFeedforward m_stage3FF;
+    private boolean returnToIdle = true;
 
     public Arm(PinchersofPower m_claw, CommandXboxController driverController, ButtonBoard copilotController, LEDs m_LEDs) {
         // populate position map
@@ -184,6 +185,11 @@ public class Arm extends SubsystemBase {
     private void moveToPoint (double x, double y, double theta) {
         double[] thetas = inverseKinematics(x, y, theta);
         moveToAngles(thetas[0], thetas[1], thetas[2]);
+    }
+
+    public void toggleIdle () {
+        returnToIdle = !returnToIdle;
+        defaultCommand().schedule();
     }
 
     private void moveToPoint( double stage1, double stage2, double stage3, double x_Inc, double y_Inc ) {        
@@ -392,7 +398,13 @@ public class Arm extends SubsystemBase {
                 if (RobotContainer.copilotController.getRawButton(9)) {
                     moveToPointCommand().schedule();
                 } else {
-                    if ( !m_clawSubsystem.isOpen() ) moveToPositionCommand(positions.Idle).schedule();
+                    if ( !m_clawSubsystem.isOpen() ) {
+                        if (returnToIdle) {
+                            moveToPositionCommand(positions.Idle).schedule();
+                        } else {
+                            moveToPositionCommand(positions.IdleShootPosition).schedule();
+                        }
+                    }
                 }
             }, 
             (interrupted) -> {},

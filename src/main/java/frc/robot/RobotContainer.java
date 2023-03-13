@@ -64,6 +64,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
+    driverController.x().onTrue(new InstantCommand( () -> m_arm.toggleIdle()));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand());

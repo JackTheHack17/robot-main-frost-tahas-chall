@@ -111,7 +111,8 @@ public final class Constants {
             Floor,
             FloorAlt,
             Substation,
-            Idle
+            Idle,
+            IdleShootPosition
         };
 
         public static final double STAGE_1_OFFSET = 147.5;
@@ -127,6 +128,7 @@ public final class Constants {
         //public static ArmPosition idlePosition       = new ArmPosition(195, 60, 315);
         //public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
         public static ArmPosition idlePosition       = new ArmPosition(190, 105, 343);
+        public static ArmPosition idleShootPosition  = new ArmPosition(95, 285, 5);
 
 
 
