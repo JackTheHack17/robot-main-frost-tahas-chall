@@ -82,6 +82,8 @@ public class RobotContainer {
     copilotController.button(6).onFalse(m_claw.notakeCommand());
     copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
     copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
+    copilotController.button(9).onTrue(m_arm.defaultCommand());
+    copilotController.button(9).onFalse(m_arm.defaultCommand());
     copilotController.button(12).onTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
         m_claw.toggle();
