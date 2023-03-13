@@ -508,7 +508,7 @@ public class Drivetrain extends SubsystemBase {
     // for every path in the group
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
       Telemetry.getValue("general/autonomous/selectedRoutine", "default"), 
-      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default"))
+      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "New Path"))
     );
 
     // This is just an example event map. It would be better to have a constant, global event map
