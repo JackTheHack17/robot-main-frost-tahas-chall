@@ -34,15 +34,15 @@ public class RobotContainer {
   private final Limelight m_limelight = new Limelight();
   private final LEDs m_LEDs = new LEDs();
   private final PinchersofPower m_claw = new PinchersofPower();
-  private final Arm m_arm = new Arm(m_claw, driverController, copilotController);
-  private final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight);
+  private final Arm m_arm = new Arm(m_claw, driverController, copilotController, m_LEDs);
+  private final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     File[] paths = Filesystem.getDeployDirectory().listFiles();
     String pathsString = "";
     for (int i = 0; i < paths.length; i++) {
-      //pathsString += paths[i].getName().substring(0, paths[i].getName().indexOf(".")) + ",";
+      pathsString += paths[i].getName().substring(0, paths[i].getName().indexOf(".")) + ",";
     }
     Telemetry.setValue("general/autonomous/availableRoutines", pathsString);
 
@@ -65,11 +65,17 @@ public class RobotContainer {
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
+    copilotController.button(0).onFalse(m_claw.intakeCommand());
     copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
+    copilotController.button(1).onFalse(m_claw.intakeCommand());
     copilotController.button(2).whileTrue(m_arm.moveToPositionCommand(positions.ScoreHigh));
+    copilotController.button(2).onFalse(m_claw.intakeCommand());
     copilotController.button(3).whileTrue(m_arm.moveToPositionCommand(positions.FloorAlt));
+    copilotController.button(3).onFalse(m_claw.intakeCommand());
     copilotController.button(4).whileTrue(m_arm.moveToPositionCommand(positions.ScoreMid));
+    copilotController.button(4).onFalse(m_claw.intakeCommand());
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
+    copilotController.button(5).onFalse(m_claw.intakeCommand());
     copilotController.button(6).onTrue(m_claw.outtakeCommand());
     copilotController.button(6).onFalse(m_claw.notakeCommand());
     // TODO swap turnYellow / turnPurple after we prank armaan

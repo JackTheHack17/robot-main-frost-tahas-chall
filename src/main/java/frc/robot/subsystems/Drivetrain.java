@@ -33,8 +33,6 @@ import static frc.robot.Constants.DRIVETRAIN.MAX_LINEAR_SPEED;
 import static frc.robot.Constants.DRIVETRAIN.MAX_ROTATION_SPEED;
 import static frc.robot.Constants.DRIVETRAIN.MAX_WAYPOINT_DISTANCE;
 import static frc.robot.Constants.DRIVETRAIN.ROBOT_WIDTH;
-import static frc.robot.Constants.DRIVETRAIN.SHWERVE_DRIVE_Kd;
-import static frc.robot.Constants.DRIVETRAIN.SHWERVE_DRIVE_Kp;
 import static frc.robot.Constants.DRIVETRAIN.WHEEL_DIAMETER;
 
 import java.util.ArrayList;
@@ -58,7 +56,6 @@ import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -69,9 +66,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -120,8 +115,6 @@ public class Drivetrain extends SubsystemBase {
   private final TalonFX BR_Drive = new TalonFX(BR_DRIVE_ID);
 
   private final CANSparkMax shwerveDrive = new CANSparkMax(SHWERVE_DRIVE_ID, MotorType.kBrushless);
-  private final RelativeEncoder shwerveDriveEncoder = shwerveDrive.getEncoder();
-  private final PIDController shwerveDrivePID = new PIDController(SHWERVE_DRIVE_Kp, 0, SHWERVE_DRIVE_Kd);
 
   // swerve module azimuth (steering) motors
   private final TalonFX FL_Azimuth = new TalonFX(FL_AZIMUTH_ID);
@@ -159,7 +152,7 @@ public class Drivetrain extends SubsystemBase {
   private PIDController BR_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
 
   // robot oriented / field oriented swerve drive toggle
-  private boolean isRobotOriented = true;
+  private boolean isRobotOriented = false; // default to field oriented
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 80, 80, 0);
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
@@ -178,7 +171,7 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKd = 1;
 
   /** Creates a new ExampleSubsystem. */
-  public Drivetrain(CommandGenericHID driverController, Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight) {
+  public Drivetrain(CommandGenericHID driverController, Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight, LEDs m_LEDs) {
     this.m_gyro = m_gyro;
     this.m_arm = m_arm;
     this.m_claw = m_claw;
@@ -240,11 +233,6 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    //if (FL_Position.getPosition() < -360 || FL_Position.getPosition() > 360) { FL_Position.setPosition(FL_Position.getPosition() % 360); }
-    //if (FR_Position.getPosition() < -360 || FR_Position.getPosition() > 360) { FR_Position.setPosition(FR_Position.getPosition() % 360); }
-    //if (BL_Position.getPosition() < -360 || BL_Position.getPosition() > 360) { BL_Position.setPosition(BL_Position.getPosition() % 360); }
-    //if (BR_Position.getPosition() < -360 || BR_Position.getPosition() > 360) { BR_Position.setPosition(BR_Position.getPosition() % 360); }
-
     // This method will be called once per scheduler run
 
     _translationKp = Telemetry.getValue("drivetrain/PathPlanner/translationKp", 0);
@@ -324,7 +312,7 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
   
-    Telemetry.setValue("drivetrai/shwervePower", shwerveDrive.get());
+    Telemetry.setValue("drivetrain/shwervePower", shwerveDrive.get());
   }
 
   @Override

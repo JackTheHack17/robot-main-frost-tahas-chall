@@ -125,10 +125,24 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void intake() {
-    if (m_cone) {
+    if (m_cone || whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cone) {
       forward();
     } else {
       spinin();
+    }
+  }
+
+  public boolean wantCone () {
+    return m_cone;
+  }
+
+  public boolean isOpen() {
+    if ( whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cone || m_cone ) {
+      return pusher.get() == Value.kReverse;
+    } else if ( whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cube ) {
+      return false;
+    } else {
+      return false;
     }
   }
 
@@ -137,6 +151,7 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void notake() {
+    forward();
     spinoff();
   }
 
@@ -155,9 +170,9 @@ public class PinchersofPower extends SubsystemBase  {
 
   public Command outtakeCommand() {
     if ( m_cone ) {
-      return new InstantCommand(() -> outtake(), this).andThen(new WaitCommand(0.25).andThen(new InstantCommand( () -> reverse())));
+      return new InstantCommand(() -> spinout(), this).andThen(new WaitCommand(0).andThen(new InstantCommand( () -> reverse())));
     }
-    return new InstantCommand(() -> outtake(), this);
+    return new InstantCommand(() -> spinout(), this);
   }
 
   public Command notakeCommand() {

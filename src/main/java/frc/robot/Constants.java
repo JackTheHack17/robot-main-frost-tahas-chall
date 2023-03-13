@@ -115,7 +115,7 @@ public final class Constants {
         };
 
         public static final double STAGE_1_OFFSET = 147.5;
-        public static final double STAGE_2_OFFSET = 176.5;
+        public static final double STAGE_2_OFFSET = 176.5 - 60;
         public static final double STAGE_3_OFFSET = 346.0;
 
         public static ArmPosition scoreHighPosition  = new ArmPosition(175, 245, 5);

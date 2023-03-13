@@ -4,6 +4,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+/*
+ * Yes, buttons start at 0, i subtract because LabVIEW
+ */
+
 public class ButtonBoard {
     CommandGenericHID leftBoard;
     CommandGenericHID rightBoard;

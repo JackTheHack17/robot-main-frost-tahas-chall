@@ -4,12 +4,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.Telemetry;
@@ -26,9 +24,6 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
   private PowerDistribution PDH = new PowerDistribution();
-  private int m_rainbowFirstPixelHue;
-
-  
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -39,35 +34,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-
-    // PWM port 9
-    // Must be a PWM header, not MXP or DIO
-    
-
-    // Reuse buffer
-    // Default to a length of 60, start empty output
-    // Length is expensive to set, so only set it once, then just update data
-
   }
-  
-  /*private void rainbow() {
-    // For every pixel
-    for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-      // Calculate the hue - hue is easier for rainbows because the color
-      // shape is a circle so only one value needs to precess
-      final var hue = (m_rainbowFirstPixelHue + (i * 180 / m_ledBuffer.getLength())) % 180;
-      // Set the value
-      m_ledBuffer.setHSV(i, hue, 255, 128);
-    }
-    // Increase by to make the rainbow "move"
-    m_rainbowFirstPixelHue += 3;
-    // Check bounds
-    m_rainbowFirstPixelHue %= 180;
-  }*
-
-  
-
-  
 
   /**
    * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
@@ -85,20 +52,7 @@ public class Robot extends TimedRobot {
     Telemetry.setValue("buttonBoard/joystick", "" + RobotContainer.copilotController.getJoystick().getX() + ", " + RobotContainer.copilotController.getJoystick().getY());
 
     Telemetry.setValue("general/FMSAlliance", DriverStation.getAlliance() == Alliance.Blue ? "Blue" : (DriverStation.getAlliance() == Alliance.Red ? "Red" : "Invalid") );
-
-    // rainbow();
-    // if(RobotContainer.copilotController.getRawButton(7)){
-    //   flashCube();
-    // }
-    // else if(RobotContainer.copilotController.getRawButton(8)){
-    //   flashCone();
-    // }
-
-    // m_led.setData(m_ledBuffer);
-
-   
     
-
     if (!DriverStation.isEnabled()) {
       if ( RobotContainer.copilotController.getRawButton(9) ) {
         DriverStation.reportWarning("Manual Override Enabled! Do not Enable Robot without Disabling Manual Override!", false);
@@ -112,13 +66,6 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
   }
 
-  /** This function is called once each time the robot enters Disabled mode. */
-  @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
@@ -130,10 +77,6 @@ public class Robot extends TimedRobot {
     }
   }
 
-  /** This function is called periodically during autonomous. */
-  @Override
-  public void autonomousPeriodic() {}
-
   @Override
   public void teleopInit() {
     // This makes sure that the autonomous stops running when
@@ -144,26 +87,4 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
   }
-
-  /** This function is called periodically during operator control. */
-  @Override
-  public void teleopPeriodic() {}
-
-  @Override
-  public void testInit() {
-    // Cancels all running commands at the start of test mode.
-    CommandScheduler.getInstance().cancelAll();
-  }
-
-  /** This function is called periodically during test mode. */
-  @Override
-  public void testPeriodic() {}
-
-  /** This function is called once when the robot is first started up. */
-  @Override
-  public void simulationInit() {}
-
-  /** This function is called periodically whilst in simulation. */
-  @Override
-  public void simulationPeriodic() {}
 }
