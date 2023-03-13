@@ -5,17 +5,17 @@ import static frc.robot.Constants.ARM.JOINT_COORDINATE_DEADZONE;
 import static frc.robot.Constants.ARM.STAGE_1_Kd;
 import static frc.robot.Constants.ARM.STAGE_1_Ki;
 import static frc.robot.Constants.ARM.STAGE_1_Kp;
+import static frc.robot.Constants.ARM.STAGE_1_LENGTH;
 import static frc.robot.Constants.ARM.STAGE_1_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_2_Kd;
 import static frc.robot.Constants.ARM.STAGE_2_Ki;
 import static frc.robot.Constants.ARM.STAGE_2_Kp;
+import static frc.robot.Constants.ARM.STAGE_2_LENGTH;
 import static frc.robot.Constants.ARM.STAGE_2_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_3_Kd;
 import static frc.robot.Constants.ARM.STAGE_3_Ki;
 import static frc.robot.Constants.ARM.STAGE_3_Kp;
 import static frc.robot.Constants.ARM.STAGE_3_OFFSET;
-import static frc.robot.Constants.ARM.STAGE_1_LENGTH;
-import static frc.robot.Constants.ARM.STAGE_2_LENGTH;
 import static frc.robot.Constants.ARM.floorAltPosition;
 import static frc.robot.Constants.ARM.floorPosition;
 import static frc.robot.Constants.ARM.idlePosition;
@@ -38,25 +38,22 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.ArmPosition;
 import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 import frc.lib.Triangle;
 import frc.robot.Constants.ARM.positions;
-import frc.robot.subsystems.PinchersofPower.GamePieces;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DIO;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 public class Arm extends SubsystemBase {
     private final CANSparkMax m_stage1;
@@ -69,8 +66,6 @@ public class Arm extends SubsystemBase {
     private final PIDController m_stage2PID;
     private final PIDController m_stage3PID;
     private PinchersofPower m_clawSubsystem;
-    private LEDs m_LEDsSubsystem;
-    private CommandXboxController m_driverController;
     private ButtonBoard m_copilotController;
     private double m_stage1Target = 0;
     private double m_stage2Target = 0;
@@ -89,7 +84,7 @@ public class Arm extends SubsystemBase {
     private ArmFeedforward m_stage3FF;
     private boolean returnToIdle = true;
 
-    public Arm(PinchersofPower m_claw, CommandXboxController driverController, ButtonBoard copilotController, LEDs m_LEDs) {
+    public Arm(PinchersofPower m_claw, ButtonBoard copilotController) {
         // populate position map
         positionMap.put(positions.ScoreHigh, scoreHighPosition);
         positionMap.put(positions.ScoreMid, scoreMidPosition);
@@ -99,9 +94,7 @@ public class Arm extends SubsystemBase {
         positionMap.put(positions.Substation, substationPosition);
         positionMap.put(positions.Idle, idlePosition);
 
-        m_LEDsSubsystem = m_LEDs;
         m_clawSubsystem = m_claw;
-        m_driverController = driverController;
         m_copilotController = copilotController;
 
         m_stage1 = new CANSparkMax(CAN.ARM_STAGE_1_ID, MotorType.kBrushless);
@@ -190,28 +183,6 @@ public class Arm extends SubsystemBase {
     public void toggleIdle () {
         returnToIdle = !returnToIdle;
         defaultCommand().schedule();
-    }
-
-    private void moveToPoint( double stage1, double stage2, double stage3, double x_Inc, double y_Inc ) {        
-        double[] pos = forwardKinematics(Math.toRadians(stage1), Math.toRadians(stage2), Math.toRadians(stage3));
-        double x = pos[0] + x_Inc;
-        double y = pos[1] + y_Inc;
-        double dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-        Triangle tri = new Triangle(19, 30, dist);
-        double angle1 = 360 - (Math.toDegrees(tri.getAngleB()) -Math.toDegrees(Math.atan2(y, x)));
-        double angle2 = 180 - ((90 - angle1) - (Math.toRadians(tri.getAngleC())));
-        moveToAngles(angle1, angle2, stage3);
-    }
-
-    private void moveToPoint( double x_Inc, double y_Inc ) {        
-        double[] pos = forwardKinematics(Math.toRadians(m_stage1Target), Math.toRadians(m_stage2Target), Math.toRadians(m_stage3Target));
-        double x = pos[0] + x_Inc;
-        double y = pos[1] + y_Inc;
-        double dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-        Triangle tri = new Triangle(19, 30, dist);
-        double angle1 = 360 - (Math.toDegrees(tri.getAngleB()) -Math.toDegrees(Math.atan2(y, x)));
-        double angle2 = 180 - ((90 - angle1) - (Math.toRadians(tri.getAngleC())));
-        moveToAngles(angle1, angle2, m_stage3Target);
     }
 
     /** all inputs in radians */
@@ -411,6 +382,7 @@ public class Arm extends SubsystemBase {
     }
 
     public Command placeCommand () {
+        if (!m_clawSubsystem.wantCone() || m_clawSubsystem.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() != GamePieces.Cone) return new InstantCommand();
         switch ( target ) {
             case ScoreHigh:
                 return moveToPositionTerminatingCommand(positions.ScoreHighPlace);
