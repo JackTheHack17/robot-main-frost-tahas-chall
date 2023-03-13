@@ -3,6 +3,42 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import static edu.wpi.first.math.MathUtil.clamp;
+import static edu.wpi.first.math.MathUtil.inputModulus;
+import static frc.robot.Constants.CAN.BL_AZIMUTH_ID;
+import static frc.robot.Constants.CAN.BL_CANCODER_ID;
+import static frc.robot.Constants.CAN.BL_DRIVE_ID;
+import static frc.robot.Constants.CAN.BR_AZIMUTH_ID;
+import static frc.robot.Constants.CAN.BR_CANCODER_ID;
+import static frc.robot.Constants.CAN.BR_DRIVE_ID;
+import static frc.robot.Constants.CAN.FL_AZIMUTH_ID;
+import static frc.robot.Constants.CAN.FL_CANCODER_ID;
+import static frc.robot.Constants.CAN.FL_DRIVE_ID;
+import static frc.robot.Constants.CAN.FR_AZIMUTH_ID;
+import static frc.robot.Constants.CAN.FR_CANCODER_ID;
+import static frc.robot.Constants.CAN.FR_DRIVE_ID;
+import static frc.robot.Constants.CAN.SHWERVE_DRIVE_ID;
+import static frc.robot.Constants.DRIVETRAIN.AUTO_BALANCE_Kd;
+import static frc.robot.Constants.DRIVETRAIN.AUTO_BALANCE_Kp;
+import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kD;
+import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kP;
+import static frc.robot.Constants.DRIVETRAIN.BL_ECODER_OFFSET;
+import static frc.robot.Constants.DRIVETRAIN.BR_ECODER_OFFSET;
+import static frc.robot.Constants.DRIVETRAIN.DRIVE_GEAR_RATIO;
+import static frc.robot.Constants.DRIVETRAIN.DRIVE_kF;
+import static frc.robot.Constants.DRIVETRAIN.DRIVE_kP;
+import static frc.robot.Constants.DRIVETRAIN.FL_ECODER_OFFSET;
+import static frc.robot.Constants.DRIVETRAIN.FR_ECODER_OFFSET;
+import static frc.robot.Constants.DRIVETRAIN.MAX_LINEAR_SPEED;
+import static frc.robot.Constants.DRIVETRAIN.MAX_ROTATION_SPEED;
+import static frc.robot.Constants.DRIVETRAIN.MAX_WAYPOINT_DISTANCE;
+import static frc.robot.Constants.DRIVETRAIN.ROBOT_WIDTH;
+import static frc.robot.Constants.DRIVETRAIN.WHEEL_DIAMETER;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -11,9 +47,16 @@ import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.server.PathPlannerServer;
+import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+import com.pathplanner.lib.server.PathPlannerServer;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,21 +66,35 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
-import static frc.robot.Constants.DRIVETRAIN.*;
-import static frc.robot.Constants.CAN.*;
+import frc.robot.Constants.ARM.positions;
+import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 public class Drivetrain extends SubsystemBase {
-  private final Pigeon m_gyro;
+  private Pigeon m_gyro;
+  private Arm m_arm;
+  private PinchersofPower m_claw;
+  private Limelight m_limelight;
+  private LEDs m_LEDs;
+  private CommandGenericHID m_driverController;
 
   private SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-    new Translation2d(-ROBOT_WIDTH/2, ROBOT_WIDTH/2),
     new Translation2d(ROBOT_WIDTH/2, ROBOT_WIDTH/2),
-    new Translation2d(-ROBOT_WIDTH/2, -ROBOT_WIDTH/2),
-    new Translation2d(ROBOT_WIDTH/2, -ROBOT_WIDTH/2)
+    new Translation2d(ROBOT_WIDTH/2, -ROBOT_WIDTH/2),
+    new Translation2d(-ROBOT_WIDTH/2, ROBOT_WIDTH/2),
+    new Translation2d(-ROBOT_WIDTH/2, -ROBOT_WIDTH/2)
   );
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds();
@@ -56,6 +113,8 @@ public class Drivetrain extends SubsystemBase {
   private final TalonFX FR_Drive = new TalonFX(FR_DRIVE_ID);
   private final TalonFX BL_Drive = new TalonFX(BL_DRIVE_ID);
   private final TalonFX BR_Drive = new TalonFX(BR_DRIVE_ID);
+
+  private final CANSparkMax shwerveDrive = new CANSparkMax(SHWERVE_DRIVE_ID, MotorType.kBrushless);
 
   // swerve module azimuth (steering) motors
   private final TalonFX FL_Azimuth = new TalonFX(FL_AZIMUTH_ID);
@@ -87,26 +146,21 @@ public class Drivetrain extends SubsystemBase {
   private double BL_Actual_Speed = 0.0;
   private double BR_Actual_Speed = 0.0;
 
-  // robot oriented / field oriented swerve drive toggle
-  private boolean isRobotOriented = true;
+  private PIDController FL_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
+  private PIDController FR_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
+  private PIDController BL_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
+  private PIDController BR_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
 
-  // for calculating rotation vector
-  private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_WIDTH, ROBOT_WIDTH));
-  private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_WIDTH, ROBOT_WIDTH));
+  // robot oriented / field oriented swerve drive toggle
+  private boolean isRobotOriented = false; // default to field oriented
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 80, 80, 0);
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
 
-  // private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
-  //   new Rotation2d(), 
-  //   new Pose2d(), 
-  //   m_kinematics, 
-  //   new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01), 
-  //   new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.02), 
-  //   new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
-  // );
-
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
+
+  private List<Pose2d> _coneWaypoints = new ArrayList<Pose2d>();
+  private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
 
   private Pose2d _robotPose = new Pose2d();
 
@@ -118,8 +172,18 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKd = 1;
 
   /** Creates a new ExampleSubsystem. */
-  public Drivetrain(Pigeon m_gyro) {
+  public Drivetrain(CommandGenericHID driverController, Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight, LEDs m_LEDs) {
     this.m_gyro = m_gyro;
+    this.m_arm = m_arm;
+    this.m_claw = m_claw;
+    this.m_limelight = m_limelight;
+    this.m_LEDs = m_LEDs;
+    this.m_driverController = driverController;
+
+    FL_PID.enableContinuousInput(0, 360);
+    FR_PID.enableContinuousInput(0, 360);
+    BL_PID.enableContinuousInput(0, 360);
+    BR_PID.enableContinuousInput(0, 360);
     
     Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
     Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
@@ -145,6 +209,46 @@ public class Drivetrain extends SubsystemBase {
     configAzimuth(FR_Azimuth, FR_Position);
     configAzimuth(BL_Azimuth, BL_Position);
     configAzimuth(BR_Azimuth, BR_Position);
+
+    shwerveDrive.restoreFactoryDefaults();
+    shwerveDrive.clearFaults();
+    shwerveDrive.setSmartCurrentLimit(40);
+    shwerveDrive.setSecondaryCurrentLimit(40);
+    shwerveDrive.burnFlash();
+
+    // TODO declare scoring positions
+    // declare scoring positions
+    if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+      // red alliance waypoints
+      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.70, 5.05, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 3.84, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 3.28, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 2.18, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 1.60, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 0.47, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(14.70, 1.03, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(14.70, 2.75, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(14.70, 4.42, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+    } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
+      // blue alliance waypoints
+      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 5.05, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 3.84, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 3.28, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 2.18, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 1.60, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 0.47, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.84, 1.03, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.84, 2.75, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.84, 4.42, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
+    }
 
     PathPlannerServer.startServer(6969);
   }
@@ -173,10 +277,10 @@ public class Drivetrain extends SubsystemBase {
     BR_Actual_Speed = 2.0*(((BR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
 
     // dashboard data
-    Telemetry.setValue("drivetrain/modules/FL/azimuth/targetPosition", FL_Target);
-    Telemetry.setValue("drivetrain/modules/FR/azimuth/targetPosition", FR_Target);
-    Telemetry.setValue("drivetrain/modules/BL/azimuth/targetPosition", BL_Target);
-    Telemetry.setValue("drivetrain/modules/BR/azimuth/targetPosition", BR_Target);
+    Telemetry.setValue("drivetrain/modules/FL/azimuth/targetPosition", FL_Target % 360);
+    Telemetry.setValue("drivetrain/modules/FR/azimuth/targetPosition", FR_Target % 360);
+    Telemetry.setValue("drivetrain/modules/BL/azimuth/targetPosition", BL_Target % 360);
+    Telemetry.setValue("drivetrain/modules/BR/azimuth/targetPosition", BR_Target % 360);
     Telemetry.setValue("drivetrain/modules/FL/drive/targetSpeed", FL_Speed);
     Telemetry.setValue("drivetrain/modules/FR/drive/targetSpeed", FR_Speed);
     Telemetry.setValue("drivetrain/modules/BL/drive/targetSpeed", BL_Speed);
@@ -224,10 +328,13 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
     //_robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
+    m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
     _robotPose = m_odometry.update(new Rotation2d(m_gyro.getYaw()), getSwerveModulePositions());
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
+  
+    Telemetry.setValue("drivetrain/shwervePower", shwerveDrive.get());
   }
 
   @Override
@@ -241,57 +348,86 @@ public class Drivetrain extends SubsystemBase {
     
     modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
 
-    // if joystick is idle, lock wheels to X formation to avoid pushing
-    if (LX == 0 && LY == 0 && RX == 0 && false) {
-      modules[0].angle = new Rotation2d((Math.atan2( ROTATION_Y,  ROTATION_X)) % 360);
-      modules[1].angle = new Rotation2d((Math.atan2( ROTATION_Y, -ROTATION_X)) % 360);
-      modules[2].angle = new Rotation2d((Math.atan2(-ROTATION_Y,  ROTATION_X)) % 360);
-      modules[3].angle = new Rotation2d((Math.atan2(-ROTATION_Y, -ROTATION_X)) % 360);
-    } else if ( LX == 0 && LY == 0 && RX == 0 ) {
-      FL_Azimuth.set(ControlMode.PercentOutput, 0);
-      FR_Azimuth.set(ControlMode.PercentOutput, 0);
-      BL_Azimuth.set(ControlMode.PercentOutput, 0);
-      BR_Azimuth.set(ControlMode.PercentOutput, 0);
-      FL_Drive.set(ControlMode.PercentOutput, 0);
-      FR_Drive.set(ControlMode.PercentOutput, 0);
-      BL_Drive.set(ControlMode.PercentOutput, 0);
-      BR_Drive.set(ControlMode.PercentOutput, 0);
-      return;
-    }
-
     driveFromModuleStates(modules);
   }
 
   public void driveFromModuleStates ( SwerveModuleState[] modules ) {
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
 
-    FL_Target = modules[0].angle.getDegrees() % 360;
-    FR_Target = modules[1].angle.getDegrees() % 360;
-    BL_Target = modules[2].angle.getDegrees() % 360;
-    BR_Target = modules[3].angle.getDegrees() % 360;
+    modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
+    modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
+    modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
+    modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
+
+    FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
+    FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
+    BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
+    BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
     FL_Speed = modules[0].speedMetersPerSecond;
     FR_Speed = modules[1].speedMetersPerSecond;
     BL_Speed = modules[2].speedMetersPerSecond;
     BR_Speed = modules[3].speedMetersPerSecond;
 
-    // find the shortest path to an equivalent position to prevent unneccesary full rotations
-    FL_Target = optimizeAzimuthPath(FL_Target, FL_Actual_Position);
-    FR_Target = optimizeAzimuthPath(FR_Target, FR_Actual_Position);
-    BL_Target = optimizeAzimuthPath(BL_Target, BL_Actual_Position);
-    BR_Target = optimizeAzimuthPath(BR_Target, BR_Actual_Position);
-
-    // correct the target positions so that they are close to the current position
-    // then convert to sensor units and pass target positions to motor controllers
-    FL_Azimuth.set(ControlMode.Position, ((FL_Target + (FL_Actual_Position - (FL_Actual_Position % 360))) / 360) * 4096);
-    FR_Azimuth.set(ControlMode.Position, ((FR_Target + (FR_Actual_Position - (FR_Actual_Position % 360))) / 360) * 4096);
-    BL_Azimuth.set(ControlMode.Position, ((BL_Target + (BL_Actual_Position - (BL_Actual_Position % 360))) / 360) * 4096);
-    BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual_Position - (BR_Actual_Position % 360))) / 360) * 4096);
+    FL_Azimuth.set(ControlMode.PercentOutput, clamp(FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360), -1, 1));
+    FR_Azimuth.set(ControlMode.PercentOutput, clamp(FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360), -1, 1));
+    BL_Azimuth.set(ControlMode.PercentOutput, clamp(BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360), -1, 1));
+    BR_Azimuth.set(ControlMode.PercentOutput, clamp(BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360), -1, 1));
 
     // pass wheel speeds to motor controllers
     FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
     FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
     BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
     BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
+  }
+
+  public Command moveToPositionCommand () {
+    Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+    if (closest == null) return new InstantCommand();
+    if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
+      m_LEDs.flashRed();
+      m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
+      return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
+    }
+    return pathToCommand( closest );
+  }
+
+  public Command pathToCommand (Pose2d target) {
+    PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
+      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default")),
+      new PathPoint(new Translation2d(m_odometry.getEstimatedPosition().getX(),m_odometry.getEstimatedPosition().getY()), new Rotation2d(m_gyro.getYaw()), Math.hypot(forwardKinematics.vxMetersPerSecond, forwardKinematics.vxMetersPerSecond)),
+      new PathPoint(new Translation2d(target.getX(), target.getY()), target.getRotation())
+    );
+    return new PPSwerveControllerCommand(
+      _toTarget,
+      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
+      this.m_kinematics, // SwerveDriveKinematics
+      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+      (Subsystem) this
+    ).andThen(() -> {
+      m_LEDs.flashGreen();
+      m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1);
+    }).alongWith(new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)));
+  }
+
+  public Command autoBalanceCommand () {
+    PIDController pitchPID = new PIDController(AUTO_BALANCE_Kp, 0, AUTO_BALANCE_Kd);
+    PIDController rollPID = new PIDController(AUTO_BALANCE_Kp, 0, AUTO_BALANCE_Kd);
+
+    return new FunctionalCommand(
+      () -> {}, 
+      () -> {
+        joystickDrive(pitchPID.calculate(m_gyro.getPitch(), 0), rollPID.calculate(m_gyro.getRoll(), 0), 0);
+      }, 
+      (interrupted) -> {
+        pitchPID.close();
+        rollPID.close();
+      }, 
+      () -> {return pitchPID.atSetpoint() && rollPID.atSetpoint();}, 
+      (Subsystem) this
+    );
   }
 
   /** Sets the gyroscope's current heading to 0 */
@@ -342,7 +478,7 @@ public class Drivetrain extends SubsystemBase {
     motor.configRemoteFeedbackFilter(position, 0);
     motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
     motor.configStatorCurrentLimit(AZIMUTH_CURRENT_LIMIT);
-    motor.setSelectedSensorPosition(FL_Position.getAbsolutePosition());
+    motor.setSelectedSensorPosition(position.getAbsolutePosition());
     motor.config_kP(0, AZIMUTH_kP);
     motor.config_kD(0, AZIMUTH_kD);
   }
@@ -358,19 +494,6 @@ public class Drivetrain extends SubsystemBase {
     encoder.setPositionToAbsolute();
   }
 
-  /** finds the closest equivalent position to the target 
-   * @param target - the target direction of the module (deg)
-   * @param actual - the current direction of the module (deg)
-   * @return the corrected target position of the motor
-  */
-  private double optimizeAzimuthPath (double target, double actual) {
-    if (Math.min(Math.min(Math.abs(target - actual), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target + 360) - actual))
-      target += 360;
-    if (Math.min(Math.min(Math.abs(target - actual), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target - 360) - actual))
-      target -= 360;
-    return target;
-  }
-
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, new Rotation2d(FL_Actual_Position));
@@ -380,22 +503,63 @@ public class Drivetrain extends SubsystemBase {
     return positions;
   }
 
-  public Command followTrajectoryCommand(PathPlannerTrajectory traj) {
-
-    m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), traj.getInitialHolonomicPose());
-
-    // HashMap<String, Command> eventMap = new HashMap<>();
-    // eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-
-    return new PPSwerveControllerCommand(
-      traj, 
-      () -> m_odometry.getEstimatedPosition(), // Pose supplier
-      this.m_kinematics, // SwerveDriveKinematics
-      new PIDController(_translationKp, _translationKi, _translationKd), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-      new PIDController(_translationKp, _translationKi, _translationKd), // Y controller (usually the same values as X controller)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-      modules -> driveFromModuleStates(modules), // Module states consumer
-      this // Requires this drive subsystem
+  public Command getAutonomousCommand () {
+    // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
+    // for every path in the group
+    List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
+      Telemetry.getValue("general/autonomous/selectedRoutine", "default"), 
+      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "New Path"))
     );
+
+    // This is just an example event map. It would be better to have a constant, global event map
+    // in your code that will be used by all path following commands.
+    HashMap<String, Command> eventMap = new HashMap<>();
+    eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+    eventMap.put("placeHigh", m_arm.moveToPositionCommand(positions.ScoreHigh));
+    eventMap.put("release", m_claw.outtakeCommand());
+    eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.ScoreLow));
+    eventMap.put("intakeIn", new FunctionalCommand(
+      () -> {}, () -> {
+      m_claw.intake();
+    }, 
+    (interrupt) -> {
+      m_claw.notake();
+    }, 
+    () -> {
+      return m_claw.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() != GamePieces.None;
+    }, 
+    (Subsystem) m_claw));
+    eventMap.put("autobalance", autoBalanceCommand());
+    eventMap.put("realign", moveToPositionCommand());
+    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode("cone"); } ));
+    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode("cube"); } ));
+
+    // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
+    SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
+      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
+      pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose), // Pose2d consumer, used to reset odometry at the beginning of auto
+      this.m_kinematics, // SwerveDriveKinematics
+      new PIDConstants(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      new PIDConstants(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+      eventMap,
+      true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+      (Subsystem) this // The drive subsystem. Used to properly set the requirements of path following commands
+    );
+
+    return autoBuilder.fullAuto(pathGroup);
+  }
+
+  public void shwerve ( double LX, double LY) {
+    // 6in diameter wheels, 10:1 gearbox
+    if (isRobotOriented) {
+      shwerveDrive.set(-LX*10);
+    } else {
+      noShwerve();
+    }
+  }
+
+  public void noShwerve () {
+    shwerveDrive.set(0);
   }
 }

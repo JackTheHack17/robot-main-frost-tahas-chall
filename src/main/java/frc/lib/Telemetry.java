@@ -32,6 +32,15 @@ public class Telemetry {
         getTelemetryTable().getEntry(key).setValue(value);
     }
 
+    /** 
+     * Set a telemetry value on the NetworkTable
+     * @param key - the location to assign the value
+     * @param value - the value to assign to the key
+     */
+    public static void setValue ( String key, String[] value ) {
+        getTelemetryTable().getEntry(key).setStringArray(value);
+    }
+
     /**
      * Get a telemetry value from the NetworkTable
      * @param key - the location to fetch the data

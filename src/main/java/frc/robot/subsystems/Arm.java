@@ -1,173 +1,424 @@
 package frc.robot.subsystems;
+
+import static frc.robot.Constants.ARM.JOINT_ANGLE_DEADZONE;
+import static frc.robot.Constants.ARM.JOINT_COORDINATE_DEADZONE;
+import static frc.robot.Constants.ARM.STAGE_1_Kd;
+import static frc.robot.Constants.ARM.STAGE_1_Ki;
+import static frc.robot.Constants.ARM.STAGE_1_Kp;
+import static frc.robot.Constants.ARM.STAGE_1_OFFSET;
+import static frc.robot.Constants.ARM.STAGE_2_Kd;
+import static frc.robot.Constants.ARM.STAGE_2_Ki;
+import static frc.robot.Constants.ARM.STAGE_2_Kp;
+import static frc.robot.Constants.ARM.STAGE_2_OFFSET;
+import static frc.robot.Constants.ARM.STAGE_3_Kd;
+import static frc.robot.Constants.ARM.STAGE_3_Ki;
+import static frc.robot.Constants.ARM.STAGE_3_Kp;
+import static frc.robot.Constants.ARM.STAGE_3_OFFSET;
+import static frc.robot.Constants.ARM.floorAltPosition;
+import static frc.robot.Constants.ARM.floorPosition;
+import static frc.robot.Constants.ARM.idlePosition;
+import static frc.robot.Constants.ARM.scoreHighPosition;
+import static frc.robot.Constants.ARM.scoreLowPosition;
+import static frc.robot.Constants.ARM.scoreMidPosition;
+import static frc.robot.Constants.ARM.substationPosition;
+import static frc.robot.Constants.ARM.thetaSpeed;
+import static frc.robot.Constants.ARM.xSpeed;
+import static frc.robot.Constants.ARM.ySpeed;
+
+import java.util.HashMap;
+
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxPIDController.AccelStrategy;
-import com.revrobotics.SparkMaxPIDController;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.Triangle;
-import frc.robot.Constants.*;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.ArmPosition;
+import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
-
+import frc.lib.Triangle;
+import frc.robot.Constants.ARM.positions;
+import frc.robot.Constants.CAN;
+import frc.robot.Constants.DIO;
+import frc.robot.RobotContainer;
 
 public class Arm extends SubsystemBase {
-    private final CANSparkMax mBiscep;
-    private final CANSparkMax mBiscep2;
-    private final CANSparkMax mElbow;
-    private final CANSparkMax mClaw;
-    private final RelativeEncoder biscepEncoder;  
-    private final RelativeEncoder elbowEncoder;
-    private final RelativeEncoder clawEncoder;
-    private final SparkMaxPIDController biscepPID;  
-    private final SparkMaxPIDController elbowPID;
-    private final SparkMaxPIDController clawPID;
-    private SparkMaxAlternateEncoder.Type kAltEncType;
+    private final CANSparkMax m_stage1;
+    private final CANSparkMax m_stage2;
+    private final CANSparkMax m_stage3;
+    private final DutyCycleEncoder m_stage1Encoder;  
+    private final DutyCycleEncoder m_stage2Encoder;
+    private final DutyCycleEncoder m_stage3Encoder;
+    private final PIDController m_stage1PID;  
+    private final PIDController m_stage2PID;
+    private final PIDController m_stage3PID;
+    private PinchersofPower m_clawSubsystem;
+    private LEDs m_LEDsSubsystem;
+    private CommandXboxController m_driverController;
+    private ButtonBoard m_copilotController;
+    private double m_stage1Target = 0;
+    private double m_stage2Target = 0;
+    private double m_stage3Target = 0;
+    // manual targets actually unused
+    private double m_manualTargetX = 0;
+    private double m_manualTargetY = 0;
+    private double m_manualTargetTheta = 0;
+    private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
+    private boolean movingToIdle = false;
+    private positions target = positions.Idle;
+    private positions lastPosition;
+    private ArmPosition fromIdleTargetPosition;
+    private ArmFeedforward m_stage1FF;
+    private ArmFeedforward m_stage2FF;
+    private ArmFeedforward m_stage3FF;
 
-    public Arm() {
-        mBiscep = new CANSparkMax(1, MotorType.kBrushless);
-        mBiscep2 = new CANSparkMax(1, MotorType.kBrushless);   
-        mElbow = new CANSparkMax(2, MotorType.kBrushless);
-        mClaw = new CANSparkMax(3, MotorType.kBrushless);
+    public Arm(PinchersofPower m_claw, CommandXboxController driverController, ButtonBoard copilotController, LEDs m_LEDs) {
+        // populate position map
+        positionMap.put(positions.ScoreHigh, scoreHighPosition);
+        positionMap.put(positions.ScoreMid, scoreMidPosition);
+        positionMap.put(positions.ScoreLow, scoreLowPosition);
+        positionMap.put(positions.Floor, floorPosition);
+        positionMap.put(positions.FloorAlt, floorAltPosition);
+        positionMap.put(positions.Substation, substationPosition);
+        positionMap.put(positions.Idle, idlePosition);
 
-        mBiscep.setIdleMode(IdleMode.kBrake);
-        mElbow.setIdleMode(IdleMode.kBrake);
-        mClaw.setIdleMode(IdleMode.kBrake);
-        mBiscep2.setIdleMode(IdleMode.kBrake);
-        mBiscep2.follow(mBiscep);
+        m_LEDsSubsystem = m_LEDs;
+        m_clawSubsystem = m_claw;
+        m_driverController = driverController;
+        m_copilotController = copilotController;
 
-        kAltEncType = SparkMaxAlternateEncoder.Type.kQuadrature;
+        m_stage1 = new CANSparkMax(CAN.ARM_STAGE_1_ID, MotorType.kBrushless);
+        m_stage2 = new CANSparkMax(CAN.ARM_STAGE_2_ID, MotorType.kBrushless);
+        m_stage3 = new CANSparkMax(CAN.ARM_STAGE_3_ID, MotorType.kBrushless);
 
-        biscepEncoder = mBiscep.getAlternateEncoder(kAltEncType, 8192);
-        elbowEncoder = mElbow.getAlternateEncoder(kAltEncType, 8192);
-        clawEncoder = mClaw.getAlternateEncoder(kAltEncType, 8192);
+        m_stage1.setIdleMode(IdleMode.kBrake);
+        m_stage2.setIdleMode(IdleMode.kBrake);
+        m_stage3.setIdleMode(IdleMode.kBrake);
 
-        biscepEncoder.setPositionConversionFactor(360);
-        elbowEncoder.setPositionConversionFactor(360);
-        clawEncoder.setPositionConversionFactor(360);
+        m_stage2.setInverted(false);
+        m_stage3.setInverted(false);
 
-        biscepEncoder.setVelocityConversionFactor(360);
-        elbowEncoder.setVelocityConversionFactor(360);
-        clawEncoder.setVelocityConversionFactor(360);
+        m_stage1Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_1_ENCODER_ID);
+        m_stage2Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_2_ENCODER_ID);
+        m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
-        biscepPID = mBiscep.getPIDController(); 
-        elbowPID = mElbow.getPIDController();
-        clawPID = mClaw.getPIDController();
+        m_stage1FF = new ArmFeedforward(0.04, 1.1,0,0.07);
+        m_stage2FF = new ArmFeedforward(0.04, 0.85, 0,0.13);
+        m_stage3FF = new ArmFeedforward(0.04, 0.52, 1.95,0.04);
 
-        configPID(0, 0, 0, 0, 0, 0, biscepEncoder, biscepPID);
-        configPID(0, 0, 0, 0, 0, 0, elbowEncoder, elbowPID);
-        configPID(0, 0, 0, 0, 0, 0, clawEncoder, clawPID);
+        m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
+        m_stage1PID.enableContinuousInput(0, 360);
+        m_stage2PID = new PIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd);
+        m_stage2PID.enableContinuousInput(0, 360);
+        m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
+        m_stage3PID.enableContinuousInput(0, 360);
+
+        m_stage1PID.setTolerance(0);
+        m_stage2PID.setTolerance(1.5);
+        m_stage3PID.setTolerance(0);
+
+        m_stage1.restoreFactoryDefaults();
+        m_stage1.clearFaults();
+        m_stage1.setSmartCurrentLimit(40);
+        m_stage1.setSecondaryCurrentLimit(40);
+        m_stage1.burnFlash();
+
+        m_stage2.restoreFactoryDefaults();
+        m_stage2.clearFaults();
+        m_stage2.setSmartCurrentLimit(40);
+        m_stage2.setSecondaryCurrentLimit(40);
+        m_stage2.burnFlash();
+
+        m_stage3.restoreFactoryDefaults();
+        m_stage3.clearFaults();
+        m_stage3.setSmartCurrentLimit(40);
+        m_stage3.setSecondaryCurrentLimit(40);
+        m_stage3.burnFlash();
+
+        m_copilotController.button(10).whileTrue(new RepeatCommand( new InstantCommand(() -> {
+            if (m_copilotController.getRawButton(9)) m_manualTargetTheta += thetaSpeed;
+        })));
+        m_copilotController.button(11).whileTrue(new RepeatCommand( new InstantCommand(() -> {
+            if (m_copilotController.getRawButton(9)) m_manualTargetTheta -= thetaSpeed;
+        })));
+
+        lastPosition = positions.Idle;
     }
 
-    public void movetopoint(double x, double y, double claw) {
-        Triangle triangle = new Triangle(x, y, Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-        posArm(triangle.getAngleA() + (90 - Math.atan2(x, y)));
-        posElbows(triangle.getAngleB());
-        posClaws(claw);
+    private void moveToPoint( double stage1, double stage2, double stage3, double x_Inc, double y_Inc ) {        
+        double[] pos = forwardKinematics(Math.toRadians(stage1), Math.toRadians(stage2), Math.toRadians(stage3));
+        double x = pos[0] + x_Inc;
+        double y = pos[1] + y_Inc;
+        double dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        Triangle tri = new Triangle(19, 30, dist);
+        double angle1 = 360 - (Math.toDegrees(tri.getAngleB()) -Math.toDegrees(Math.atan2(y, x)));
+        double angle2 = 180 - ((90 - angle1) - (Math.toRadians(tri.getAngleC())));
+        moveToAngles(angle1, angle2, stage3);
     }
 
-    public void setArm(double speed) {
-        mBiscep.set(speed);
+    /** @deprecated */
+    private void moveToPoint( double x_Inc, double y_Inc ) {        
+        double[] pos = forwardKinematics(Math.toRadians(m_stage1Target), Math.toRadians(m_stage2Target), Math.toRadians(m_stage3Target));
+        double x = pos[0] + x_Inc;
+        double y = pos[1] + y_Inc;
+        double dist = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        Triangle tri = new Triangle(19, 30, dist);
+        double angle1 = 360 - (Math.toDegrees(tri.getAngleB()) -Math.toDegrees(Math.atan2(y, x)));
+        double angle2 = 180 - ((90 - angle1) - (Math.toRadians(tri.getAngleC())));
+        moveToAngles(angle1, angle2, m_stage3Target);
     }
 
-    public void setElbows(double speed) {    
-        mElbow.set(speed);  
+    /** all inputs in radians */
+    private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
+        // double[] output = new double[3];
+        // output[0] = Math.cos(Math.toRadians(stage1 - STAGE_1_OFFSET)) * Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH);
+        // output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH);
+        // output[2] = stage3 - STAGE_3_OFFSET;
+        ArmPosition armpos = new ArmPosition(stage1, stage2, stage3);
+        double[] output = {armpos.getXPosition(), armpos.getYPosition(), stage3};
+        return output;
     }
 
-    public void setClaws(double speed) {    
-        mClaw.set(speed);  
+    private double[] getCurrentPoint () {
+        return forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360);
     }
 
-    public void posArm(double angle) {
-        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
+    private void moveToAngles (double stage1Angle, double stage2Angle, double stage3Angle) {
+        setStage1Target(stage1Angle);
+        setStage2Target(stage2Angle);
+        setStage3Target(stage3Angle);
     }
 
-    public void posElbows(double angle) {
-        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
+    private void moveToPosition (positions position) {
+        target = position;
+        ArmPosition target = positionMap.get(position);
+        fromIdleTargetPosition = target;
+        if ( lastPosition == positions.Idle && position != positions.Idle && Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - target.getStage2Angle()) > JOINT_ANGLE_DEADZONE) {
+            moveToAngles(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle());
+            m_manualTargetX = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[0];
+            m_manualTargetY = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[1];
+            m_manualTargetTheta = target.getStage3Angle();
+        } else if ( position == positions.Idle && !movingToIdle && Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - target.getStage1Angle()) > JOINT_ANGLE_DEADZONE ) {
+            moveToAngles(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle());
+            movingToIdle = true;
+            m_manualTargetX = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[0];
+            m_manualTargetY = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[1];
+            m_manualTargetTheta = target.getStage3Angle();
+        } else if ( !movingToIdle && m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target < JOINT_ANGLE_DEADZONE ) {
+            m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
+            m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
+            m_manualTargetTheta = target.getStage3Angle();
+            moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
+        }
     }
 
-    public void posClaws(double angle) {
-        biscepPID.setReference(angle, CANSparkMax.ControlType.kPosition);
+    public Boolean isAtTarget () {
+        if (RobotContainer.copilotController.getRawButton(9)) {
+            return (
+                Math.abs(getCurrentPoint()[0] - m_manualTargetX) < JOINT_COORDINATE_DEADZONE &&
+                Math.abs(getCurrentPoint()[1] - m_manualTargetY) < JOINT_COORDINATE_DEADZONE &&
+                Math.abs(getCurrentPoint()[2] - m_manualTargetTheta) < JOINT_COORDINATE_DEADZONE
+            );
+        } else {
+            return (
+                Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
+                Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE &&
+                Math.abs(m_stage3Encoder.getAbsolutePosition()*360 - m_stage3Target) < JOINT_ANGLE_DEADZONE
+            );
+        }
     }
 
-    public void lowArmScore() {
-        posArm(ARM.LOW_ARM_ANG);
-        posElbows(ARM.LOW_ELBOW_ANG);  
-        posClaws(ARM.LOW_CLAW_ANG);
+    public void setStage1Target(double angle) {
+        m_stage1Target = angle;
     }
 
-    public void highArmScore() {
-        posArm(ARM.HIGH_ARM_ANG);
-        posElbows(ARM.HIGH_ELBOW_ANG);  
-        posClaws(ARM.HIGH_CLAW_ANG);
-    }
-    
-    public void idleArmScore() {
-        posArm(ARM.IDLE_ARM_ANG);
-        posElbows(ARM.IDLE_ELBOW_ANG);  
-        posClaws(ARM.IDLE_CLAW_ANG);
+    public void setStage2Target(double angle) {
+        m_stage2Target = angle;
     }
 
-    public void fetch() {
-        posArm(ARM.FETCH_ARM_ANG);
-        posElbows(ARM.FETCH_ELBOW_ANG);  
-        posClaws(ARM.FETCH_CLAW_ANG);
+    public void setStage3Target(double angle) {
+        m_stage3Target = angle;
     }
 
-    public Command midScore(Arm arm) {
-        return new InstantCommand(() -> lowArmScore(), arm);
+    public Command moveToPositionCommand (positions position) {
+        return new FunctionalCommand(
+            () -> { // init
+                if (!m_copilotController.getRawButton(9)) {
+                    m_copilotController.setLED(10, false);
+                    m_copilotController.setLED(11, false);
+                    m_copilotController.setLED(12, false);
+                    m_copilotController.setLED(13, false);
+                    m_copilotController.setLED(14, false);
+                }
+                m_copilotController.setLED(0, false);
+                m_copilotController.setLED(1, false);
+                m_copilotController.setLED(2, false);
+                m_copilotController.setLED(3, false);
+                m_copilotController.setLED(4, false);
+                m_copilotController.setLED(5, false);
+        
+                switch (position) {
+                    case ScoreHigh:
+                        m_copilotController.setLED(2, true);
+                        break;
+                    case ScoreMid:
+                        m_copilotController.setLED(4, true);
+                        break;
+                    case ScoreLow:
+                        m_copilotController.setLED(5, true);
+                        break;
+                    case Floor:
+                        m_copilotController.setLED(1, true);
+                        break;
+                    case FloorAlt:
+                        m_copilotController.setLED(3, true);
+                        break;
+                    case Substation:
+                        m_copilotController.setLED(0, true);
+                        break;
+                    case Idle:
+                        break;
+                }
+            }, 
+            () -> { // execution
+                if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
+                moveToPosition(position);
+            }, 
+            interrupted -> { // when should the command do when it ends?
+                lastPosition = position;
+                movingToIdle = false;
+                if (!interrupted) {
+                    // arm is in position
+                    if ( position == positions.Idle ) return; // idle position is exempt from driver notification
+                    m_LEDsSubsystem.flashGreen();
+                    m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1);
+                    new SequentialCommandGroup(new WaitCommand(0.5), new InstantCommand( () -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))).schedule();
+                }
+            },
+            () -> { // should the command end?
+                //return this.isAtTarget();
+                return false;
+            },
+            this
+        );
     }
 
-    public Command highScore(Arm arm) {
-        return new InstantCommand(() -> highArmScore(), arm);
+    public Command moveToPointCommand () {
+        return new FunctionalCommand(
+            () -> { // init
+                m_copilotController.setLED(0, false);
+                m_copilotController.setLED(1, false);
+                m_copilotController.setLED(2, false);
+                m_copilotController.setLED(3, false);
+                m_copilotController.setLED(4, false);
+                m_copilotController.setLED(5, false);
+                m_copilotController.setLED(6, false);
+                m_copilotController.setLED(7, false);
+                m_copilotController.setLED(8, false);
+
+                m_copilotController.setLED(10, true);
+                m_copilotController.setLED(11, true);
+                m_copilotController.setLED(12, true);
+                m_copilotController.setLED(13, true);
+                m_copilotController.setLED(14, true);
+            }, 
+            () -> { // execution
+                m_manualTargetX += m_copilotController.getJoystick().getX() * xSpeed;
+                m_manualTargetY += m_copilotController.getJoystick().getY() * ySpeed;
+                moveToPoint(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_copilotController.getJoystick().getX() * xSpeed, m_copilotController.getJoystick().getY() * ySpeed);
+            }, 
+
+            interrupted -> { // when should the command do when it ends?
+                if (!interrupted) {
+                    // arm is in position
+                }
+            },
+            () -> { // should the command end?
+                return false; //this.isAtTarget();
+            },
+            this
+        );
     }
-    
-    public Command lowScore(Arm arm) {
-        return new InstantCommand(() -> idleArmScore(), arm);
-    }
-    
-    public Command fetch(Arm arm) {
-        return new InstantCommand(() -> fetch(), arm);
+
+    public Command defaultCommand () {
+        return new FunctionalCommand(
+            () -> {},
+            () -> {
+                if (RobotContainer.copilotController.getRawButton(9)) {
+                    moveToPointCommand().schedule();
+                } else {
+                    if ( !m_clawSubsystem.isOpen() ) moveToPositionCommand(positions.Idle).schedule();
+                }
+            }, 
+            (interrupted) -> {},
+            () -> false, 
+            (Subsystem) this
+        );
     }
 
     @Override  public void periodic() {
-        Telemetry.setValue("POP/Biscep/speed", mBiscep.get());
-        Telemetry.setValue("POP/Biscep/temp", mBiscep.getMotorTemperature());
-        Telemetry.setValue("POP/Biscep/voltage", mBiscep.getAppliedOutput());
-        Telemetry.setValue("POP/Biscep/statorcurrent", mBiscep.getOutputCurrent());
-        Telemetry.setValue("POP/Biscep/position", biscepEncoder.getPosition());
-        Telemetry.setValue("POP/Biscep/velocity", biscepEncoder.getVelocity());
-        Telemetry.setValue("POP/BiscepFollower/speed2", mBiscep2.get());
-        Telemetry.setValue("POP/BiscepFollower/temp2", mBiscep2.getMotorTemperature());
-        Telemetry.setValue("POP/BiscepFollower/voltage2", mBiscep2.getAppliedOutput());
-        Telemetry.setValue("POP/BiscepFollower/statorcurrent2", mBiscep2.getOutputCurrent());
-        Telemetry.setValue("POP/Elbow/speed", mElbow.get());
-        Telemetry.setValue("POP/Elbow/temp", mElbow.getMotorTemperature());
-        Telemetry.setValue("POP/Elbow/voltage", mElbow.getAppliedOutput());
-        Telemetry.setValue("POP/Elbow/statorcurrent", mElbow.getOutputCurrent());
-        Telemetry.setValue("POP/Elbow/position", elbowEncoder.getPosition());
-        Telemetry.setValue("POP/Elbow/velocity", elbowEncoder.getVelocity());
-        Telemetry.setValue("POP/Claw/speed", mClaw.get());
-        Telemetry.setValue("POP/Claw/temp", mClaw.getMotorTemperature());
-        Telemetry.setValue("POP/Claw/voltage", mClaw.getAppliedOutput());
-        Telemetry.setValue("POP/Claw/statorcurrent", mClaw.getOutputCurrent());
-        Telemetry.setValue("POP/Claw/position", clawEncoder.getPosition());
-        Telemetry.setValue("POP/Claw/velocity", clawEncoder.getVelocity());
+        Telemetry.setValue("Arm/targetPosition", target.name());
+        Telemetry.setValue("Arm/currentPoint/x", getCurrentPoint()[0]);
+        Telemetry.setValue("Arm/currentPoint/y", getCurrentPoint()[1]);
+        Telemetry.setValue("Arm/currentPoint/theta", getCurrentPoint()[2]);
+        Telemetry.setValue("Arm/manualTarget/manualTargetX", m_manualTargetX);
+        Telemetry.setValue("Arm/manualTarget/manualTargetY", m_manualTargetY);
+        Telemetry.setValue("Arm/manualTarget/manualTargetTheta", m_manualTargetTheta);
+        Telemetry.setValue("Arm/stage1/setpoint", m_stage1.get());
+        Telemetry.setValue("Arm/stage1/temperature", m_stage1.getMotorTemperature());
+        Telemetry.setValue("Arm/stage1/outputVoltage", m_stage1.getAppliedOutput());
+        Telemetry.setValue("Arm/stage1/statorCurrent", m_stage1.getOutputCurrent());
+        Telemetry.setValue("Arm/stage1/actualPosition", m_stage1Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage1/targetPosition", m_stage1Target);
+        Telemetry.setValue("Arm/stage2/setpoint", m_stage2.get());
+        Telemetry.setValue("Arm/stage2/temperature", m_stage2.getMotorTemperature());
+        Telemetry.setValue("Arm/stage2/outputVoltage", m_stage2.getAppliedOutput());
+        Telemetry.setValue("Arm/stage2/statorcurrent", m_stage2.getOutputCurrent());
+        Telemetry.setValue("Arm/stage2/actualPosition", m_stage2Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage2/targetPosition", m_stage2Target);
+        Telemetry.setValue("Arm/stage3/setpoint", m_stage3.get());
+        Telemetry.setValue("Arm/stage3/temperature", m_stage3.getMotorTemperature());
+        Telemetry.setValue("Arm/stage3/outputVoltage", m_stage3.getAppliedOutput());
+        Telemetry.setValue("Arm/stage3/statorCurrent", m_stage3.getOutputCurrent());
+        Telemetry.setValue("Arm/stage3/actualPosition", m_stage3Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage3/targetPosition", m_stage3Target);
+        Telemetry.setValue("Arm/stage2/internalVelocity", m_stage2.getEncoder().getVelocity());
+
+        if ( DriverStation.isEnabled() ) {
+            if (movingToIdle) {
+                if ( Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE ) {
+                    setStage2Target(idlePosition.getStage2Angle());
+                    movingToIdle = false;
+                }
+            }
+            if ( fromIdleTargetPosition != null && lastPosition == positions.Idle ) {
+                if ( Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE ) {
+                    setStage1Target(fromIdleTargetPosition.getStage1Angle());
+                }
+            }
+            
+            Telemetry.setValue( "Arm/stage1/theoreticalOutput", m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), (m_stage1.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
+            Telemetry.setValue( "Arm/stage2/theoreticalOutput", m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
+            Telemetry.setValue( "Arm/stage3/theoreticalOutput", m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), (m_stage3.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
+
+            m_stage1.setVoltage( m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), (m_stage1.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
+            m_stage2.setVoltage( m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
+            m_stage3.setVoltage( m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), (m_stage3.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
+        }
     }
     
     @Override  public void simulationPeriodic() {}
-
-    public void configPID(double kp, double kd, double FF, double maxV, double maxA, int profile, RelativeEncoder encoder, SparkMaxPIDController controller) {
-        controller.setP(kp, profile);
-        controller.setD(kd, profile);
-        controller.setFF(FF, profile);
-        controller.setSmartMotionMaxAccel(maxA, profile);
-        controller.setSmartMotionMaxVelocity(maxV, profile);
-        controller.setSmartMotionAccelStrategy(AccelStrategy.kSCurve, profile);
-        controller.setFeedbackDevice(encoder);
-    }
 }
