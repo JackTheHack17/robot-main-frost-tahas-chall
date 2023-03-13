@@ -13,9 +13,9 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.POP;
 
 public class PinchersofPower extends SubsystemBase  {
@@ -59,11 +59,13 @@ public class PinchersofPower extends SubsystemBase  {
 
   /** Close */
   public void forward() {
+    spinoff();
     pusher.set(Value.kForward);
   }
 
   /** Open */
   public void reverse() {
+    spinoff();
     pusher.set(Value.kReverse);
   }
 
@@ -148,6 +150,7 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void outtake() {
     spinout();
+
   }
 
   public void notake() {
@@ -170,7 +173,7 @@ public class PinchersofPower extends SubsystemBase  {
 
   public Command outtakeCommand() {
     if ( m_cone ) {
-      return new InstantCommand(() -> spinout(), this).andThen(new WaitCommand(0).andThen(new InstantCommand( () -> reverse())));
+      return new InstantCommand(() -> spinout(), this).andThen(new InstantCommand( () -> reverse()));
     }
     return new InstantCommand(() -> spinout(), this);
   }
@@ -191,5 +194,9 @@ public class PinchersofPower extends SubsystemBase  {
     Telemetry.setValue("Pincher/rightMotor/statorCurrent", spinner2.getOutputCurrent());
     Telemetry.setValue("Pincher/piston", pusher.get() == DoubleSolenoid.Value.kForward ? "Forward" : "Reverse");
     Telemetry.setValue("Pincher/compressor/pressure", comp.getPressure());
+
+    if ( !RobotContainer.copilotController.getRawButton(9) && m_cone ) {
+      spinoff();
+    }
   }
 }

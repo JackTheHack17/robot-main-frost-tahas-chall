@@ -1,5 +1,8 @@
 package frc.lib;
 
+import static frc.robot.Constants.ARM.STAGE_1_LENGTH;
+import static frc.robot.Constants.ARM.STAGE_2_LENGTH;
+
 public class ArmPosition {
     private double stage1Angle = 0;
     private double stage2Angle = 0;
@@ -24,10 +27,10 @@ public class ArmPosition {
     }
 
     public double getXPosition() {
-        return 19 * Math.cos(stage1Angle) + 30 * Math.cos(stage2Angle);
+        return STAGE_1_LENGTH * Math.cos(Math.toRadians(stage1Angle)) + STAGE_2_LENGTH * Math.cos(Math.toRadians(stage2Angle));
     }
 
     public double getYPosition() {
-        return 19 * Math.sin(stage1Angle) + 30 * Math.sin(stage2Angle);
+        return -(STAGE_1_LENGTH * Math.sin(Math.toRadians(stage1Angle)) + STAGE_2_LENGTH * Math.sin(Math.toRadians(stage2Angle)));
     }
 }

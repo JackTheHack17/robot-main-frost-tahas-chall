@@ -14,6 +14,8 @@ import static frc.robot.Constants.ARM.STAGE_3_Kd;
 import static frc.robot.Constants.ARM.STAGE_3_Ki;
 import static frc.robot.Constants.ARM.STAGE_3_Kp;
 import static frc.robot.Constants.ARM.STAGE_3_OFFSET;
+import static frc.robot.Constants.ARM.STAGE_1_LENGTH;
+import static frc.robot.Constants.ARM.STAGE_2_LENGTH;
 import static frc.robot.Constants.ARM.floorAltPosition;
 import static frc.robot.Constants.ARM.floorPosition;
 import static frc.robot.Constants.ARM.idlePosition;
@@ -51,6 +53,7 @@ import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 import frc.lib.Triangle;
 import frc.robot.Constants.ARM.positions;
+import frc.robot.subsystems.PinchersofPower.GamePieces;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DIO;
 import frc.robot.RobotContainer;
@@ -158,6 +161,31 @@ public class Arm extends SubsystemBase {
         lastPosition = positions.Idle;
     }
 
+    private double[] inverseKinematics (double x, double y, double theta) {
+        double[] output = new double[3];
+
+        double l1 = STAGE_1_LENGTH;
+        double l2 = STAGE_2_LENGTH;
+        double l3 = Math.hypot(x, y);
+        double thetaA = Math.toDegrees(Math.acos((l2*l2-l1*l1-l3*l3)/(-2*l1*l3)));
+        double thetaB = Math.toDegrees(Math.acos((l3*l3-l1*l1-l2*l2)/(-2*l1*l2)));
+
+        output[0] = 360 - (Math.toDegrees(Math.atan2(y, x)) - thetaA);
+        output[1] = 360 - (180 - output[0] - thetaB);
+        output[2] = theta;
+
+        if ( output[0] != output[0] || output[1] != output[1] || output[2] != output[2] ) {
+            output = getCurrentPoint();
+        }
+
+        return output;
+    }
+
+    private void moveToPoint (double x, double y, double theta) {
+        double[] thetas = inverseKinematics(x, y, theta);
+        moveToAngles(thetas[0], thetas[1], thetas[2]);
+    }
+
     private void moveToPoint( double stage1, double stage2, double stage3, double x_Inc, double y_Inc ) {        
         double[] pos = forwardKinematics(Math.toRadians(stage1), Math.toRadians(stage2), Math.toRadians(stage3));
         double x = pos[0] + x_Inc;
@@ -169,7 +197,6 @@ public class Arm extends SubsystemBase {
         moveToAngles(angle1, angle2, stage3);
     }
 
-    /** @deprecated */
     private void moveToPoint( double x_Inc, double y_Inc ) {        
         double[] pos = forwardKinematics(Math.toRadians(m_stage1Target), Math.toRadians(m_stage2Target), Math.toRadians(m_stage3Target));
         double x = pos[0] + x_Inc;
@@ -281,12 +308,15 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(5, true);
                         break;
                     case Floor:
+                        m_clawSubsystem.reverse();
                         m_copilotController.setLED(1, true);
                         break;
                     case FloorAlt:
+                        m_clawSubsystem.reverse();
                         m_copilotController.setLED(3, true);
                         break;
                     case Substation:
+                        m_clawSubsystem.reverse();
                         m_copilotController.setLED(0, true);
                         break;
                     case Idle:
@@ -294,7 +324,8 @@ public class Arm extends SubsystemBase {
                 }
             }, 
             () -> { // execution
-                if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
+                m_clawSubsystem.spinoff();
+                if ( !m_clawSubsystem.wantCone() && position != positions.Idle && m_clawSubsystem.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.None) m_clawSubsystem.spinin();
                 moveToPosition(position);
             }, 
             interrupted -> { // when should the command do when it ends?
@@ -337,8 +368,9 @@ public class Arm extends SubsystemBase {
             }, 
             () -> { // execution
                 m_manualTargetX += m_copilotController.getJoystick().getX() * xSpeed;
-                m_manualTargetY += m_copilotController.getJoystick().getY() * ySpeed;
-                moveToPoint(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_copilotController.getJoystick().getX() * xSpeed, m_copilotController.getJoystick().getY() * ySpeed);
+                m_manualTargetY += -m_copilotController.getJoystick().getY() * ySpeed;
+                moveToPoint(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
+                //moveToPoint(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_copilotController.getJoystick().getX() * xSpeed, m_copilotController.getJoystick().getY() * ySpeed);
             }, 
 
             interrupted -> { // when should the command do when it ends?
@@ -347,7 +379,7 @@ public class Arm extends SubsystemBase {
                 }
             },
             () -> { // should the command end?
-                return false; //this.isAtTarget();
+                return true; //this.isAtTarget();
             },
             this
         );
@@ -377,6 +409,8 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("Arm/manualTarget/manualTargetX", m_manualTargetX);
         Telemetry.setValue("Arm/manualTarget/manualTargetY", m_manualTargetY);
         Telemetry.setValue("Arm/manualTarget/manualTargetTheta", m_manualTargetTheta);
+        double[] telemetryConversion = inverseKinematics(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
+        Telemetry.setValue("Arm/manualTarget/manualTargetFK", forwardKinematics(telemetryConversion[0], telemetryConversion[1], telemetryConversion[2]));
         Telemetry.setValue("Arm/stage1/setpoint", m_stage1.get());
         Telemetry.setValue("Arm/stage1/temperature", m_stage1.getMotorTemperature());
         Telemetry.setValue("Arm/stage1/outputVoltage", m_stage1.getAppliedOutput());

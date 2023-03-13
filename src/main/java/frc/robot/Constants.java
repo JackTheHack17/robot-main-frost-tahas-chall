@@ -115,15 +115,15 @@ public final class Constants {
         };
 
         public static final double STAGE_1_OFFSET = 147.5;
-        public static final double STAGE_2_OFFSET = 176.5 - 60;
+        public static final double STAGE_2_OFFSET = 176.5 - 60 - 20;
         public static final double STAGE_3_OFFSET = 346.0;
 
-        public static ArmPosition scoreHighPosition  = new ArmPosition(175, 245, 5);
-        public static ArmPosition scoreMidPosition   = new ArmPosition(207, 195, 353);
-        public static ArmPosition scoreLowPosition   = new ArmPosition(135, 110+5, 350+5);
-        public static ArmPosition floorPosition      = new ArmPosition(138, 153, 350);
-        public static ArmPosition floorAltPosition   = new ArmPosition(180, 156, 277);
-        public static ArmPosition substationPosition = new ArmPosition(160, 240, 355);
+        public static ArmPosition scoreHighPosition  = new ArmPosition(175, 245-20, 5);
+        public static ArmPosition scoreMidPosition   = new ArmPosition(207, 195-20, 353);
+        public static ArmPosition scoreLowPosition   = new ArmPosition(135, 110+5-20, 350+5);
+        public static ArmPosition floorPosition      = new ArmPosition(138, 153-20, 350);
+        public static ArmPosition floorAltPosition   = new ArmPosition(180, 156-20, 277);
+        public static ArmPosition substationPosition = new ArmPosition(160, 240-20, 355);
         //public static ArmPosition idlePosition       = new ArmPosition(195, 60, 315);
         //public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
         public static ArmPosition idlePosition       = new ArmPosition(190, 105, 343);
@@ -134,8 +134,9 @@ public final class Constants {
         public static final double xSpeed = 0.1;
         public static final double ySpeed = 0.1;
 
-        public static final double STAGE_1_LENGTH = 10;
-        public static final double STAGE_2_LENGTH = 10;
+        // inches
+        public static final double STAGE_1_LENGTH = 20.0;
+        public static final double STAGE_2_LENGTH = 29.5;
 
         public static final double STAGE_1_Kp = 0.009;
         public static final double STAGE_1_Ki = 0;
