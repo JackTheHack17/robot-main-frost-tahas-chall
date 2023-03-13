@@ -159,7 +159,8 @@ public class Drivetrain extends SubsystemBase {
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
 
-  private List<Pose2d> _waypoints = new ArrayList<Pose2d>();
+  private List<Pose2d> _coneWaypoints = new ArrayList<Pose2d>();
+  private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
 
   private Pose2d _robotPose = new Pose2d();
 
@@ -219,13 +220,34 @@ public class Drivetrain extends SubsystemBase {
     // declare scoring positions
     if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {
       // red alliance waypoints
-      _waypoints.add(new Pose2d(0, 0, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.70, 5.05, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 3.84, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 3.28, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 2.18, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 1.60, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.70, 0.47, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(14.70, 1.03, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(14.70, 2.75, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(14.70, 4.42, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
-      _waypoints.add(new Pose2d(0, 0, new Rotation2d(0)));
-    } else {
-      // no alliance waypoints
-      _waypoints.add(new Pose2d(0, 0, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 5.05, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 3.84, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 3.28, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 2.18, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 1.60, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.84, 0.47, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.84, 1.03, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.84, 2.75, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.84, 4.42, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
     }
 
     PathPlannerServer.startServer(6969);
@@ -359,7 +381,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command moveToPositionCommand () {
-    Pose2d closest = m_odometry.getEstimatedPosition().nearest(_waypoints);
+    Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
     if (closest == null) return new InstantCommand();
     if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
       m_LEDs.flashRed();

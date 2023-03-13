@@ -39,9 +39,10 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    File[] paths = Filesystem.getDeployDirectory().listFiles();
+    File[] paths = new File(Filesystem.getDeployDirectory(), "pathplanner").listFiles();
     String pathsString = "";
     for (int i = 0; i < paths.length; i++) {
+      if (paths[i].isDirectory()) continue;
       pathsString += paths[i].getName().substring(0, paths[i].getName().indexOf(".")) + ",";
     }
     Telemetry.setValue("general/autonomous/availableRoutines", pathsString);
