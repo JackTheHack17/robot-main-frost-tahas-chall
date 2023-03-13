@@ -326,6 +326,9 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(0, true);
                         break;
                     case Idle:
+                    case IdleShootPosition:
+                        break;
+                    default:
                         break;
                 }
             }, 
@@ -337,13 +340,6 @@ public class Arm extends SubsystemBase {
             interrupted -> { // when should the command do when it ends?
                 lastPosition = position;
                 movingToIdle = false;
-                if (!interrupted) {
-                    // arm is in position
-                    if ( position == positions.Idle ) return; // idle position is exempt from driver notification
-                    m_LEDsSubsystem.flashGreen();
-                    m_driverController.getHID().setRumble(RumbleType.kBothRumble, 1);
-                    new SequentialCommandGroup(new WaitCommand(0.5), new InstantCommand( () -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0))).schedule();
-                }
             },
             () -> { // should the command end?
                 //return this.isAtTarget();
@@ -351,6 +347,78 @@ public class Arm extends SubsystemBase {
             },
             this
         );
+    }
+
+    public Command moveToPositionTerminatingCommand( positions position ) {
+        return new FunctionalCommand(
+            () -> { // init
+                if (!m_copilotController.getRawButton(9)) {
+                    m_copilotController.setLED(10, false);
+                    m_copilotController.setLED(11, false);
+                    m_copilotController.setLED(12, false);
+                    m_copilotController.setLED(13, false);
+                    m_copilotController.setLED(14, false);
+                }
+                m_copilotController.setLED(0, false);
+                m_copilotController.setLED(1, false);
+                m_copilotController.setLED(2, false);
+                m_copilotController.setLED(3, false);
+                m_copilotController.setLED(4, false);
+                m_copilotController.setLED(5, false);
+        
+                switch (position) {
+                    case ScoreHigh:
+                        m_copilotController.setLED(2, true);
+                        break;
+                    case ScoreMid:
+                        m_copilotController.setLED(4, true);
+                        break;
+                    case ScoreLow:
+                        m_copilotController.setLED(5, true);
+                        break;
+                    case Floor:
+                        m_clawSubsystem.reverse();
+                        m_copilotController.setLED(1, true);
+                        break;
+                    case FloorAlt:
+                        m_clawSubsystem.reverse();
+                        m_copilotController.setLED(3, true);
+                        break;
+                    case Substation:
+                        m_clawSubsystem.reverse();
+                        m_copilotController.setLED(0, true);
+                        break;
+                    case Idle:
+                    case IdleShootPosition:
+                        break;
+                    default:
+                        break;
+                }
+            }, 
+            () -> { // execution
+                m_clawSubsystem.spinoff();
+                moveToPosition(position);
+            }, 
+            interrupted -> { // when should the command do when it ends?
+                lastPosition = position;
+                movingToIdle = false;
+            },
+            () -> { // should the command end?
+                return this.isAtTarget();
+            },
+            this
+        );
+    }
+
+    public Command placeCommand () {
+        switch ( target ) {
+            case ScoreHigh:
+                return moveToPositionTerminatingCommand(positions.ScoreHighPlace);
+            case ScoreMid:
+                return moveToPositionTerminatingCommand(positions.ScoreMidPlace);
+            default:
+                return new InstantCommand();
+        }
     }
 
     public Command moveToPointCommand () {

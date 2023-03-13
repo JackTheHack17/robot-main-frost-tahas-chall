@@ -107,6 +107,8 @@ public final class Constants {
         public static enum positions {
             ScoreHigh,
             ScoreMid,
+            ScoreHighPlace,
+            ScoreMidPlace,
             ScoreLow,
             Floor,
             FloorAlt,
@@ -125,12 +127,10 @@ public final class Constants {
         public static ArmPosition floorPosition      = new ArmPosition(138, 153-20, 350);
         public static ArmPosition floorAltPosition   = new ArmPosition(180, 156-20, 277);
         public static ArmPosition substationPosition = new ArmPosition(160, 240-20, 355);
-        //public static ArmPosition idlePosition       = new ArmPosition(195, 60, 315);
-        //public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
         public static ArmPosition idlePosition       = new ArmPosition(190, 105, 343);
         public static ArmPosition idleShootPosition  = new ArmPosition(95, 285, 5);
-
-
+        public static ArmPosition scoreHighPlace     = new ArmPosition(0, 0, 0);
+        public static ArmPosition scoreMidPlace      = new ArmPosition(0, 0, 0);
 
         public static final double thetaSpeed = 0.1;
         public static final double xSpeed = 0.1;

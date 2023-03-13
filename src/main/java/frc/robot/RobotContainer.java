@@ -78,7 +78,7 @@ public class RobotContainer {
     copilotController.button(4).onFalse(m_claw.intakeCommand());
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
     copilotController.button(5).onFalse(m_claw.intakeCommand());
-    copilotController.button(6).onTrue(m_claw.outtakeCommand());
+    copilotController.button(6).onTrue(m_arm.placeCommand().andThen(m_claw.outtakeCommand()));
     copilotController.button(6).onFalse(m_claw.notakeCommand());
     copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
     copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
