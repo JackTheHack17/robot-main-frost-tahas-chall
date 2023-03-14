@@ -101,7 +101,7 @@ public final class Constants {
     }
 
     public static final class ARM {
-        public static final double JOINT_ANGLE_DEADZONE = 10;
+        public static final double JOINT_ANGLE_DEADZONE = 20;
         public static final double JOINT_COORDINATE_DEADZONE = 0;
 
         public static enum positions {
@@ -121,13 +121,15 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 176.5 - 60 - 20;
         public static final double STAGE_3_OFFSET = 346.0;
 
-        public static ArmPosition scoreHighPosition  = new ArmPosition(175, 245-20, 5);
+        public static ArmPosition scoreHighPosition  = new ArmPosition(183, 180, 5);
         public static ArmPosition scoreMidPosition   = new ArmPosition(207, 195-20, 353);
         public static ArmPosition scoreLowPosition   = new ArmPosition(135, 110+5-20, 350+5);
-        public static ArmPosition floorPosition      = new ArmPosition(138, 153-20, 350);
+        public static ArmPosition floorPosition      = new ArmPosition(142, 80, 350);
         public static ArmPosition floorAltPosition   = new ArmPosition(180, 156-20, 277);
         public static ArmPosition substationPosition = new ArmPosition(160, 240-20, 355);
-        public static ArmPosition idlePosition       = new ArmPosition(190, 105, 343);
+        //public static ArmPosition idlePosition       = new ArmPosition(195, 60, 315);
+        //public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
+        public static ArmPosition idlePosition       = new ArmPosition(207, 20, 335);
         public static ArmPosition idleShootPosition  = new ArmPosition(95, 285, 5);
         public static ArmPosition scoreHighPlace     = new ArmPosition(0, 0, 0);
         public static ArmPosition scoreMidPlace      = new ArmPosition(0, 0, 0);
@@ -140,17 +142,18 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 20.0;
         public static final double STAGE_2_LENGTH = 29.5;
 
-        public static final double STAGE_1_Kp = 0.009;
+        public static final double STAGE_1_Kp = 0.004;
         public static final double STAGE_1_Ki = 0;
-        public static final double STAGE_1_Kd = 0.005;
+        public static final double STAGE_1_Kd = 0;
         public static final double STAGE_2_Kp = 0.005;
+        //public static final double STAGE_2_Kp = 0.011;
         public static final double STAGE_2_Ki = 0;
         public static final double STAGE_2_Kd = 0;
 
         public static final double STAGE_3_Kp = 0.005;
         public static final double STAGE_3_Ki = 0;
         public static final double STAGE_3_Kd = 0;
- }
+    }
 
      public class POP {
          public static final double F = 0;
