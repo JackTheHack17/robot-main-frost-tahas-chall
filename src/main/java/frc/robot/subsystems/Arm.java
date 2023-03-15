@@ -509,7 +509,7 @@ public class Arm extends SubsystemBase {
             //Telemetry.setValue( "Arm/stage2/theoreticalOutput", m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
             //Telemetry.setValue( "Arm/stage3/theoreticalOutput", m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), (m_stage3.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
 
-            if ( false && m_stage1Target == 0.0 && m_stage2Target == 0.0 && m_stage3Target == 0.0 ) {
+            if ( m_stage1Target == 0.0 && m_stage2Target == 0.0 && m_stage3Target == 0.0 ) {
                 m_stage1.setVoltage(0);
                 m_stage2.setVoltage(0);
                 m_stage3.setVoltage(0);
