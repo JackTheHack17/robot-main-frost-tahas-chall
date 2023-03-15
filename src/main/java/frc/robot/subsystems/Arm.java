@@ -189,7 +189,7 @@ public class Arm extends SubsystemBase {
         double[] output = new double[3];
         output[0] = Math.cos(Math.toRadians(stage1Degrees)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2Degrees)) * (STAGE_2_LENGTH);
         output[1] = Math.sin(Math.toRadians(stage1Degrees)) * STAGE_1_LENGTH + Math.sin(Math.toRadians(stage2Degrees)) * (STAGE_2_LENGTH);
-        output[2] = stage3Degrees;
+        output[2] = (360 + stage3Degrees) % 360;
         return output;
     }
 
@@ -198,8 +198,8 @@ public class Arm extends SubsystemBase {
     }
 
     private void moveToAngles (double stage1Angle, double stage2Angle, double stage3Angle) {
-        m_manualTargetX = forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[0];
-        m_manualTargetY = forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[1];
+        m_manualTargetX = forwardKinematics((stage1Angle - STAGE_1_OFFSET)%360, (stage2Angle - STAGE_2_OFFSET)%360, stage3Angle - STAGE_3_OFFSET)[0];
+        m_manualTargetY = forwardKinematics((stage1Angle - STAGE_1_OFFSET)%360, (stage2Angle - STAGE_2_OFFSET)%360, stage3Angle - STAGE_3_OFFSET)[1];
         m_manualTargetTheta = stage3Angle - STAGE_3_OFFSET;
         setStage1Target(stage1Angle % 360);
         setStage2Target(stage2Angle % 360);
@@ -396,7 +396,8 @@ public class Arm extends SubsystemBase {
         }
     }
 
-    public Command moveToPointCommand () {
+    public Command 
+    moveToPointCommand () {
         return new FunctionalCommand(
             () -> { // init
                 m_copilotController.setLED(0, false);
@@ -434,6 +435,14 @@ public class Arm extends SubsystemBase {
         );
     }
 
+    public Command onManual () {
+        return new InstantCommand( () -> {
+            m_manualTargetX = getCurrentPoint()[0];
+            m_manualTargetY = getCurrentPoint()[1];
+            m_manualTargetTheta = getCurrentPoint()[2];
+        });
+    }
+
     public Command defaultCommand () {
         return new FunctionalCommand(
             () -> {},
@@ -441,7 +450,7 @@ public class Arm extends SubsystemBase {
                 if (RobotContainer.copilotController.getRawButton(9)) {
                     moveToPointCommand().schedule();
                 } else {
-                    if ( !m_clawSubsystem.isOpen() ) {
+                    if ( true || !m_clawSubsystem.isOpen() ) {
                         if (returnToIdle) {
                             moveToPositionCommand(positions.Idle).schedule();
                         } else {

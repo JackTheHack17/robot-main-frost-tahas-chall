@@ -125,16 +125,16 @@ public final class Constants {
         public static ArmPosition scoreMidPosition   = new ArmPosition(225, 120, 5);
         public static ArmPosition scoreLowPosition   = new ArmPosition(142, 85, 350);
         public static ArmPosition floorPosition      = new ArmPosition(132, 85, 350);
-        public static ArmPosition floorAltPosition   = new ArmPosition(148, 156-20, 277);
+        public static ArmPosition floorAltPosition   = new ArmPosition(175, 86, 255);
         public static ArmPosition substationPosition = new ArmPosition(160, 240-20, 355);
         public static ArmPosition idlePosition       = new ArmPosition(207, 20, 335);
         public static ArmPosition idleShootPosition  = new ArmPosition(95, 285, 5);
         public static ArmPosition scoreHighPlace     = new ArmPosition(167, 165, 5);
         public static ArmPosition scoreMidPlace      = new ArmPosition(205, 95, 353);
 
-        public static final double thetaSpeed = 0.1;
-        public static final double xSpeed = 0.1;
-        public static final double ySpeed = 0.1;
+        public static final double thetaSpeed = 0.5;
+        public static final double xSpeed = 0.5;
+        public static final double ySpeed = 0.5;
 
         // inches
         public static final double STAGE_1_LENGTH = 20.0;
