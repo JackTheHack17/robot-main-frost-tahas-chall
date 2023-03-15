@@ -185,14 +185,11 @@ public class Arm extends SubsystemBase {
         defaultCommand().schedule();
     }
 
-    /** all inputs in radians */
-    private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
+    private double[] forwardKinematics ( double stage1Degrees, double stage2Degrees, double stage3Degrees ) {
         double[] output = new double[3];
-        output[0] = Math.cos(Math.toRadians(stage1)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2)) * (STAGE_2_LENGTH);
-        output[1] = Math.sin(Math.toRadians(stage1)) * STAGE_1_LENGTH + Math.sin(Math.toRadians(stage2)) * (STAGE_2_LENGTH);
-        output[2] = stage3;
-        //ArmPosition armpos = new ArmPosition(stage1, stage2, stage3);
-        //double[] output = {armpos.getXPosition(), armpos.getYPosition(), stage3};
+        output[0] = Math.cos(Math.toRadians(stage1Degrees)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2Degrees)) * (STAGE_2_LENGTH);
+        output[1] = Math.sin(Math.toRadians(stage1Degrees)) * STAGE_1_LENGTH + Math.sin(Math.toRadians(stage2Degrees)) * (STAGE_2_LENGTH);
+        output[2] = stage3Degrees;
         return output;
     }
 
