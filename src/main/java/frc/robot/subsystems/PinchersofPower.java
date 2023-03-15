@@ -34,7 +34,7 @@ public class PinchersofPower extends SubsystemBase  {
     //spinner2.follow(spinner, true);
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = true;
-    pusher.set(Value.kReverse);
+    pusher.set(Value.kForward);
 
     //comp.disable();
 
