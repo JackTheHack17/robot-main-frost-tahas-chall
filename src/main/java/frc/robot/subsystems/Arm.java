@@ -177,7 +177,7 @@ public class Arm extends SubsystemBase {
 
     private void moveToPoint (double x, double y, double theta) {
         double[] thetas = inverseKinematics(x, y, theta);
-        moveToAngles(thetas[0], thetas[1], thetas[2]);
+        moveToAngles(thetas[0] + STAGE_1_OFFSET, thetas[1] + STAGE_2_OFFSET, thetas[2] + STAGE_3_OFFSET);
     }
 
     public void toggleIdle () {
@@ -188,25 +188,25 @@ public class Arm extends SubsystemBase {
     /** all inputs in radians */
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
         double[] output = new double[3];
-        output[0] = Math.cos(Math.toRadians(stage1 - STAGE_1_OFFSET)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (STAGE_2_LENGTH);
-        output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * STAGE_1_LENGTH + Math.sin(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (STAGE_2_LENGTH);
-        output[2] = stage3 - STAGE_3_OFFSET;
+        output[0] = Math.cos(Math.toRadians(stage1)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2)) * (STAGE_2_LENGTH);
+        output[1] = Math.sin(Math.toRadians(stage1)) * STAGE_1_LENGTH + Math.sin(Math.toRadians(stage2)) * (STAGE_2_LENGTH);
+        output[2] = stage3;
         //ArmPosition armpos = new ArmPosition(stage1, stage2, stage3);
         //double[] output = {armpos.getXPosition(), armpos.getYPosition(), stage3};
         return output;
     }
 
     private double[] getCurrentPoint () {
-        return forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360);
+        return forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage2Encoder.getAbsolutePosition()*360-STAGE_2_OFFSET, m_stage3Encoder.getAbsolutePosition()*360-STAGE_3_OFFSET);
     }
 
     private void moveToAngles (double stage1Angle, double stage2Angle, double stage3Angle) {
         m_manualTargetX = forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[0];
         m_manualTargetY = forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[1];
         m_manualTargetTheta = stage3Angle - STAGE_3_OFFSET;
-        setStage1Target(stage1Angle);
-        setStage2Target(stage2Angle);
-        setStage3Target(stage3Angle);
+        setStage1Target(stage1Angle % 360);
+        setStage2Target(stage2Angle % 360);
+        setStage3Target(stage3Angle % 360);
     }
 
     private void moveToPosition (positions position) {
