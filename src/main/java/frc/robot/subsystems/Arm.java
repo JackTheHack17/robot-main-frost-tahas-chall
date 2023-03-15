@@ -164,9 +164,9 @@ public class Arm extends SubsystemBase {
         double thetaA = Math.toDegrees(Math.acos((l2*l2-l1*l1-l3*l3)/(-2*l1*l3)));
         double thetaB = Math.toDegrees(Math.acos((l3*l3-l1*l1-l2*l2)/(-2*l1*l2)));
 
-        output[0] = (Math.toDegrees(Math.atan2(y, x)) + thetaA) % 360;
-        output[1] = (output[0] - thetaB - 180) % 360;
-        output[2] = theta % 360;
+        output[0] = (360 + Math.toDegrees(Math.atan2(y, x)) + thetaA) % 360;
+        output[1] = (360 + output[0] + thetaB + 180) % 360;
+        output[2] = (360 + theta) % 360;
 
         if ( y >= 20 || x > 49.0 || output[0] != output[0] || output[1] != output[1] || output[2] != output[2])  {
             output = getCurrentPoint();
@@ -187,12 +187,12 @@ public class Arm extends SubsystemBase {
 
     /** all inputs in radians */
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
-        // double[] output = new double[3];
-        // output[0] = Math.cos(Math.toRadians(stage1 - STAGE_1_OFFSET)) * Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH);
-        // output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * Constants.ARM.STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (Constants.ARM.STAGE_2_LENGTH);
-        // output[2] = stage3 - STAGE_3_OFFSET;
-        ArmPosition armpos = new ArmPosition(stage1, stage2, stage3);
-        double[] output = {armpos.getXPosition(), armpos.getYPosition(), stage3};
+        double[] output = new double[3];
+        output[0] = Math.cos(Math.toRadians(stage1 - STAGE_1_OFFSET)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (STAGE_2_LENGTH);
+        output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (STAGE_2_LENGTH);
+        output[2] = stage3 - STAGE_3_OFFSET;
+        //ArmPosition armpos = new ArmPosition(stage1, stage2, stage3);
+        //double[] output = {armpos.getXPosition(), armpos.getYPosition(), stage3};
         return output;
     }
 
@@ -201,6 +201,9 @@ public class Arm extends SubsystemBase {
     }
 
     private void moveToAngles (double stage1Angle, double stage2Angle, double stage3Angle) {
+        m_manualTargetX = forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[0];
+        m_manualTargetY =  forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[1];
+        m_manualTargetTheta = stage3Angle - STAGE_3_OFFSET;
         setStage1Target(stage1Angle);
         setStage2Target(stage2Angle);
         setStage3Target(stage3Angle);
@@ -212,19 +215,19 @@ public class Arm extends SubsystemBase {
         fromIdleTargetPosition = target;
         if ( lastPosition == positions.Idle && position != positions.Idle && Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - target.getStage2Angle()) > JOINT_ANGLE_DEADZONE) {
             moveToAngles(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle());
-            m_manualTargetX = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[0];
-            m_manualTargetY = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[1];
-            m_manualTargetTheta = target.getStage3Angle();
+            //m_manualTargetX = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[0];
+            //m_manualTargetY = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[1];
+            //m_manualTargetTheta = target.getStage3Angle();
         } else if ( position == positions.Idle && !movingToIdle && Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - target.getStage1Angle()) > JOINT_ANGLE_DEADZONE ) {
             moveToAngles(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle());
             movingToIdle = true;
-            m_manualTargetX = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[0];
-            m_manualTargetY = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[1];
-            m_manualTargetTheta = target.getStage3Angle();
+            //m_manualTargetX = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[0];
+            //m_manualTargetY = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[1];
+            //m_manualTargetTheta = target.getStage3Angle();
         } else if ( !movingToIdle && m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target < JOINT_ANGLE_DEADZONE ) {
-            m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
-            m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
-            m_manualTargetTheta = target.getStage3Angle();
+            //m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
+            //m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
+            //m_manualTargetTheta = target.getStage3Angle();
             moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
         }
     }
@@ -273,6 +276,8 @@ public class Arm extends SubsystemBase {
                 m_copilotController.setLED(3, false);
                 m_copilotController.setLED(4, false);
                 m_copilotController.setLED(5, false);
+                
+                m_clawSubsystem.spinoff();
         
                 switch (position) {
                     case ScoreHigh:
@@ -285,14 +290,17 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(5, true);
                         break;
                     case Floor:
+                        if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
                         m_clawSubsystem.reverse();
                         m_copilotController.setLED(1, true);
                         break;
                     case FloorAlt:
+                        if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
                         m_clawSubsystem.reverse();
                         m_copilotController.setLED(3, true);
                         break;
                     case Substation:
+                        if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
                         m_clawSubsystem.reverse();
                         m_copilotController.setLED(0, true);
                         break;
@@ -304,8 +312,7 @@ public class Arm extends SubsystemBase {
                 }
             }, 
             () -> { // execution
-                m_clawSubsystem.spinoff();
-                if ( !m_clawSubsystem.wantCone() && position != positions.Idle && m_clawSubsystem.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.None) m_clawSubsystem.spinin();
+                //if ( !m_clawSubsystem.wantCone() && position != positions.Idle && m_clawSubsystem.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.None) m_clawSubsystem.spinin();
                 moveToPosition(position);
             }, 
             interrupted -> { // when should the command do when it ends?
@@ -367,7 +374,6 @@ public class Arm extends SubsystemBase {
                 }
             }, 
             () -> { // execution
-                m_clawSubsystem.spinoff();
                 moveToPosition(position);
             }, 
             interrupted -> { // when should the command do when it ends?
@@ -468,29 +474,32 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("Arm/stage1/outputVoltage", m_stage1.getAppliedOutput());
         Telemetry.setValue("Arm/stage1/statorCurrent", m_stage1.getOutputCurrent());
         Telemetry.setValue("Arm/stage1/actualPosition", m_stage1Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage1/actualPositionOffset", m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET);
         Telemetry.setValue("Arm/stage1/targetPosition", m_stage1Target);
         Telemetry.setValue("Arm/stage2/setpoint", m_stage2.get());
         Telemetry.setValue("Arm/stage2/temperature", m_stage2.getMotorTemperature());
         Telemetry.setValue("Arm/stage2/outputVoltage", m_stage2.getAppliedOutput());
         Telemetry.setValue("Arm/stage2/statorcurrent", m_stage2.getOutputCurrent());
         Telemetry.setValue("Arm/stage2/actualPosition", m_stage2Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage2/actualPositionOffset", m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET);
         Telemetry.setValue("Arm/stage2/targetPosition", m_stage2Target);
         Telemetry.setValue("Arm/stage3/setpoint", m_stage3.get());
         Telemetry.setValue("Arm/stage3/temperature", m_stage3.getMotorTemperature());
         Telemetry.setValue("Arm/stage3/outputVoltage", m_stage3.getAppliedOutput());
         Telemetry.setValue("Arm/stage3/statorCurrent", m_stage3.getOutputCurrent());
         Telemetry.setValue("Arm/stage3/actualPosition", m_stage3Encoder.getAbsolutePosition()*360);
+        Telemetry.setValue("Arm/stage3/actualPositionOffset", m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET);
         Telemetry.setValue("Arm/stage3/targetPosition", m_stage3Target);
         Telemetry.setValue("Arm/stage2/internalVelocity", m_stage2.getEncoder().getVelocity());
 
         if ( DriverStation.isEnabled() ) {
-            if (movingToIdle) {
+            if (movingToIdle && !m_copilotController.getRawButton(9) ) {
                 if ( Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE ) {
                     setStage2Target(idlePosition.getStage2Angle());
                     movingToIdle = false;
                 }
             }
-            if ( fromIdleTargetPosition != null && lastPosition == positions.Idle ) {
+            if ( fromIdleTargetPosition != null && lastPosition == positions.Idle  && !m_copilotController.getRawButton(9) ) {
                 if ( Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE ) {
                     setStage1Target(fromIdleTargetPosition.getStage1Angle());
                 }
@@ -499,6 +508,13 @@ public class Arm extends SubsystemBase {
             //Telemetry.setValue( "Arm/stage1/theoreticalOutput", m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), (m_stage1.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
             //Telemetry.setValue( "Arm/stage2/theoreticalOutput", m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
             //Telemetry.setValue( "Arm/stage3/theoreticalOutput", m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), (m_stage3.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
+
+            if ( false && m_stage1Target == 0.0 && m_stage2Target == 0.0 && m_stage3Target == 0.0 ) {
+                m_stage1.setVoltage(0);
+                m_stage2.setVoltage(0);
+                m_stage3.setVoltage(0);
+                return;
+            }
 
             m_stage1.setVoltage( m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), (m_stage1.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
             m_stage2.setVoltage( m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));

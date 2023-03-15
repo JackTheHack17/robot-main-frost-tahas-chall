@@ -33,7 +33,7 @@ public class PinchersofPower extends SubsystemBase  {
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
     //spinner2.follow(spinner, true);
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
-    m_cone = false;
+    m_cone = true;
     pusher.set(Value.kReverse);
 
     //comp.disable();
@@ -59,13 +59,11 @@ public class PinchersofPower extends SubsystemBase  {
 
   /** Close */
   public void forward() {
-    spinoff();
     pusher.set(Value.kForward);
   }
 
   /** Open */
   public void reverse() {
-    spinoff();
     pusher.set(Value.kReverse);
   }
 
@@ -154,7 +152,6 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void notake() {
-    forward();
     spinoff();
   }
 
