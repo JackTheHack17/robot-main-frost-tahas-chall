@@ -189,7 +189,7 @@ public class Arm extends SubsystemBase {
     private double[] forwardKinematics ( double stage1, double stage2, double stage3 ) {
         double[] output = new double[3];
         output[0] = Math.cos(Math.toRadians(stage1 - STAGE_1_OFFSET)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (STAGE_2_LENGTH);
-        output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * STAGE_1_LENGTH + Math.cos(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (STAGE_2_LENGTH);
+        output[1] = Math.sin(Math.toRadians(stage1 - STAGE_1_OFFSET)) * STAGE_1_LENGTH + Math.sin(Math.toRadians(stage2 - STAGE_2_OFFSET)) * (STAGE_2_LENGTH);
         output[2] = stage3 - STAGE_3_OFFSET;
         //ArmPosition armpos = new ArmPosition(stage1, stage2, stage3);
         //double[] output = {armpos.getXPosition(), armpos.getYPosition(), stage3};
@@ -202,7 +202,7 @@ public class Arm extends SubsystemBase {
 
     private void moveToAngles (double stage1Angle, double stage2Angle, double stage3Angle) {
         m_manualTargetX = forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[0];
-        m_manualTargetY =  forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[1];
+        m_manualTargetY = forwardKinematics(stage1Angle - STAGE_1_OFFSET, stage2Angle - STAGE_2_OFFSET, stage3Angle - STAGE_3_OFFSET)[1];
         m_manualTargetTheta = stage3Angle - STAGE_3_OFFSET;
         setStage1Target(stage1Angle);
         setStage2Target(stage2Angle);
