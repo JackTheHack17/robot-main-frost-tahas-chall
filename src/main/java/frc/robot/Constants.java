@@ -76,6 +76,7 @@ public final class Constants {
         /** maximum rotation speed (radians per second) */
         public static final double MAX_ROTATION_SPEED = Math.PI*2;
         public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.05;
+        public static final double ROTATION_SCALE_FACTOR = 0.65;
             
         // pid values
         public static final double AZIMUTH_kP = 0.01; // sds: 0.2; rylan: 0.65
@@ -88,7 +89,7 @@ public final class Constants {
         /* Maximum distance for a valid waypoint (meters) */
         public static final double MAX_WAYPOINT_DISTANCE = 0.5;
 
-        public static final double SHWERVE_DRIVE_Kp = .044057;
+        public static final double SHWERVE_DRIVE_Kp = 0.044057;
         public static final double SHWERVE_DRIVE_Kd = 0;
 
         public static final double AUTO_BALANCE_Kp = 0;
@@ -122,17 +123,17 @@ public final class Constants {
         public static final double STAGE_3_OFFSET = 347;
 
         public static ArmPosition scoreHighPosition  = new ArmPosition(173, 170, 5);
-        public static ArmPosition scoreMidPosition   = new ArmPosition(225, 120, 5);
+        public static ArmPosition scoreMidPosition   = new ArmPosition(225, 125, 5);
         public static ArmPosition scoreLowPosition   = new ArmPosition(142, 85, 350);
         public static ArmPosition floorPosition      = new ArmPosition(132, 85, 350);
         public static ArmPosition floorAltPosition   = new ArmPosition(175, 86, 255);
-        public static ArmPosition substationPosition = new ArmPosition(160, 240-20, 355);
+        public static ArmPosition substationPosition = new ArmPosition(220, 125, 5);
         public static ArmPosition idlePosition       = new ArmPosition(207, 20, 335);
         public static ArmPosition idleShootPosition  = new ArmPosition(95, 285, 5);
         public static ArmPosition scoreHighPlace     = new ArmPosition(167, 165, 5);
         public static ArmPosition scoreMidPlace      = new ArmPosition(205, 95, 353);
 
-        public static final double thetaSpeed = 0.5;
+        public static final double thetaSpeed = 1;
         public static final double xSpeed = 0.5;
         public static final double ySpeed = 0.5;
 

@@ -76,13 +76,18 @@ public class Arm extends SubsystemBase {
     private double m_manualTargetTheta = 0;
     private HashMap<positions, ArmPosition> positionMap = new HashMap<positions, ArmPosition>();
     private boolean movingToIdle = false;
-    private positions target = positions.Idle;
+    public positions target = positions.Idle;
     private positions lastPosition;
     private ArmPosition fromIdleTargetPosition;
     private ArmFeedforward m_stage1FF;
     private ArmFeedforward m_stage2FF;
     private ArmFeedforward m_stage3FF;
     private boolean returnToIdle = true;
+
+    private final boolean IS_E_HAPPY = true;
+    private double stage1 = 0;
+    private double stage2 = 0;
+    private double stage3 = 0;
 
     public Arm(PinchersofPower m_claw, ButtonBoard copilotController) {
         // populate position map
@@ -146,10 +151,16 @@ public class Arm extends SubsystemBase {
         m_stage3.burnFlash();
 
         m_copilotController.button(10).whileTrue(new RepeatCommand( new InstantCommand(() -> {
-            if (m_copilotController.getRawButton(9)) m_manualTargetTheta += thetaSpeed;
+            if (m_copilotController.getRawButton(9)) {
+                m_manualTargetTheta += thetaSpeed;
+                stage3 += thetaSpeed;
+            }
         })));
         m_copilotController.button(11).whileTrue(new RepeatCommand( new InstantCommand(() -> {
-            if (m_copilotController.getRawButton(9)) m_manualTargetTheta -= thetaSpeed;
+            if (m_copilotController.getRawButton(9)) {
+                m_manualTargetTheta -= thetaSpeed;
+                stage3 -= thetaSpeed;
+            }
         })));
 
         lastPosition = positions.Idle;
@@ -176,6 +187,12 @@ public class Arm extends SubsystemBase {
     }
 
     private void moveToPoint (double x, double y, double theta) {
+        if (IS_E_HAPPY) {
+            stage1 += m_copilotController.getJoystick().getY()*thetaSpeed;
+            stage2 += m_copilotController.getJoystick().getX()*thetaSpeed;
+            moveToAngles(stage1, stage2, stage3);
+            return;
+        }
         double[] thetas = inverseKinematics(x, y, theta);
         moveToAngles(thetas[0] + STAGE_1_OFFSET, thetas[1] + STAGE_2_OFFSET, thetas[2] + STAGE_3_OFFSET);
     }
@@ -396,8 +413,7 @@ public class Arm extends SubsystemBase {
         }
     }
 
-    public Command 
-    moveToPointCommand () {
+    public Command moveToPointCommand () {
         return new FunctionalCommand(
             () -> { // init
                 m_copilotController.setLED(0, false);
@@ -418,7 +434,7 @@ public class Arm extends SubsystemBase {
             }, 
             () -> { // execution
                 m_manualTargetX += m_copilotController.getJoystick().getX() * xSpeed;
-                m_manualTargetY += -m_copilotController.getJoystick().getY() * ySpeed;
+                m_manualTargetY += m_copilotController.getJoystick().getY() * ySpeed;
                 moveToPoint(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
                 //moveToPoint(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_copilotController.getJoystick().getX() * xSpeed, m_copilotController.getJoystick().getY() * ySpeed);
             }, 
@@ -437,6 +453,9 @@ public class Arm extends SubsystemBase {
 
     public Command onManual () {
         return new InstantCommand( () -> {
+            stage1 = m_stage1Encoder.getAbsolutePosition()*360;
+            stage2 = m_stage2Encoder.getAbsolutePosition()*360;
+            stage3 = m_stage3Encoder.getAbsolutePosition()*360;
             m_manualTargetX = getCurrentPoint()[0];
             m_manualTargetY = getCurrentPoint()[1];
             m_manualTargetTheta = getCurrentPoint()[2];
@@ -522,9 +541,9 @@ public class Arm extends SubsystemBase {
                 return;
             }
 
-            m_stage1.setVoltage( m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), (m_stage1.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
-            m_stage2.setVoltage( m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
-            m_stage3.setVoltage( m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), (m_stage3.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
+            m_stage1.setVoltage( m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), 0) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
+            m_stage2.setVoltage( m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), 0) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
+            m_stage3.setVoltage( m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), 0) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
         }
     }
     

@@ -30,12 +30,12 @@ public class RobotContainer {
   public static final ButtonBoard copilotController = new ButtonBoard(1, 2);
 
   // The robot's subsystems and commands are defined here...
-  private final Pigeon m_gyro = new Pigeon();
-  private final Limelight m_limelight = new Limelight();
-  private final LEDs m_LEDs = new LEDs();
-  private final PinchersofPower m_claw = new PinchersofPower();
-  private final Arm m_arm = new Arm(m_claw, copilotController);
-  private final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
+  public final Pigeon m_gyro = new Pigeon();
+  public final Limelight m_limelight = new Limelight();
+  public final LEDs m_LEDs = new LEDs();
+  public final PinchersofPower m_claw = new PinchersofPower(this);
+  public final Arm m_arm = new Arm(m_claw, copilotController);
+  public final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -53,6 +53,10 @@ public class RobotContainer {
    // m_LEDs.rainbow();
     m_arm.setDefaultCommand(m_arm.defaultCommand());
     m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController, copilotController));
+  }
+
+  public Arm getArm() {
+    return m_arm;
   }
 
   /**
@@ -101,6 +105,9 @@ public class RobotContainer {
       }
     }));
     copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinoff();}));
+    
+    driverController.axisGreaterThan(2, 0.1).onTrue(m_swerve.moveToPositionCommand());
+    driverController.axisGreaterThan(3, 0.1).onTrue(m_swerve.moveToPositionCommand());
   }
 
   /**

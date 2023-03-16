@@ -17,16 +17,19 @@ import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.POP;
+import frc.robot.Constants.ARM.positions;
 
 public class PinchersofPower extends SubsystemBase  {
   private final Compressor comp;
   private final DoubleSolenoid pusher;
+  private RobotContainer m_container;
   private final CANSparkMax spinner;
   private final CANSparkMax spinner2;
   private final ColorSensorV3 colorSensor;
   private boolean m_cone;
 
-  public PinchersofPower() {
+  public PinchersofPower(RobotContainer m_container) {
+    this.m_container = m_container;
     comp = new Compressor(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH);
     pusher = new DoubleSolenoid(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH, Constants.POP.FORWARD_PNEUMATIC_CHANNEL, Constants.POP.BACKWARD_PNEUMATIC_CHANNEL);
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
@@ -169,10 +172,15 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public Command outtakeCommand() {
-    if ( m_cone ) {
-      return new InstantCommand(() -> spinout(), this).andThen(new InstantCommand( () -> reverse()));
-    }
-    return new InstantCommand(() -> spinout(), this);
+    return new InstantCommand( () -> {
+      if (m_container.getArm().target == positions.Substation && m_cone) {
+        forward();
+      } else if ( m_cone ) {
+        new InstantCommand(() -> spinout(), this).andThen(new InstantCommand( () -> reverse())).schedule();
+      } else {
+        spinout();
+      }
+    });
   }
 
   public Command notakeCommand() {

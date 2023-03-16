@@ -57,6 +57,7 @@ import com.pathplanner.lib.server.PathPlannerServer;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -334,6 +335,7 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
   
     Telemetry.setValue("drivetrain/shwervePower", shwerveDrive.get());
+    Telemetry.setValue("drivetrain/shwerveStator", shwerveDrive.getOutputCurrent());
   }
 
   @Override
@@ -552,7 +554,7 @@ public class Drivetrain extends SubsystemBase {
   public void shwerve ( double LX, double LY) {
     // 6in diameter wheels, 10:1 gearbox
     if (isRobotOriented) {
-      shwerveDrive.set(-LX*10);
+      shwerveDrive.set(MathUtil.clamp(-LX*10, -1, 1));
     } else {
       noShwerve();
     }
