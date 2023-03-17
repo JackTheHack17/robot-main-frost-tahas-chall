@@ -6,6 +6,7 @@ package frc.robot.commands;
 import static frc.robot.Constants.DRIVETRAIN.ROTATION_SCALE_FACTOR;
 import static frc.robot.Constants.DRIVETRAIN.SWERVE_SLOW_SPEED_PERCENTAGE;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.ButtonBoard;
@@ -44,7 +45,8 @@ public class DriveCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    
+    if (DriverStation.isAutonomous()) return;
+
     // fetch joystick axis values
     m_LX = driverController.getRawAxis(0); // left x axis (strafe)
     m_LY = -driverController.getRawAxis(1); // left y axis (strafe)
