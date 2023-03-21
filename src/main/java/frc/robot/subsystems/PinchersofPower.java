@@ -50,8 +50,8 @@ public class PinchersofPower extends SubsystemBase  {
     spinner.setIdleMode(IdleMode.kBrake);
     spinner2.setIdleMode(IdleMode.kBrake);
 
-    spinner.setSmartCurrentLimit(40);
-    spinner2.setSmartCurrentLimit(40);
+    spinner.setSmartCurrentLimit(20);
+    spinner2.setSmartCurrentLimit(20);
 
     spinner2.setInverted(true);
 
@@ -112,7 +112,7 @@ public class PinchersofPower extends SubsystemBase  {
     None
   }
 
-  public GamePieces whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment () {
+  public GamePieces intakePiece () {
     Color actualColor = colorSensor.getColor();
     if ( colorSensor.getProximity() > 100 ) {
       if (actualColor.green < actualColor.blue) { // cube
@@ -128,7 +128,10 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void intake() {
-    if (m_cone || whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cone) {
+    if(!m_cone && !isOpen()) {
+      reverse();
+    }
+    if (m_cone || intakePiece() == GamePieces.Cone) {
       forward();
     } else {
       spinin();
@@ -140,9 +143,9 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public boolean isOpen() {
-    if ( whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cone || m_cone ) {
+    if ( intakePiece() == GamePieces.Cone || m_cone ) {
       return pusher.get() == Value.kReverse;
-    } else if ( whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cube ) {
+    } else if ( intakePiece() == GamePieces.Cube ) {
       return false;
     } else {
       return false;
@@ -151,7 +154,6 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void outtake() {
     spinout();
-
   }
 
   public void notake() {
@@ -176,11 +178,21 @@ public class PinchersofPower extends SubsystemBase  {
       if (m_container.getArm().target == positions.Substation && m_cone) {
         forward();
       } else if ( m_cone ) {
-        new InstantCommand(() -> spinout(), this).andThen(new InstantCommand( () -> reverse())).schedule();
+        reverse();
       } else {
         spinout();
       }
     });
+  }
+
+  public Command subclose() {
+    Color actualColor = colorSensor.getColor();
+    if( colorSensor.getProximity() > 100 ) {
+      if (((actualColor.green < actualColor.blue) || (actualColor.green > actualColor.blue))) {
+        return intakeCommand();
+      }
+    }
+    return notakeCommand();
   }
 
   public Command notakeCommand() {
@@ -199,9 +211,5 @@ public class PinchersofPower extends SubsystemBase  {
     Telemetry.setValue("Pincher/rightMotor/statorCurrent", spinner2.getOutputCurrent());
     Telemetry.setValue("Pincher/piston", pusher.get() == DoubleSolenoid.Value.kForward ? "Forward" : "Reverse");
     Telemetry.setValue("Pincher/compressor/pressure", comp.getPressure());
-
-    if ( !RobotContainer.copilotController.getRawButton(9) && m_cone ) {
-      spinoff();
-    }
   }
 }

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 import frc.robot.Constants.ARM.positions;
+import frc.robot.commands.AutoBalance;
 import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
@@ -68,7 +69,8 @@ public class RobotContainer {
   private void configureButtonBindings() {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
-    driverController.x().onTrue(new InstantCommand( () -> m_arm.toggleIdle()));
+    driverController.y().onTrue(new AutoBalance(m_swerve));
+    driverController.x().onTrue(new InstantCommand(() -> m_arm.toggleIdle()));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand());

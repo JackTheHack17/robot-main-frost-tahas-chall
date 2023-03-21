@@ -291,8 +291,6 @@ public class Arm extends SubsystemBase {
                 m_copilotController.setLED(3, false);
                 m_copilotController.setLED(4, false);
                 m_copilotController.setLED(5, false);
-                
-                m_clawSubsystem.spinoff();
         
                 switch (position) {
                     case ScoreHigh:
@@ -315,20 +313,22 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(3, true);
                         break;
                     case Substation:
-                        if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
+                        m_clawSubsystem.spinin();
                         m_clawSubsystem.reverse();
                         m_copilotController.setLED(0, true);
                         break;
                     case Idle:
                     case IdleShootPosition:
+                        m_clawSubsystem.spinoff();
                         break;
                     default:
                         break;
                 }
             }, 
             () -> { // execution
-                //if ( !m_clawSubsystem.wantCone() && position != positions.Idle && m_clawSubsystem.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.None) m_clawSubsystem.spinin();
+                if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
                 moveToPosition(position);
+            
             }, 
             interrupted -> { // when should the command do when it ends?
                 lastPosition = position;
@@ -342,6 +342,8 @@ public class Arm extends SubsystemBase {
         );
     }
 
+    // if(((position == positions.Substation) || (position == positions.Floor)) || (position == positions.FloorAlt)) {
+    //     m_clawSubsystem.subclose();
     public Command moveToPositionTerminatingCommand( positions position ) {
         return new FunctionalCommand(
             () -> { // init
@@ -378,6 +380,7 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(3, true);
                         break;
                     case Substation:
+                    m_clawSubsystem.spinin();
                         m_clawSubsystem.reverse();
                         m_copilotController.setLED(0, true);
                         break;
@@ -403,7 +406,7 @@ public class Arm extends SubsystemBase {
     }
 
     public Command placeCommand () {
-        if (!m_clawSubsystem.wantCone() || m_clawSubsystem.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() != GamePieces.Cone) return new InstantCommand();
+        if (!m_clawSubsystem.wantCone() || m_clawSubsystem.intakePiece() != GamePieces.Cone) return new InstantCommand();
         switch ( target ) {
             case ScoreHigh:
                 return moveToPositionTerminatingCommand(positions.ScoreHighPlace);

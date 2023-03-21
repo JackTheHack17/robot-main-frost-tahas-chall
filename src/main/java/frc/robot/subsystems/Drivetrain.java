@@ -379,6 +379,13 @@ public class Drivetrain extends SubsystemBase {
     BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
   }
 
+  public void setX(){
+    FL_Azimuth.set(ControlMode.PercentOutput, clamp(FL_PID.calculate(FL_Position.getAbsolutePosition(), -45 % 360), -1, 1));
+    FR_Azimuth.set(ControlMode.PercentOutput, clamp(FR_PID.calculate(FR_Position.getAbsolutePosition(), 45 % 360), -1, 1));
+    BL_Azimuth.set(ControlMode.PercentOutput, clamp(BL_PID.calculate(BL_Position.getAbsolutePosition(), 45 % 360), -1, 1));
+    BR_Azimuth.set(ControlMode.PercentOutput, clamp(BR_PID.calculate(BR_Position.getAbsolutePosition(), -45 % 360), -1, 1));
+  }
+
   public Command moveToPositionCommand () {
     Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
     if (closest == null) return new InstantCommand();
@@ -388,6 +395,10 @@ public class Drivetrain extends SubsystemBase {
       return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
     }
     return pathToCommand( closest );
+  }
+
+  public double getGyroX(){
+    return m_gyro.getPitch();
   }
 
   public Command pathToCommand (Pose2d target) {
@@ -502,6 +513,30 @@ public class Drivetrain extends SubsystemBase {
     return positions;
   }
 
+  // public void setX() {
+  //   FL_Drive.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+  //   FR_Drive.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+  //   BL_Drive.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+  //   BR_Drive.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+  // }
+
+  // public void setDesiredState(SwerveModuleState desiredState) {
+  //   // Apply chassis angular offset to the desired state.
+  //   SwerveModuleState correctedDesiredState = new SwerveModuleState();
+  //   correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
+  //   correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
+
+  //   // Optimize the reference state to avoid spinning further than 90 degrees.
+  //   SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState,
+  //       new Rotation2d(m_turningEncoder.getPosition()));
+
+  //   // Command driving and turning SPARKS MAX towards their respective setpoints.
+  //   m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
+  //   m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
+
+  //   m_desiredState = desiredState;
+  // }
+
   public Command getAutonomousCommand () {
     switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
       case "dontMove":
@@ -523,8 +558,7 @@ public class Drivetrain extends SubsystemBase {
             new InstantCommand(() -> m_gyro.zeroYaw(180)),
             new InstantCommand(() -> setRobotOriented(false)),
             new InstantCommand(() -> m_claw.setMode("cone")),
-            m_arm.moveToPositionCommand(positions.Idle).withTimeout(1
-            ),
+            m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
             m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
             new InstantCommand(() -> {
               joystickDrive(0, -0.1, 0);
@@ -542,34 +576,88 @@ public class Drivetrain extends SubsystemBase {
               m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
               new InstantCommand(() -> {
                 joystickDrive(0, 0.1, 0);
-              }).repeatedly().withTimeout(3)
+              }).repeatedly().withTimeout(0)
             ),
+            //new InstantCommand(() -> {
+            //  joystickDrive(0.1, 0, 0);
+            //}).repeatedly().withTimeout(0.2),
             new InstantCommand(() -> {
               joystickDrive(0, 0, 0);
             })
           );
+        case "middleCharge":
+            return new SequentialCommandGroup(
+              new InstantCommand(() -> m_gyro.zeroYaw(180)),
+              new InstantCommand(() -> setRobotOriented(false)),
+              new InstantCommand(() -> m_claw.setMode("cube")),
+              m_claw.intakeCommand(),
+              new WaitCommand(0.2),
+              m_claw.notakeCommand(),
+              m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
+              m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
+              new InstantCommand(() -> {
+                joystickDrive(0, -0.1, 0);
+              }).repeatedly().withTimeout(1),
+              new InstantCommand(() -> {
+                joystickDrive(0, 0, 0);
+              }),
+              new WaitCommand(0.1),
+              m_claw.outtakeCommand(),
+              new WaitCommand(0.5),
+              m_claw.notakeCommand(),
+              new InstantCommand(() -> {
+                joystickDrive(0, 0.1, 0);
+              }).repeatedly().withTimeout(1),
+              new ParallelCommandGroup(
+                m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
+                new InstantCommand(() -> {
+                  joystickDrive(0, 0.1, 0);
+                }).repeatedly().withTimeout(5)
+              ),
+              new InstantCommand(() -> {
+                joystickDrive(0, 0, 0);
+              }),
+              new WaitCommand(0.5),
+              new InstantCommand(() -> {
+                joystickDrive(0, -0.1, 0);
+              }).repeatedly().withTimeout(1.5),
+              new InstantCommand(() -> {
+                joystickDrive(0, 0, 0);
+              })
+            );
         case "backupScoreOneBackupCube":
-          return new SequentialCommandGroup(
-            new InstantCommand(() -> m_gyro.zeroYaw(180)),
-            new InstantCommand(() -> setRobotOriented(false)),
-            new InstantCommand(() -> m_claw.setMode("cube")),
-            m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-            new InstantCommand(() -> {
-              joystickDrive(0, -0.1, 0);
-            }).repeatedly().withTimeout(1),
-            new InstantCommand(() -> {
-              joystickDrive(0, 0, 0);
-            }),
-            m_claw.outtakeCommand(),
-            new WaitCommand(1),
-            m_claw.notakeCommand(),
+        return new SequentialCommandGroup(
+          new InstantCommand(() -> m_gyro.zeroYaw(180)),
+          new InstantCommand(() -> setRobotOriented(false)),
+          new InstantCommand(() -> m_claw.setMode("cube")),
+          m_claw.intakeCommand(),
+          new WaitCommand(0.2),
+          m_claw.notakeCommand(),
+          m_arm.moveToPositionCommand(positions.Idle).withTimeout(1
+          ),
+          m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
+          new InstantCommand(() -> {
+            joystickDrive(0, -0.1, 0);
+          }).repeatedly().withTimeout(1),
+          new InstantCommand(() -> {
+            joystickDrive(0, 0, 0);
+          }),
+          new WaitCommand(0.1),
+          m_claw.outtakeCommand(),
+          new WaitCommand(0.5),
+          m_claw.notakeCommand(),
+          new InstantCommand(() -> {
+            joystickDrive(0, 0.1, 0);
+          }).repeatedly().withTimeout(1),
+          new ParallelCommandGroup(
+            m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
             new InstantCommand(() -> {
               joystickDrive(0, 0.1, 0);
-            }).repeatedly().withTimeout(10),
-            m_arm.moveToPositionCommand(positions.Idle).withTimeout(0.5),
-            new InstantCommand(() -> {
-              joystickDrive(0, 0, 0);
-            })
+            }).repeatedly().withTimeout(3)
+          ),
+          new InstantCommand(() -> {
+            joystickDrive(0, 0, 0);
+          })
         );
     }
 
@@ -595,7 +683,7 @@ public class Drivetrain extends SubsystemBase {
       m_claw.notake();
     }, 
     () -> {
-      return m_claw.whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() != GamePieces.None;
+      return m_claw.intakePiece() != GamePieces.None;
     }, 
     (Subsystem) m_claw));
     eventMap.put("autobalance", autoBalanceCommand());

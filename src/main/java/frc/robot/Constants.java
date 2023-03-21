@@ -92,7 +92,7 @@ public final class Constants {
         public static final double SHWERVE_DRIVE_Kp = 0.044057;
         public static final double SHWERVE_DRIVE_Kd = 0;
 
-        public static final double AUTO_BALANCE_Kp = 0;
+        public static final double AUTO_BALANCE_Kp = 0.1;
         public static final double AUTO_BALANCE_Kd = 0;
     }
 
@@ -122,16 +122,18 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 155;
         public static final double STAGE_3_OFFSET = 347;
 
-        public static ArmPosition scoreHighPosition  = new ArmPosition(168, 175, 10);
-        public static ArmPosition scoreMidPosition   = new ArmPosition(225, 132, 5);
-        public static ArmPosition scoreLowPosition   = new ArmPosition(142, 85, 350);
-        public static ArmPosition floorPosition      = new ArmPosition(132, 85, 350);
-        public static ArmPosition floorAltPosition   = new ArmPosition(175, 86, 255);
-        public static ArmPosition substationPosition = new ArmPosition(220, 125, 5);
-        public static ArmPosition idlePosition       = new ArmPosition(207, 20, 335);
-        public static ArmPosition idleShootPosition  = new ArmPosition(95, 285, 5);
-        public static ArmPosition scoreHighPlace     = new ArmPosition(167, 165, 5);
-        public static ArmPosition scoreMidPlace      = new ArmPosition(205, 95, 353);
+
+
+        public static ArmPosition scoreHighPosition  = new ArmPosition(166, 145, 255);
+        public static ArmPosition scoreMidPosition   = new ArmPosition(225, 62, 220);
+        public static ArmPosition idleShootPosition   = new ArmPosition(98, 244, 205);
+        public static ArmPosition scoreLowPosition      = new ArmPosition(135, 45, 235);
+        public static ArmPosition floorPosition      = new ArmPosition(135, 45, 235);
+        public static ArmPosition floorAltPosition   = new ArmPosition(168, 46, 140);
+        public static ArmPosition substationPosition = new ArmPosition(208, 95, 243);
+        public static ArmPosition idlePosition       = new ArmPosition(210, 340, 212);
+        public static ArmPosition scoreHighPlace     = new ArmPosition(160, 125, 250);
+        public static ArmPosition scoreMidPlace      = new ArmPosition(198, 55, 238);
 
         public static final double THETA_SPEED = 1;
         public static final double X_SPEED = 0.5;
