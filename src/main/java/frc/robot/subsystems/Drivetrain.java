@@ -391,7 +391,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double getGyroX(){
-    return m_gyro.getPitch();
+    return m_gyro.getYaw();
   }
 
   public Command pathToCommand (Pose2d target) {
