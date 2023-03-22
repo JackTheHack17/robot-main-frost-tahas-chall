@@ -379,13 +379,6 @@ public class Drivetrain extends SubsystemBase {
     BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
   }
 
-  public void setX(){
-    FL_Azimuth.set(ControlMode.PercentOutput, clamp(FL_PID.calculate(FL_Position.getAbsolutePosition(), -45 % 360), -1, 1));
-    FR_Azimuth.set(ControlMode.PercentOutput, clamp(FR_PID.calculate(FR_Position.getAbsolutePosition(), 45 % 360), -1, 1));
-    BL_Azimuth.set(ControlMode.PercentOutput, clamp(BL_PID.calculate(BL_Position.getAbsolutePosition(), 45 % 360), -1, 1));
-    BR_Azimuth.set(ControlMode.PercentOutput, clamp(BR_PID.calculate(BR_Position.getAbsolutePosition(), -45 % 360), -1, 1));
-  }
-
   public Command moveToPositionCommand () {
     Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
     if (closest == null) return new InstantCommand();
@@ -513,29 +506,7 @@ public class Drivetrain extends SubsystemBase {
     return positions;
   }
 
-  // public void setX() {
-  //   FL_Drive.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-  //   FR_Drive.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-  //   BL_Drive.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-  //   BR_Drive.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-  // }
-
-  // public void setDesiredState(SwerveModuleState desiredState) {
-  //   // Apply chassis angular offset to the desired state.
-  //   SwerveModuleState correctedDesiredState = new SwerveModuleState();
-  //   correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
-  //   correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
-
-  //   // Optimize the reference state to avoid spinning further than 90 degrees.
-  //   SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(correctedDesiredState,
-  //       new Rotation2d(m_turningEncoder.getPosition()));
-
-  //   // Command driving and turning SPARKS MAX towards their respective setpoints.
-  //   m_drivingPIDController.setReference(optimizedDesiredState.speedMetersPerSecond, CANSparkMax.ControlType.kVelocity);
-  //   m_turningPIDController.setReference(optimizedDesiredState.angle.getRadians(), CANSparkMax.ControlType.kPosition);
-
-  //   m_desiredState = desiredState;
-  // }
+  
 
   public Command getAutonomousCommand () {
     switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
