@@ -112,7 +112,7 @@ public class PinchersofPower extends SubsystemBase  {
     None
   }
 
-  public GamePieces intakePiece () {
+  public GamePieces getColorSensorGamePiece () {
     Color actualColor = colorSensor.getColor();
     if ( colorSensor.getProximity() > 100 ) {
       if (actualColor.green < actualColor.blue) { // cube
@@ -128,13 +128,10 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void intake() {
-    if(!m_cone && !isOpen()) {
+    if(!m_cone) {
       reverse();
-    }
-    if (m_cone || intakePiece() == GamePieces.Cone) {
-      forward();
     } else {
-      spinin();
+      forward();
     }
   }
 
@@ -143,10 +140,8 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public boolean isOpen() {
-    if ( intakePiece() == GamePieces.Cone || m_cone ) {
+    if ( m_cone ) {
       return pusher.get() == Value.kReverse;
-    } else if ( intakePiece() == GamePieces.Cube ) {
-      return false;
     } else {
       return false;
     }
@@ -183,16 +178,6 @@ public class PinchersofPower extends SubsystemBase  {
         spinout();
       }
     });
-  }
-
-  public Command subclose() {
-    Color actualColor = colorSensor.getColor();
-    if( colorSensor.getProximity() > 100 ) {
-      if (((actualColor.green < actualColor.blue) || (actualColor.green > actualColor.blue))) {
-        return intakeCommand();
-      }
-    }
-    return notakeCommand();
   }
 
   public Command notakeCommand() {

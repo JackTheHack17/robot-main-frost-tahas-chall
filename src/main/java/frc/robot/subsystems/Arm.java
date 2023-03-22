@@ -303,12 +303,12 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(5, true);
                         break;
                     case Floor:
-                        if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
+                        m_clawSubsystem.spinin();
                         m_clawSubsystem.reverse();
                         m_copilotController.setLED(1, true);
                         break;
                     case FloorAlt:
-                        if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
+                        m_clawSubsystem.spinin();
                         m_clawSubsystem.reverse();
                         m_copilotController.setLED(3, true);
                         break;
@@ -318,15 +318,14 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(0, true);
                         break;
                     case Idle:
-                    case IdleShootPosition:
                         m_clawSubsystem.spinoff();
                         break;
                     default:
+                        m_clawSubsystem.spinoff();
                         break;
                 }
             }, 
             () -> { // execution
-                if ( !m_clawSubsystem.wantCone() ) m_clawSubsystem.spinin();
                 moveToPosition(position);
             
             }, 
@@ -406,7 +405,7 @@ public class Arm extends SubsystemBase {
     }
 
     public Command placeCommand () {
-        if (!m_clawSubsystem.wantCone() || m_clawSubsystem.intakePiece() != GamePieces.Cone) return new InstantCommand();
+        if (!m_clawSubsystem.wantCone() || m_clawSubsystem.getColorSensorGamePiece() != GamePieces.Cone) return new InstantCommand();
         switch ( target ) {
             case ScoreHigh:
                 return moveToPositionTerminatingCommand(positions.ScoreHighPlace);

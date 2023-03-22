@@ -654,7 +654,7 @@ public class Drivetrain extends SubsystemBase {
       m_claw.notake();
     }, 
     () -> {
-      return m_claw.intakePiece() != GamePieces.None;
+      return m_claw.getColorSensorGamePiece() != GamePieces.None;
     }, 
     (Subsystem) m_claw));
     eventMap.put("autobalance", autoBalanceCommand());
