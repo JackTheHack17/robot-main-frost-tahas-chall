@@ -18,6 +18,7 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PinchersofPower;
+import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -83,10 +84,10 @@ public class RobotContainer {
     copilotController.button(4).onFalse(m_claw.intakeCommand());
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
     copilotController.button(5).onFalse(m_claw.intakeCommand());
-    copilotController.button(6).onTrue(m_arm.placeCommand().andThen(m_claw.outtakeCommand()));
-    copilotController.button(6).onFalse(m_claw.notakeCommand());
-    copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
-    copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
+    copilotController.button(6).onTrue(m_arm.placeCommand().andThen(m_claw.outTakeCommand()));
+    copilotController.button(6).onFalse(m_claw.spinOffCommand());
+    copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cone))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
+    copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cube))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
     copilotController.button(9).onTrue(m_arm.defaultCommand().alongWith(m_arm.onManual()));
     copilotController.button(9).onFalse(m_arm.defaultCommand());
     copilotController.button(12).onTrue(new InstantCommand( () -> {
@@ -96,16 +97,16 @@ public class RobotContainer {
     }));
     copilotController.button(14).whileTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
-        m_claw.spinout();
+        m_claw.spinOut();
       }
     }));
-    copilotController.button(14).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinoff();}));
+    copilotController.button(14).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinOff();}));
     copilotController.button(13).whileTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
-        m_claw.spinin();
+        m_claw.spinIn();
       }
     }));
-    copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinoff();}));
+    copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinOff();}));
     
     driverController.axisGreaterThan(2, 0.1).onTrue(m_swerve.moveToPositionCommand());
     driverController.axisGreaterThan(3, 0.1).onTrue(m_swerve.moveToPositionCommand());

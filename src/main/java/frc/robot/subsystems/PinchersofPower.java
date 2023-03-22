@@ -61,17 +61,13 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   /** Close */
-  public void forward() {
+  public void closeGrip() {
     pusher.set(Value.kForward);
   }
 
   /** Open */
-  public void reverse() {
+  public void openGrip() {
     pusher.set(Value.kReverse);
-  }
-
-  public void off() {
-    pusher.set(Value.kOff);
   }
 
   public void toggle () {
@@ -82,28 +78,20 @@ public class PinchersofPower extends SubsystemBase  {
     }
   }
 
-  public void spinin() {
+  public void spinIn() {
     spinner.set(POP.SPEED);
     spinner2.set(POP.SPEED);
   }
 
-  public void spinout() {
+  public void spinOut() {
     spinner.set(-POP.SPEED);
     spinner2.set(-POP.SPEED);
   }
 
-  public void spinoff() {
+  public void spinOff() {
     spinner.set(0);
     spinner2.set(0);
 
-  }
-
-  public void enable() {
-    comp.enableDigital();
-  }
-
-  public void disable() {
-    comp.disable();
   }
 
   public enum GamePieces {
@@ -129,9 +117,9 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void intake() {
     if(!m_cone) {
-      reverse();
+      openGrip();
     } else {
-      forward();
+      closeGrip();
     }
   }
 
@@ -139,49 +127,28 @@ public class PinchersofPower extends SubsystemBase  {
     return m_cone;
   }
 
-  public boolean isOpen() {
-    if ( m_cone ) {
-      return pusher.get() == Value.kReverse;
-    } else {
-      return false;
-    }
-  }
-
-  public void outtake() {
-    spinout();
-  }
-
-  public void notake() {
-    spinoff();
-  }
-
-  public void setMode(String mode) {
-    if(mode == "cone") {
-      m_cone = true;
-    }
-    if(mode == "cube") {
-      m_cone = false;
-    }
+  public void setMode(GamePieces mode) {
+    m_cone = (mode == GamePieces.Cone);
   }
 
   public Command intakeCommand() {
     return new InstantCommand(() -> intake(), this);
   }
 
-  public Command outtakeCommand() {
+  public Command outTakeCommand() {
     return new InstantCommand( () -> {
       if (m_container.getArm().target == positions.Substation && m_cone) {
-        forward();
+        closeGrip();
       } else if ( m_cone ) {
-        reverse();
+        openGrip();
       } else {
-        spinout();
+        spinOut();
       }
     });
   }
 
-  public Command notakeCommand() {
-    return new InstantCommand(() -> notake(), this);
+  public Command spinOffCommand() {
+    return new InstantCommand(() -> spinOff(), this);
   }
 
   @Override

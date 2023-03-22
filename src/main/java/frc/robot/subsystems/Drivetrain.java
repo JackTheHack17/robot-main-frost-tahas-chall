@@ -391,7 +391,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double getGyroAngle(){
-    return m_gyro.getYaw();
+    return m_gyro.getPitch();
   }
 
   public Command pathToCommand (Pose2d target) {
@@ -528,7 +528,7 @@ public class Drivetrain extends SubsystemBase {
           return new SequentialCommandGroup(
             new InstantCommand(() -> m_gyro.zeroYaw(180)),
             new InstantCommand(() -> setRobotOriented(false)),
-            new InstantCommand(() -> m_claw.setMode("cone")),
+            new InstantCommand(() -> m_claw.setMode(GamePieces.Cone)),
             m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
             m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
             new InstantCommand(() -> {
@@ -538,7 +538,7 @@ public class Drivetrain extends SubsystemBase {
               joystickDrive(0, 0, 0);
             }),
             new WaitCommand(0.1),
-            m_claw.outtakeCommand(),
+            m_claw.outTakeCommand(),
             new WaitCommand(0.5),
             new InstantCommand(() -> {
               joystickDrive(0, 0.1, 0);
@@ -560,10 +560,10 @@ public class Drivetrain extends SubsystemBase {
             return new SequentialCommandGroup(
               new InstantCommand(() -> m_gyro.zeroYaw(180)),
               new InstantCommand(() -> setRobotOriented(false)),
-              new InstantCommand(() -> m_claw.setMode("cube")),
+              new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
               m_claw.intakeCommand(),
               new WaitCommand(0.2),
-              m_claw.notakeCommand(),
+              m_claw.spinOffCommand(),
               m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
               m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
               new InstantCommand(() -> {
@@ -573,9 +573,9 @@ public class Drivetrain extends SubsystemBase {
                 joystickDrive(0, 0, 0);
               }),
               new WaitCommand(0.1),
-              m_claw.outtakeCommand(),
+              m_claw.outTakeCommand(),
               new WaitCommand(0.5),
-              m_claw.notakeCommand(),
+              m_claw.spinOffCommand(),
               new InstantCommand(() -> {
                 joystickDrive(0, 0.1, 0);
               }).repeatedly().withTimeout(1),
@@ -600,10 +600,10 @@ public class Drivetrain extends SubsystemBase {
         return new SequentialCommandGroup(
           new InstantCommand(() -> m_gyro.zeroYaw(180)),
           new InstantCommand(() -> setRobotOriented(false)),
-          new InstantCommand(() -> m_claw.setMode("cube")),
+          new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
           m_claw.intakeCommand(),
           new WaitCommand(0.2),
-          m_claw.notakeCommand(),
+          m_claw.spinOffCommand(),
           m_arm.moveToPositionCommand(positions.Idle).withTimeout(1
           ),
           m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
@@ -614,9 +614,9 @@ public class Drivetrain extends SubsystemBase {
             joystickDrive(0, 0, 0);
           }),
           new WaitCommand(0.1),
-          m_claw.outtakeCommand(),
+          m_claw.outTakeCommand(),
           new WaitCommand(0.5),
-          m_claw.notakeCommand(),
+          m_claw.spinOffCommand(),
           new InstantCommand(() -> {
             joystickDrive(0, 0.1, 0);
           }).repeatedly().withTimeout(1),
@@ -644,14 +644,14 @@ public class Drivetrain extends SubsystemBase {
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("marker1", new PrintCommand("Passed marker 1"));
     eventMap.put("placeHigh", m_arm.moveToPositionCommand(positions.ScoreHigh));
-    eventMap.put("release", m_claw.outtakeCommand());
+    eventMap.put("release", m_claw.outTakeCommand());
     eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.ScoreLow));
     eventMap.put("intakeIn", new FunctionalCommand(
       () -> {}, () -> {
       m_claw.intake();
     }, 
     (interrupt) -> {
-      m_claw.notake();
+      m_claw.spinOff();
     }, 
     () -> {
       return m_claw.getColorSensorGamePiece() != GamePieces.None;
@@ -659,8 +659,8 @@ public class Drivetrain extends SubsystemBase {
     (Subsystem) m_claw));
     eventMap.put("autobalance", autoBalanceCommand());
     eventMap.put("realign", moveToPositionCommand());
-    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode("cone"); } ));
-    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode("cube"); } ));
+    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cone); } ));
+    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cube); } ));
 
     // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
