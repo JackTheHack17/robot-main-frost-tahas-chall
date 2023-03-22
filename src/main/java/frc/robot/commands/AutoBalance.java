@@ -35,12 +35,12 @@ public class AutoBalance extends ProfiledPIDCommand {
     getController().setTolerance(5); //degrees
   }
 
+  public void initialize () {}
+
   @Override
   public boolean isFinished () {
     return false;
   }
 
-  public void end (boolean interrupted) {
-    return;
-  }
+  public void end (boolean interrupted) {}
 }
