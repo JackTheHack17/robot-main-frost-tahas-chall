@@ -390,7 +390,7 @@ public class Drivetrain extends SubsystemBase {
     return pathToCommand( closest );
   }
 
-  public double getGyroX(){
+  public double getGyroAngle(){
     return m_gyro.getYaw();
   }
 

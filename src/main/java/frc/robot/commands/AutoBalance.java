@@ -21,7 +21,7 @@ public class AutoBalance extends ProfiledPIDCommand {
             // The motion profile constraints
             new TrapezoidProfile.Constraints(1, 1)),
         // This should return the measurement
-        drivetrain::getGyroX, //gyro X angle
+        drivetrain::getGyroAngle, //gyro angle
         // This should return the goal (can also be a constant)
         0,
         // This uses the output
@@ -34,12 +34,5 @@ public class AutoBalance extends ProfiledPIDCommand {
     addRequirements(drivetrain);
     getController().setTolerance(5); //degrees
 
-  }
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-
-    return false;
   }
 }
