@@ -27,7 +27,7 @@ public class AutoBalance extends ProfiledPIDCommand {
         // This uses the output
         (output, setpoint) -> {
           // Use the output (and setpoint, if desired) here
-          drivetrain.joystickDrive(0, -output * 0.75, 0);
+          drivetrain.joystickDrive(-output * 0.75, 0, 0);
         });
     // Use addRequirements() here to declare subsystem dependencies.
     // Configure additional PID options by calling `getController` here.
