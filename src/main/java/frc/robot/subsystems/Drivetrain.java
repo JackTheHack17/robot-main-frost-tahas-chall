@@ -497,15 +497,23 @@ public class Drivetrain extends SubsystemBase {
     encoder.setPositionToAbsolute();
   }
 
+  // private SwerveModulePosition[] getSwerveModulePositions() {
+  //   SwerveModulePosition[] positions = new SwerveModulePosition[4];
+  //   positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(FL_Actual_Position));
+  //   positions[1] = new SwerveModulePosition((FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(FR_Actual_Position));
+  //   positions[2] = new SwerveModulePosition((BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(BL_Actual_Position));
+  //   positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(BR_Actual_Position));
+  //   return positions;
+  // }
+
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
-    positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(FL_Actual_Position));
-    positions[1] = new SwerveModulePosition((FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(FR_Actual_Position));
-    positions[2] = new SwerveModulePosition((BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(BL_Actual_Position));
-    positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(BR_Actual_Position));
+    positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, new Rotation2d(Math.toRadians(FL_Actual_Position)));
+    positions[1] = new SwerveModulePosition((FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, new Rotation2d(Math.toRadians(FR_Actual_Position)));
+    positions[2] = new SwerveModulePosition((BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, new Rotation2d(Math.toRadians(BL_Actual_Position)));
+    positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, new Rotation2d(Math.toRadians(BR_Actual_Position)));
     return positions;
   }
-
   
 
   public Command getAutonomousCommand () {

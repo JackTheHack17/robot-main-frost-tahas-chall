@@ -62,6 +62,8 @@ public final class Constants {
         public static final double ROBOT_WIDTH = 0.6858;
         // wheel diameter (meters)
         public static final double WHEEL_DIAMETER = 0.1016;
+        // wheel perimeter (meters)
+        public static final double WHEEL_PERIMETER = WHEEL_DIAMETER * Math.PI;
         // drive gear ratio
         public static final double DRIVE_GEAR_RATIO = 6.75;
 
