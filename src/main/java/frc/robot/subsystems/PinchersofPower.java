@@ -13,28 +13,31 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.POP;
+import frc.robot.Constants.ARM.positions;
 
 public class PinchersofPower extends SubsystemBase  {
   private final Compressor comp;
   private final DoubleSolenoid pusher;
+  private RobotContainer m_container;
   private final CANSparkMax spinner;
   private final CANSparkMax spinner2;
   private final ColorSensorV3 colorSensor;
   private boolean m_cone;
 
-  public PinchersofPower() {
+  public PinchersofPower(RobotContainer m_container) {
+    this.m_container = m_container;
     comp = new Compressor(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH);
     pusher = new DoubleSolenoid(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH, Constants.POP.FORWARD_PNEUMATIC_CHANNEL, Constants.POP.BACKWARD_PNEUMATIC_CHANNEL);
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
     //spinner2.follow(spinner, true);
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
-    m_cone = false;
-    pusher.set(Value.kReverse);
+    m_cone = true;
+    pusher.set(Value.kForward);
 
     //comp.disable();
 
@@ -47,8 +50,8 @@ public class PinchersofPower extends SubsystemBase  {
     spinner.setIdleMode(IdleMode.kBrake);
     spinner2.setIdleMode(IdleMode.kBrake);
 
-    spinner.setSmartCurrentLimit(40);
-    spinner2.setSmartCurrentLimit(40);
+    spinner.setSmartCurrentLimit(20);
+    spinner2.setSmartCurrentLimit(20);
 
     spinner2.setInverted(true);
 
@@ -109,7 +112,7 @@ public class PinchersofPower extends SubsystemBase  {
     None
   }
 
-  public GamePieces whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment () {
+  public GamePieces getColorSensorGamePiece () {
     Color actualColor = colorSensor.getColor();
     if ( colorSensor.getProximity() > 100 ) {
       if (actualColor.green < actualColor.blue) { // cube
@@ -125,10 +128,10 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void intake() {
-    if (m_cone || whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cone) {
-      forward();
+    if(!m_cone) {
+      reverse();
     } else {
-      spinin();
+      forward();
     }
   }
 
@@ -137,10 +140,8 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public boolean isOpen() {
-    if ( whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cone || m_cone ) {
+    if ( m_cone ) {
       return pusher.get() == Value.kReverse;
-    } else if ( whatGamePieceIsTheIntakeHoldingAtTheCurrentMoment() == GamePieces.Cube ) {
-      return false;
     } else {
       return false;
     }
@@ -151,7 +152,6 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void notake() {
-    forward();
     spinoff();
   }
 
@@ -169,10 +169,15 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public Command outtakeCommand() {
-    if ( m_cone ) {
-      return new InstantCommand(() -> spinout(), this).andThen(new WaitCommand(0).andThen(new InstantCommand( () -> reverse())));
-    }
-    return new InstantCommand(() -> spinout(), this);
+    return new InstantCommand( () -> {
+      if (m_container.getArm().target == positions.Substation && m_cone) {
+        forward();
+      } else if ( m_cone ) {
+        reverse();
+      } else {
+        spinout();
+      }
+    });
   }
 
   public Command notakeCommand() {

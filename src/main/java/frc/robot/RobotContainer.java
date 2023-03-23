@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 import frc.robot.Constants.ARM.positions;
+import frc.robot.commands.AutoBalance;
 import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
@@ -30,12 +31,12 @@ public class RobotContainer {
   public static final ButtonBoard copilotController = new ButtonBoard(1, 2);
 
   // The robot's subsystems and commands are defined here...
-  private final Pigeon m_gyro = new Pigeon();
-  private final Limelight m_limelight = new Limelight();
-  private final LEDs m_LEDs = new LEDs();
-  private final PinchersofPower m_claw = new PinchersofPower();
-  private final Arm m_arm = new Arm(m_claw, driverController, copilotController, m_LEDs);
-  private final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
+  public final Pigeon m_gyro = new Pigeon();
+  public final Limelight m_limelight = new Limelight();
+  public final LEDs m_LEDs = new LEDs();
+  public final PinchersofPower m_claw = new PinchersofPower(this);
+  public final Arm m_arm = new Arm(m_claw, copilotController);
+  public final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -55,6 +56,10 @@ public class RobotContainer {
     m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController, copilotController));
   }
 
+  public Arm getArm() {
+    return m_arm;
+  }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -64,6 +69,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
+    driverController.y().whileTrue(new AutoBalance(m_swerve));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand());
@@ -77,11 +83,12 @@ public class RobotContainer {
     copilotController.button(4).onFalse(m_claw.intakeCommand());
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
     copilotController.button(5).onFalse(m_claw.intakeCommand());
-    copilotController.button(6).onTrue(m_claw.outtakeCommand());
+    copilotController.button(6).onTrue(m_arm.placeCommand().andThen(m_claw.outtakeCommand()));
     copilotController.button(6).onFalse(m_claw.notakeCommand());
-    // TODO swap turnYellow / turnPurple after we prank armaan
-    copilotController.button(7).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
-    copilotController.button(8).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
+    copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode("cone"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
+    copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode("cube"))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
+    copilotController.button(9).onTrue(m_arm.defaultCommand().alongWith(m_arm.onManual()));
+    copilotController.button(9).onFalse(m_arm.defaultCommand());
     copilotController.button(12).onTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
         m_claw.toggle();
@@ -99,6 +106,9 @@ public class RobotContainer {
       }
     }));
     copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinoff();}));
+    
+    driverController.axisGreaterThan(2, 0.1).onTrue(m_swerve.moveToPositionCommand());
+    driverController.axisGreaterThan(3, 0.1).onTrue(m_swerve.moveToPositionCommand());
   }
 
   /**

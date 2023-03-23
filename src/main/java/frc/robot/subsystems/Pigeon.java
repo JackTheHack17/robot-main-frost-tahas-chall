@@ -46,6 +46,10 @@ public class Pigeon extends SubsystemBase {
     pigeon.setYaw(0);
   }
 
+  public void zeroYaw (double degrees) {
+    pigeon.setYaw(degrees);
+  }
+
   @Override
   public void periodic() {
     yaw = pigeon.getYaw();

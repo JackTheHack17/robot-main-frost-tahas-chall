@@ -76,6 +76,7 @@ public final class Constants {
         /** maximum rotation speed (radians per second) */
         public static final double MAX_ROTATION_SPEED = Math.PI*2;
         public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.05;
+        public static final double ROTATION_SCALE_FACTOR = 0.65;
             
         // pid values
         public static final double AZIMUTH_kP = 0.01; // sds: 0.2; rylan: 0.65
@@ -88,10 +89,10 @@ public final class Constants {
         /* Maximum distance for a valid waypoint (meters) */
         public static final double MAX_WAYPOINT_DISTANCE = 0.5;
 
-        public static final double SHWERVE_DRIVE_Kp = .044057;
+        public static final double SHWERVE_DRIVE_Kp = 0.044057;
         public static final double SHWERVE_DRIVE_Kd = 0;
 
-        public static final double AUTO_BALANCE_Kp = 0;
+        public static final double AUTO_BALANCE_Kp = 0.1;
         public static final double AUTO_BALANCE_Kd = 0;
     }
 
@@ -101,53 +102,59 @@ public final class Constants {
     }
 
     public static final class ARM {
-        public static final double JOINT_ANGLE_DEADZONE = 10;
+        public static final double JOINT_ANGLE_DEADZONE = 20;
         public static final double JOINT_COORDINATE_DEADZONE = 0;
 
         public static enum positions {
             ScoreHigh,
             ScoreMid,
+            ScoreHighPlace,
+            ScoreMidPlace,
             ScoreLow,
             Floor,
             FloorAlt,
             Substation,
-            Idle
+            Idle,
+            IdleShootPosition
         };
 
-        public static final double STAGE_1_OFFSET = 147.5;
-        public static final double STAGE_2_OFFSET = 176.5 - 60;
-        public static final double STAGE_3_OFFSET = 346.0;
-
-        public static ArmPosition scoreHighPosition  = new ArmPosition(175, 245, 5);
-        public static ArmPosition scoreMidPosition   = new ArmPosition(207, 195, 353);
-        public static ArmPosition scoreLowPosition   = new ArmPosition(135, 110+5, 350+5);
-        public static ArmPosition floorPosition      = new ArmPosition(138, 153, 350);
-        public static ArmPosition floorAltPosition   = new ArmPosition(180, 156, 277);
-        public static ArmPosition substationPosition = new ArmPosition(160, 240, 355);
-        //public static ArmPosition idlePosition       = new ArmPosition(195, 60, 315);
-        //public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
-        public static ArmPosition idlePosition       = new ArmPosition(190, 105, 343);
+        public static final double STAGE_1_OFFSET = 150;
+        public static final double STAGE_2_OFFSET = 155;
+        public static final double STAGE_3_OFFSET = 347;
 
 
 
-        public static final double thetaSpeed = 0.1;
-        public static final double xSpeed = 0.1;
-        public static final double ySpeed = 0.1;
+        public static ArmPosition scoreHighPosition  = new ArmPosition(166, 145, 255);
+        public static ArmPosition scoreMidPosition   = new ArmPosition(225, 62, 220);
+        public static ArmPosition idleShootPosition   = new ArmPosition(98, 244, 205);
+        public static ArmPosition scoreLowPosition      = new ArmPosition(135, 45, 235);
+        public static ArmPosition floorPosition      = new ArmPosition(135, 45, 235);
+        public static ArmPosition floorAltPosition   = new ArmPosition(168, 46, 140);
+        public static ArmPosition substationPosition = new ArmPosition(208, 95, 243);
+        public static ArmPosition idlePosition       = new ArmPosition(210, 340, 212);
+        public static ArmPosition scoreHighPlace     = new ArmPosition(160, 125, 250);
+        public static ArmPosition scoreMidPlace      = new ArmPosition(198, 55, 238);
 
-        public static final double STAGE_1_LENGTH = 10;
-        public static final double STAGE_2_LENGTH = 10;
+        public static final double THETA_SPEED = 1;
+        public static final double X_SPEED = 0.5;
+        public static final double Y_SPEED = 0.5;
 
-        public static final double STAGE_1_Kp = 0.009;
+        // inches
+        public static final double STAGE_1_LENGTH = 20.0;
+        public static final double STAGE_2_LENGTH = 29.5;
+
+        public static final double STAGE_1_Kp = 0.004;
         public static final double STAGE_1_Ki = 0;
-        public static final double STAGE_1_Kd = 0.005;
+        public static final double STAGE_1_Kd = 0;
         public static final double STAGE_2_Kp = 0.005;
+        //public static final double STAGE_2_Kp = 0.011;
         public static final double STAGE_2_Ki = 0;
         public static final double STAGE_2_Kd = 0;
 
         public static final double STAGE_3_Kp = 0.005;
         public static final double STAGE_3_Ki = 0;
         public static final double STAGE_3_Kd = 0;
- }
+    }
 
      public class POP {
          public static final double F = 0;
