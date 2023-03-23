@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import static frc.robot.Constants.CAN.PIGEON_ID;
 import frc.lib.Telemetry;
 
 public class Pigeon extends SubsystemBase {
@@ -17,8 +18,8 @@ public class Pigeon extends SubsystemBase {
   private double[] ypr = new double[3];
 
     /** Creates a new ExampleSubsystem. */
-  public Pigeon (int CAN_ID) {
-    pigeon = new Pigeon2(CAN_ID);
+  public Pigeon () {
+    pigeon = new Pigeon2(PIGEON_ID);
   }
 
   public Pigeon2 getPigeon () {
