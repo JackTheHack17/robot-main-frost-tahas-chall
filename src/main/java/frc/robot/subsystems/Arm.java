@@ -56,7 +56,6 @@ import frc.robot.Constants.ARM.positions;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DIO;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 public class Arm extends SubsystemBase {
     private final CANSparkMax m_stage1;
