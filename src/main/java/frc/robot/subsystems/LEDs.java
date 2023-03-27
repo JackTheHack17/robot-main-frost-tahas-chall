@@ -40,7 +40,7 @@ public class LEDs extends SubsystemBase {
     setColor((int)Math.floor(Color.kPurple.red*255), (int)Math.floor(Color.kPurple.green*255), (int)Math.floor(Color.kPurple.blue*255));
   }); }
   public Command turnYellow () { return new InstantCommand( () -> {
-    setColor((int)Math.floor(Color.kYellow.red*255), (int)Math.floor(Color.kYellow.green*255), (int)Math.floor(Color.kYellow.blue*255));
+    setColor((int)Math.floor(Color.kOrange.red*255), (int)Math.floor(Color.kOrange.green*255), (int)Math.floor(Color.kOrange.blue*255));
   } ); }
   public Command flashRed () { return new InstantCommand( () -> {
     m_r2 = m_r;

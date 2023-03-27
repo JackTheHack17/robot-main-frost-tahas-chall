@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
@@ -76,23 +78,29 @@ public class RobotContainer {
     copilotController.button(0).onFalse(m_claw.intakeCommand());
     copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
     copilotController.button(1).onFalse(m_claw.intakeCommand());
-    copilotController.button(2).whileTrue(m_arm.moveToPositionCommand(positions.ScoreHigh));
+    copilotController.button(2).onTrue(new InstantCommand( () -> m_arm.goToScoreHigh().schedule()));
+//    copilotController.button(2).onFalse(new SequentialCommandGroup((m_arm.moveToPositionCommand(positions.Idle)).withTimeout(10), new WaitCommand(3.5), m_claw.intakeCommand())); //Close claw after the arm moves away from the node
+    copilotController.button(2).onFalse(m_arm.defaultCommand());
     copilotController.button(2).onFalse(m_claw.intakeCommand());
     copilotController.button(3).whileTrue(m_arm.moveToPositionCommand(positions.FloorAlt));
     copilotController.button(3).onFalse(m_claw.intakeCommand());
-    copilotController.button(4).whileTrue(m_arm.moveToPositionCommand(positions.ScoreMid));
+    copilotController.button(4).whileTrue(new InstantCommand( () -> m_arm.goToScoreMid().schedule()));
     copilotController.button(4).onFalse(m_claw.intakeCommand());
+    copilotController.button(4).onFalse(m_arm.defaultCommand());
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
     copilotController.button(5).onFalse(m_claw.intakeCommand());
-    copilotController.button(6).onTrue(m_arm.placeCommand().andThen(m_claw.outTakeCommand()));
+    copilotController.button(6).onTrue(new SequentialCommandGroup((m_claw.outTakeCommand()), new WaitCommand(0.25), m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(6).onFalse(m_claw.spinOffCommand());
-    copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cone))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);})));
-    copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cube))).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);})));
+    copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cone))).alongWith(new InstantCommand( () -> m_claw.setCone(true)).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);}))));
+    copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cube))).alongWith(new InstantCommand( () -> m_claw.setCone(false)).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);}))));
+    copilotController.button(8).onTrue(new InstantCommand( () -> m_claw.setCone(true)));
+    copilotController.button(7).onTrue(new InstantCommand( () -> m_claw.setCone(false)));
+    copilotController.button(6).onFalse(m_claw.spinOffCommand());
     copilotController.button(9).onTrue(m_arm.defaultCommand().alongWith(m_arm.onManual()));
     copilotController.button(9).onFalse(m_arm.defaultCommand());
     copilotController.button(12).onTrue(new InstantCommand( () -> {
       if (copilotController.getRawButton(9)) {
-        m_claw.toggle();
+        m_claw.toggle(); 
       }
     }));
     copilotController.button(14).whileTrue(new InstantCommand( () -> {

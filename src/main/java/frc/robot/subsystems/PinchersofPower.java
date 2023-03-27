@@ -79,13 +79,13 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void spinIn() {
-    spinner.set(POP.SPEED);
-    spinner2.set(POP.SPEED);
+    spinner.set(POP.SPEEDIN);
+    spinner2.set(POP.SPEEDIN);
   }
 
   public void spinOut() {
-    spinner.set(-POP.SPEED);
-    spinner2.set(-POP.SPEED);
+    spinner.set(-POP.SPEEDOUT);
+    spinner2.set(-POP.SPEEDOUT);
   }
 
   public void spinOff() {
@@ -122,7 +122,9 @@ public class PinchersofPower extends SubsystemBase  {
       closeGrip();
     }
   }
-
+  public void setCone(boolean check){
+    m_cone = check;
+  }
   public boolean wantCone () {
     return m_cone;
   }
@@ -130,6 +132,8 @@ public class PinchersofPower extends SubsystemBase  {
   public void setMode(GamePieces mode) {
     m_cone = (mode == GamePieces.Cone);
   }
+
+  
 
   public Command intakeCommand() {
     return new InstantCommand(() -> intake(), this);
