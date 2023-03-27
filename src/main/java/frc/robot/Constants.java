@@ -62,7 +62,6 @@ public final class Constants {
         public static final double ROBOT_WIDTH = 0.6858;
         // wheel diameter (meters)
         public static final double WHEEL_DIAMETER = 0.1016;
-        // wheel perimeter (meters)
         public static final double WHEEL_PERIMETER = WHEEL_DIAMETER * Math.PI;
         // drive gear ratio
         public static final double DRIVE_GEAR_RATIO = 6.75;
@@ -108,8 +107,12 @@ public final class Constants {
         public static final double JOINT_COORDINATE_DEADZONE = 0;
 
         public static enum positions {
-            ScoreHigh,
-            ScoreMid,
+            ScoreHighCone,
+            DipHighCone,
+            ScoreHighCube,
+            ScoreMidCone,
+            DipMidCone,
+            ScoreMidCube,
             ScoreHighPlace,
             ScoreMidPlace,
             ScoreLow,
@@ -126,14 +129,17 @@ public final class Constants {
 
 
 
-        public static ArmPosition scoreHighPosition  = new ArmPosition(166, 145, 255);
-        public static ArmPosition scoreMidPosition   = new ArmPosition(225, 62, 220);
-        public static ArmPosition idleShootPosition   = new ArmPosition(98, 244, 205);
-        public static ArmPosition scoreLowPosition      = new ArmPosition(135, 45, 235);
-        public static ArmPosition floorPosition      = new ArmPosition(135, 45, 235);
-        public static ArmPosition floorAltPosition   = new ArmPosition(168, 46, 140);
-        public static ArmPosition substationPosition = new ArmPosition(208, 95, 243);
-        public static ArmPosition idlePosition       = new ArmPosition(210, 340, 212);
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(195, 130, 255);
+        public static ArmPosition dipHighConePosition  = new ArmPosition(166, 110, 255);
+        public static ArmPosition scoreHighCubePosition  = new ArmPosition(178, 117, 242);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(80, 145, 262);
+        public static ArmPosition dipMidConePosition   = new ArmPosition(80, 125, 252);
+        public static ArmPosition scoreMidCubePosition   = new ArmPosition(88, 150, 210);
+        public static ArmPosition idlePosition   = new ArmPosition(78, 204, 161);
+        public static ArmPosition scoreLowPosition      = new ArmPosition(85, 175, 202);
+        public static ArmPosition floorPosition      = new ArmPosition(80, 100, 235);
+        public static ArmPosition floorAltPosition   = new ArmPosition(88, 117, 158);
+        public static ArmPosition substationPosition = new ArmPosition(88, 183, 210);
         public static ArmPosition scoreHighPlace     = new ArmPosition(160, 125, 250);
         public static ArmPosition scoreMidPlace      = new ArmPosition(198, 55, 238);
 
@@ -145,11 +151,10 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 20.0;
         public static final double STAGE_2_LENGTH = 29.5;
 
-        public static final double STAGE_1_Kp = 0.004;
+         public static final double STAGE_1_Kp = 0.004;
         public static final double STAGE_1_Ki = 0;
         public static final double STAGE_1_Kd = 0;
-        public static final double STAGE_2_Kp = 0.005;
-        //public static final double STAGE_2_Kp = 0.011;
+         public static final double STAGE_2_Kp = 0.005;
         public static final double STAGE_2_Ki = 0;
         public static final double STAGE_2_Kd = 0;
 
@@ -161,7 +166,9 @@ public final class Constants {
      public class POP {
          public static final double F = 0;
          public static final double R = 0;
-         public static final double SPEED = 0.4;
+         public static final double SPEEDOUT = 0.2;
+         public static final double SPEEDIN = 0.5;
+
          public static final int FORWARD_PNEUMATIC_CHANNEL = 14;
          public static final int BACKWARD_PNEUMATIC_CHANNEL = 15;
      }

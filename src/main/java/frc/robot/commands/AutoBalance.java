@@ -10,7 +10,8 @@ import frc.robot.subsystems.Drivetrain;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class AutoBalance extends ProfiledPIDCommand {
   /** Creates a new AutoBalance. */
-  public AutoBalance(Drivetrain drivetrain ) {
+  private Drivetrain drivetrain;
+  public AutoBalance(Drivetrain drivetrain) {
     super(
         // The ProfiledPIDController used by the command
         new ProfiledPIDController(
@@ -21,18 +22,32 @@ public class AutoBalance extends ProfiledPIDCommand {
             // The motion profile constraints
             new TrapezoidProfile.Constraints(1, 1)),
         // This should return the measurement
-        drivetrain::getGyroAngle, //gyro angle
+        drivetrain::getGyroAngle, //gyro X angle
         // This should return the goal (can also be a constant)
         0,
         // This uses the output
         (output, setpoint) -> {
           // Use the output (and setpoint, if desired) here
-          drivetrain.joystickDrive(0, -output * 0.75, 0);
+          drivetrain.joystickDrive(-output/2, 0, 0);
         });
     // Use addRequirements() here to declare subsystem dependencies.
     // Configure additional PID options by calling `getController` here.
     addRequirements(drivetrain);
-    getController().setTolerance(5); //degrees
+    this.drivetrain = drivetrain;
+    getController().setTolerance(2); //degrees
 
+  }
+  
+  public void initialize() {
+  }
+
+  // Returns true when the command should end.
+  @Override
+  public boolean isFinished() {
+    return false;
+  }
+
+  public void end() {
+    drivetrain.joystickDrive(0,0,0);
   }
 }

@@ -47,6 +47,7 @@ import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
@@ -167,12 +168,13 @@ public class Drivetrain extends SubsystemBase {
 
   private Pose2d _robotPose = new Pose2d();
 
-  private double _translationKp = 1;
-  private double _translationKi = 0;
-  private double _translationKd = 0.75;
-  private double _rotationKp = 1;
+  // private double _translationKp = 0.0019;
+  private double _translationKp = 0.0015;
+  private double _translationKi = 0.0004;
+  private double _translationKd = 0;
+  private double _rotationKp = 0.00005;
   private double _rotationKi = 0;
-  private double _rotationKd = 1;
+  private double _rotationKd = 0;
 
   /** Creates a new ExampleSubsystem. */
   public Drivetrain(CommandGenericHID driverController, Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight, LEDs m_LEDs) {
@@ -391,7 +393,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double getGyroAngle(){
-    return m_gyro.getYaw();
+    return m_gyro.getPitch();
   }
 
   public Command pathToCommand (Pose2d target) {
@@ -405,7 +407,7 @@ public class Drivetrain extends SubsystemBase {
       () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
       this.m_kinematics, // SwerveDriveKinematics
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
       new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
@@ -508,158 +510,164 @@ public class Drivetrain extends SubsystemBase {
 
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
-    positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, new Rotation2d(Math.toRadians(FL_Actual_Position)));
-    positions[1] = new SwerveModulePosition((FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, new Rotation2d(Math.toRadians(FR_Actual_Position)));
-    positions[2] = new SwerveModulePosition((BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, new Rotation2d(Math.toRadians(BL_Actual_Position)));
-    positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, new Rotation2d(Math.toRadians(BR_Actual_Position)));
+    positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(FL_Actual_Position));
+    positions[1] = new SwerveModulePosition((FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(FR_Actual_Position));
+    positions[2] = new SwerveModulePosition((BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(BL_Actual_Position));
+    positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(BR_Actual_Position));
     return positions;
   }
   
 
+  
+
   public Command getAutonomousCommand () {
-    switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
-      case "dontMove":
-        return new InstantCommand();
-      case "backupBackup":
-        return new SequentialCommandGroup(
-          new InstantCommand(() -> m_gyro.zeroYaw(180)),
-          new InstantCommand(() -> setRobotOriented(false)),
-          new InstantCommand(() -> {
-            joystickDrive(0, 0.1, 0);
-          }).repeatedly().withTimeout(10),
-          new InstantCommand(() -> {
-            joystickDrive(0, 0, 0);
-            setRobotOriented(false);
-          })
-        );
-      case "backupScoreOneBackupCone":
-          return new SequentialCommandGroup(
-            new InstantCommand(() -> m_gyro.zeroYaw(180)),
-            new InstantCommand(() -> setRobotOriented(false)),
-            new InstantCommand(() -> m_claw.setMode("cone")),
-            m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
-            m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-            new InstantCommand(() -> {
-              joystickDrive(0, -0.1, 0);
-            }).repeatedly().withTimeout(1),
-            new InstantCommand(() -> {
-              joystickDrive(0, 0, 0);
-            }),
-            new WaitCommand(0.1),
-            m_claw.outtakeCommand(),
-            new WaitCommand(0.5),
-            new InstantCommand(() -> {
-              joystickDrive(0, 0.1, 0);
-            }).repeatedly().withTimeout(1),
-            new ParallelCommandGroup(
-              m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-              new InstantCommand(() -> {
-                joystickDrive(0, 0.1, 0);
-              }).repeatedly().withTimeout(0)
-            ),
-            //new InstantCommand(() -> {
-            //  joystickDrive(0.1, 0, 0);
-            //}).repeatedly().withTimeout(0.2),
-            new InstantCommand(() -> {
-              joystickDrive(0, 0, 0);
-            })
-          );
-        case "middleCharge":
-            return new SequentialCommandGroup(
-              new InstantCommand(() -> m_gyro.zeroYaw(180)),
-              new InstantCommand(() -> setRobotOriented(false)),
-              new InstantCommand(() -> m_claw.setMode("cube")),
-              m_claw.intakeCommand(),
-              new WaitCommand(0.2),
-              m_claw.notakeCommand(),
-              m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
-              m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-              new InstantCommand(() -> {
-                joystickDrive(0, -0.1, 0);
-              }).repeatedly().withTimeout(1),
-              new InstantCommand(() -> {
-                joystickDrive(0, 0, 0);
-              }),
-              new WaitCommand(0.1),
-              m_claw.outtakeCommand(),
-              new WaitCommand(0.5),
-              m_claw.notakeCommand(),
-              new InstantCommand(() -> {
-                joystickDrive(0, 0.1, 0);
-              }).repeatedly().withTimeout(1),
-              new ParallelCommandGroup(
-                m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-                new InstantCommand(() -> {
-                  joystickDrive(0, 0.1, 0);
-                }).repeatedly().withTimeout(5)
-              ),
-              new InstantCommand(() -> {
-                joystickDrive(0, 0, 0);
-              }),
-              new WaitCommand(0.5),
-              new InstantCommand(() -> {
-                joystickDrive(0, -0.1, 0);
-              }).repeatedly().withTimeout(1.5),
-              new InstantCommand(() -> {
-                joystickDrive(0, 0, 0);
-              })
-            );
-        case "backupScoreOneBackupCube":
-        return new SequentialCommandGroup(
-          new InstantCommand(() -> m_gyro.zeroYaw(180)),
-          new InstantCommand(() -> setRobotOriented(false)),
-          new InstantCommand(() -> m_claw.setMode("cube")),
-          m_claw.intakeCommand(),
-          new WaitCommand(0.2),
-          m_claw.notakeCommand(),
-          m_arm.moveToPositionCommand(positions.Idle).withTimeout(1
-          ),
-          m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-          new InstantCommand(() -> {
-            joystickDrive(0, -0.1, 0);
-          }).repeatedly().withTimeout(1),
-          new InstantCommand(() -> {
-            joystickDrive(0, 0, 0);
-          }),
-          new WaitCommand(0.1),
-          m_claw.outtakeCommand(),
-          new WaitCommand(0.5),
-          m_claw.notakeCommand(),
-          new InstantCommand(() -> {
-            joystickDrive(0, 0.1, 0);
-          }).repeatedly().withTimeout(1),
-          new ParallelCommandGroup(
-            m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-            new InstantCommand(() -> {
-              joystickDrive(0, 0.1, 0);
-            }).repeatedly().withTimeout(3)
-          ),
-          new InstantCommand(() -> {
-            joystickDrive(0, 0, 0);
-          })
-        );
-    }
+   // switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
+      // case "dontMove":
+      //   return new InstantCommand();
+      // case "backupBackup":
+      //   return new SequentialCommandGroup(
+      //     new InstantCommand(() -> m_gyro.zeroYaw(180)),
+      //     new InstantCommand(() -> setRobotOriented(false)),
+      //     new InstantCommand(() -> {
+      //       joystickDrive(0, 0.1, 0);
+      //     }).repeatedly().withTimeout(10),
+      //     new InstantCommand(() -> {
+      //       joystickDrive(0, 0, 0);
+      //       setRobotOriented(false);
+      //     })
+      //   );
+      // case "backupScoreOneBackupCone":
+      //     return new SequentialCommandGroup(
+      //       new InstantCommand(() -> m_gyro.zeroYaw(180)),
+      //       new InstantCommand(() -> setRobotOriented(false)),
+      //       new InstantCommand(() -> m_claw.setMode(GamePieces.Cone)),
+      //       m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
+      //       m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
+      //       new InstantCommand(() -> {
+      //         joystickDrive(0, -0.1, 0);
+      //       }).repeatedly().withTimeout(1),
+      //       new InstantCommand(() -> {
+      //         joystickDrive(0, 0, 0);
+      //       }),
+      //       new WaitCommand(0.1),
+      //       m_claw.outTakeCommand(),
+      //       new WaitCommand(0.5),
+      //       new InstantCommand(() -> {
+      //         joystickDrive(0, 0.1, 0);
+      //       }).repeatedly().withTimeout(1),
+      //       new ParallelCommandGroup(
+      //         m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
+      //         new InstantCommand(() -> {
+      //           joystickDrive(0, 0.1, 0);
+      //         }).repeatedly().withTimeout(0)
+      //       ),
+      //       //new InstantCommand(() -> {
+      //       //  joystickDrive(0.1, 0, 0);
+      //       //}).repeatedly().withTimeout(0.2),
+      //       new InstantCommand(() -> {
+      //         joystickDrive(0, 0, 0);
+      //       })
+      //     );
+      //   case "middleCharge":
+      //       return new SequentialCommandGroup(
+      //         new InstantCommand(() -> m_gyro.zeroYaw(180)),
+      //         new InstantCommand(() -> setRobotOriented(false)),
+      //         new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
+      //         m_claw.intakeCommand(),
+      //         new WaitCommand(0.2),
+      //         m_claw.spinOffCommand(),
+      //         m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
+      //         m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
+      //         new InstantCommand(() -> {
+      //           joystickDrive(0, -0.1, 0);
+      //         }).repeatedly().withTimeout(1),
+      //         new InstantCommand(() -> {
+      //           joystickDrive(0, 0, 0);
+      //         }),
+      //         new WaitCommand(0.1),
+      //         m_claw.outTakeCommand(),
+      //         new WaitCommand(0.5),
+      //         m_claw.spinOffCommand(),
+      //         new InstantCommand(() -> {
+      //           joystickDrive(0, 0.1, 0);
+      //         }).repeatedly().withTimeout(1),
+      //         new ParallelCommandGroup(
+      //           m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
+      //           new InstantCommand(() -> {
+      //             joystickDrive(0, 0.1, 0);
+      //           }).repeatedly().withTimeout(5)
+      //         ),
+      //         new InstantCommand(() -> {
+      //           joystickDrive(0, 0, 0);
+      //         }),
+      //         new WaitCommand(0.5),
+      //         new InstantCommand(() -> {
+      //           joystickDrive(0, -0.1, 0);
+      //         }).repeatedly().withTimeout(1.5),
+      //         new InstantCommand(() -> {
+      //           joystickDrive(0, 0, 0);
+      //         })
+      //       );
+      //   case "backupScoreOneBackupCube":
+      //   return new SequentialCommandGroup(
+      //     new InstantCommand(() -> m_gyro.zeroYaw(180)),
+      //     new InstantCommand(() -> setRobotOriented(false)),
+      //     new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
+      //     m_claw.intakeCommand(),
+      //     new WaitCommand(0.2),
+      //     m_claw.spinOffCommand(),
+      //     m_arm.moveToPositionCommand(positions.Idle).withTimeout(1
+      //     ),
+      //     m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
+      //     new InstantCommand(() -> {
+      //       joystickDrive(0, -0.1, 0);
+      //     }).repeatedly().withTimeout(1),
+      //     new InstantCommand(() -> {
+      //       joystickDrive(0, 0, 0);
+      //     }),
+      //     new WaitCommand(0.1),
+      //     m_claw.outTakeCommand(),
+      //     new WaitCommand(0.5),
+      //     m_claw.spinOffCommand(),
+      //     new InstantCommand(() -> {
+      //       joystickDrive(0, 0.1, 0);
+      //     }).repeatedly().withTimeout(1),
+      //     new ParallelCommandGroup(
+      //       m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
+      //       new InstantCommand(() -> {
+      //         joystickDrive(0, 0.1, 0);
+      //       }).repeatedly().withTimeout(3)
+      //     ),
+      //     new InstantCommand(() -> {
+      //       joystickDrive(0, 0, 0);
+      //     })
+      //   );
+    //}
 
     // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
     // for every path in the group
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
-      Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"), 
-      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
+      Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceMobilityDock"), 
+      new PathConstraints(2, 1)
+      //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
     );
 
     // This is just an example event map. It would be better to have a constant, global event map
     // in your code that will be used by all path following commands.
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-    eventMap.put("placeHigh", m_arm.moveToPositionCommand(positions.ScoreHigh));
-    eventMap.put("release", m_claw.outtakeCommand());
-    eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.ScoreLow));
+    eventMap.put("placeHighCone", m_arm.moveToPositionCommand(positions.ScoreHighCone));
+    eventMap.put("placeHighCube", m_arm.moveToPositionCommand(positions.ScoreHighCube));
+    eventMap.put("tuck", m_arm.moveToPositionCommand(positions.Idle));
+    eventMap.put("release", m_claw.outTakeCommand());
+    eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
     eventMap.put("intakeIn", new FunctionalCommand(
       () -> {}, () -> {
+      m_claw.openGrip();
       m_claw.intake();
     }, 
     (interrupt) -> {
-      m_claw.notake();
+      m_claw.spinOff();
     }, 
     () -> {
       return m_claw.getColorSensorGamePiece() != GamePieces.None;
@@ -667,8 +675,8 @@ public class Drivetrain extends SubsystemBase {
     (Subsystem) m_claw));
     eventMap.put("autobalance", autoBalanceCommand());
     eventMap.put("realign", moveToPositionCommand());
-    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode("cone"); } ));
-    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode("cube"); } ));
+    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cone); } ));
+    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cube); } ));
 
     // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
