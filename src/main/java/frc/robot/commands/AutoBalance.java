@@ -39,6 +39,7 @@ public class AutoBalance extends ProfiledPIDCommand {
   }
   
   public void initialize() {
+    drivetrain.setRobotOriented(true);
   }
 
   // Returns true when the command should end.
@@ -48,6 +49,7 @@ public class AutoBalance extends ProfiledPIDCommand {
   }
 
   public void end() {
+    drivetrain.setRobotOriented(false);
     drivetrain.joystickDrive(0,0,0);
   }
 }

@@ -82,6 +82,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.ARM.positions;
+import frc.robot.commands.AutoBalance;
 import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 public class Drivetrain extends SubsystemBase {
@@ -430,7 +431,7 @@ public class Drivetrain extends SubsystemBase {
       }, 
       () -> {return pitchPID.atSetpoint() && rollPID.atSetpoint();}, 
       (Subsystem) this
-    );
+    ).repeatedly();
   }
 
   /** Sets the gyroscope's current heading to 0 */
@@ -636,16 +637,16 @@ public class Drivetrain extends SubsystemBase {
     // for every path in the group
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
       Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceMobilityDock"), 
-      new PathConstraints(2, 1)
+      new PathConstraints(1, 1)
       //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
     );
 
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-    eventMap.put("placeHighCone", m_arm.moveToPositionCommand(positions.ScoreHighCone));
-    eventMap.put("placeHighCube", m_arm.moveToPositionCommand(positions.ScoreHighCube));
-    eventMap.put("tuck", m_arm.moveToPositionCommand(positions.Idle).withTimeout(1.5));
-    eventMap.put("release", m_claw.outTakeCommand().withTimeout(1));
+    eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).andThen(m_arm.moveToPositionTerminatingCommand(positions.DipHighCone)).andThen(new WaitCommand(1)));
+    eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).andThen(m_arm.moveToPositionTerminatingCommand(positions.DipMidCone)).andThen(new WaitCommand(1)));
+    eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle));
+    eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(1)));
     eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
     eventMap.put("intakeIn", new FunctionalCommand(
       () -> {}, () -> {
@@ -659,7 +660,7 @@ public class Drivetrain extends SubsystemBase {
       return m_claw.getColorSensorGamePiece() != GamePieces.None;
     }, 
     (Subsystem) m_claw));
-    eventMap.put("autobalance", autoBalanceCommand());
+    eventMap.put("autobalance", new AutoBalance(this));
     eventMap.put("realign", moveToPositionCommand());
     eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cone); } ));
     eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cube); } ));

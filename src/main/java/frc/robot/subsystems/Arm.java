@@ -418,27 +418,31 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(5, true);
                         break;
                     case Floor:
+                        m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
                         m_copilotController.setLED(1, true);
                         break;
                     case FloorAlt:
+                        m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
                         m_copilotController.setLED(3, true);
                         break;
                     case Substation:
-                    m_clawSubsystem.spinIn();
+                        m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
                         m_copilotController.setLED(0, true);
                         break;
                     case Idle:
-                    case IdleShootPosition:
+                        m_clawSubsystem.spinOff();
                         break;
                     default:
+                        //m_clawSubsystem.spinOff();
                         break;
                 }
             }, 
             () -> { // execution
                 moveToPosition(position);
+            
             }, 
             interrupted -> { // when should the command do when it ends?
                 lastPosition = position;
