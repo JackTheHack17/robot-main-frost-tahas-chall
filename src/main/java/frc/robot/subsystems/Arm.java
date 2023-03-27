@@ -51,7 +51,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.ArmPosition;
 import frc.lib.ButtonBoard;
-import frc.lib.KinematicsSolver;
 import frc.lib.Telemetry;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.Constants.CAN;

@@ -1,6 +1,5 @@
 package frc.robot;
 import java.io.File;
-import java.time.Instant;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -90,7 +89,7 @@ public class RobotContainer {
     copilotController.button(4).onFalse(m_arm.defaultCommand());
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
     copilotController.button(5).onFalse(m_claw.intakeCommand());
-    copilotController.button(6).onTrue((m_claw.outTakeCommand()));
+    copilotController.button(6).onTrue(new SequentialCommandGroup((m_claw.outTakeCommand()), new WaitCommand(0.25), m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(6).onFalse(m_claw.spinOffCommand());
     copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cone))).alongWith(new InstantCommand( () -> m_claw.setCone(true)).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);}))));
     copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cube))).alongWith(new InstantCommand( () -> m_claw.setCone(false)).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);}))));

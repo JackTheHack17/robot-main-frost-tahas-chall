@@ -74,9 +74,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -642,14 +640,12 @@ public class Drivetrain extends SubsystemBase {
       //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
     );
 
-    // This is just an example event map. It would be better to have a constant, global event map
-    // in your code that will be used by all path following commands.
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("marker1", new PrintCommand("Passed marker 1"));
     eventMap.put("placeHighCone", m_arm.moveToPositionCommand(positions.ScoreHighCone));
     eventMap.put("placeHighCube", m_arm.moveToPositionCommand(positions.ScoreHighCube));
-    eventMap.put("tuck", m_arm.moveToPositionCommand(positions.Idle));
-    eventMap.put("release", m_claw.outTakeCommand());
+    eventMap.put("tuck", m_arm.moveToPositionCommand(positions.Idle).withTimeout(1.5));
+    eventMap.put("release", m_claw.outTakeCommand().withTimeout(1));
     eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
     eventMap.put("intakeIn", new FunctionalCommand(
       () -> {}, () -> {
