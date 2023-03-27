@@ -27,7 +27,7 @@ public class Pigeon extends SubsystemBase {
   }
 
   public double getYaw() {
-    return yaw;
+    return yaw % 360;
   }
 
   public double getPitch () {
@@ -46,9 +46,13 @@ public class Pigeon extends SubsystemBase {
     pigeon.setYaw(0);
   }
 
+  public void zeroYaw (double degrees) {
+    pigeon.setYaw(degrees);
+  }
+
   @Override
   public void periodic() {
-    yaw = pigeon.getYaw();
+    yaw = pigeon.getYaw() % 360;
     pitch = pigeon.getPitch();
     roll = pigeon.getRoll();
     pigeon.getYawPitchRoll(ypr);

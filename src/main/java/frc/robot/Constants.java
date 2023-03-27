@@ -62,6 +62,7 @@ public final class Constants {
         public static final double ROBOT_WIDTH = 0.6858;
         // wheel diameter (meters)
         public static final double WHEEL_DIAMETER = 0.1016;
+        public static final double WHEEL_PERIMETER = WHEEL_DIAMETER * Math.PI;
         // drive gear ratio
         public static final double DRIVE_GEAR_RATIO = 6.75;
 
@@ -76,6 +77,7 @@ public final class Constants {
         /** maximum rotation speed (radians per second) */
         public static final double MAX_ROTATION_SPEED = Math.PI*2;
         public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.05;
+        public static final double ROTATION_SCALE_FACTOR = 0.65;
             
         // pid values
         public static final double AZIMUTH_kP = 0.01; // sds: 0.2; rylan: 0.65
@@ -88,10 +90,10 @@ public final class Constants {
         /* Maximum distance for a valid waypoint (meters) */
         public static final double MAX_WAYPOINT_DISTANCE = 0.5;
 
-        public static final double SHWERVE_DRIVE_Kp = .044057;
+        public static final double SHWERVE_DRIVE_Kp = 0.044057;
         public static final double SHWERVE_DRIVE_Kd = 0;
 
-        public static final double AUTO_BALANCE_Kp = 0;
+        public static final double AUTO_BALANCE_Kp = 0.1;
         public static final double AUTO_BALANCE_Kd = 0;
     }
 
@@ -101,58 +103,72 @@ public final class Constants {
     }
 
     public static final class ARM {
-        public static final double JOINT_ANGLE_DEADZONE = 10;
+        public static final double JOINT_ANGLE_DEADZONE = 20;
         public static final double JOINT_COORDINATE_DEADZONE = 0;
 
         public static enum positions {
-            ScoreHigh,
-            ScoreMid,
+            ScoreHighCone,
+            DipHighCone,
+            ScoreHighCube,
+            ScoreMidCone,
+            DipMidCone,
+            ScoreMidCube,
+            ScoreHighPlace,
+            ScoreMidPlace,
             ScoreLow,
             Floor,
             FloorAlt,
             Substation,
-            Idle
+            Idle,
+            IdleShootPosition
         };
 
-        public static final double STAGE_1_OFFSET = 147.5;
-        public static final double STAGE_2_OFFSET = 176.5 - 60;
-        public static final double STAGE_3_OFFSET = 346.0;
-
-        public static ArmPosition scoreHighPosition  = new ArmPosition(175, 245, 5);
-        public static ArmPosition scoreMidPosition   = new ArmPosition(207, 195, 353);
-        public static ArmPosition scoreLowPosition   = new ArmPosition(135, 110+5, 350+5);
-        public static ArmPosition floorPosition      = new ArmPosition(138, 153, 350);
-        public static ArmPosition floorAltPosition   = new ArmPosition(180, 156, 277);
-        public static ArmPosition substationPosition = new ArmPosition(160, 240, 355);
-        //public static ArmPosition idlePosition       = new ArmPosition(195, 60, 315);
-        //public static ArmPosition idlePosition       = new ArmPosition(135, 110+5, 350+5);
-        public static ArmPosition idlePosition       = new ArmPosition(190, 105, 343);
+        public static final double STAGE_1_OFFSET = 150;
+        public static final double STAGE_2_OFFSET = 155;
+        public static final double STAGE_3_OFFSET = 347;
 
 
 
-        public static final double thetaSpeed = 0.1;
-        public static final double xSpeed = 0.1;
-        public static final double ySpeed = 0.1;
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(195, 130, 255);
+        public static ArmPosition dipHighConePosition  = new ArmPosition(166, 110, 255);
+        public static ArmPosition scoreHighCubePosition  = new ArmPosition(178, 117, 242);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(80, 145, 262);
+        public static ArmPosition dipMidConePosition   = new ArmPosition(80, 125, 252);
+        public static ArmPosition scoreMidCubePosition   = new ArmPosition(88, 150, 210);
+        public static ArmPosition idlePosition   = new ArmPosition(78, 204, 161);
+        public static ArmPosition scoreLowPosition      = new ArmPosition(85, 175, 202);
+        public static ArmPosition floorPosition      = new ArmPosition(80, 100, 235);
+        public static ArmPosition floorAltPosition   = new ArmPosition(88, 117, 158);
+        public static ArmPosition substationPosition = new ArmPosition(88, 183, 210);
+        public static ArmPosition scoreHighPlace     = new ArmPosition(160, 125, 250);
+        public static ArmPosition scoreMidPlace      = new ArmPosition(198, 55, 238);
 
-        public static final double STAGE_1_LENGTH = 10;
-        public static final double STAGE_2_LENGTH = 10;
+        public static final double THETA_SPEED = 1;
+        public static final double X_SPEED = 0.5;
+        public static final double Y_SPEED = 0.5;
 
-        public static final double STAGE_1_Kp = 0.009;
+        // inches
+        public static final double STAGE_1_LENGTH = 20.0;
+        public static final double STAGE_2_LENGTH = 29.5;
+
+         public static final double STAGE_1_Kp = 0.004;
         public static final double STAGE_1_Ki = 0;
-        public static final double STAGE_1_Kd = 0.005;
-        public static final double STAGE_2_Kp = 0.005;
+        public static final double STAGE_1_Kd = 0;
+         public static final double STAGE_2_Kp = 0.005;
         public static final double STAGE_2_Ki = 0;
         public static final double STAGE_2_Kd = 0;
 
         public static final double STAGE_3_Kp = 0.005;
         public static final double STAGE_3_Ki = 0;
         public static final double STAGE_3_Kd = 0;
- }
+    }
 
      public class POP {
          public static final double F = 0;
          public static final double R = 0;
-         public static final double SPEED = 0.4;
+         public static final double SPEEDOUT = 0.2;
+         public static final double SPEEDIN = 0.5;
+
          public static final int FORWARD_PNEUMATIC_CHANNEL = 14;
          public static final int BACKWARD_PNEUMATIC_CHANNEL = 15;
      }

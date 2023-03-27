@@ -1,8 +1,17 @@
 {
   "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
     "transitory": {
       "telemetry": {
         "Arm": {
+          "currentPoint": {
+            "open": true
+          },
+          "manualTarget": {
+            "open": true
+          },
           "open": true,
           "stage1": {
             "open": true
@@ -31,8 +40,15 @@
             "open": true
           }
         },
+        "buttonBoard": {
+          "open": true
+        },
         "drivetrain": {
+          "gyro": {
+            "open": true
+          },
           "kinematics": {
+            "open": true,
             "robot": {
               "open": true
             }
@@ -46,13 +62,40 @@
                 "open": true
               },
               "open": true
-            }
+            },
+            "BR": {
+              "azimuth": {
+                "open": true
+              },
+              "open": true
+            },
+            "FL": {
+              "azimuth": {
+                "open": true
+              },
+              "open": true
+            },
+            "FR": {
+              "azimuth": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
           },
           "odometry": {
             "field": {
               "open": true
-            }
-          }
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "general": {
+          "autonomous": {
+            "open": true
+          },
+          "open": true
         },
         "open": true
       }
@@ -68,12 +111,7 @@
     "Plot <0>": {
       "plots": [
         {
-          "axis": [
-            {
-              "autoFit": true
-            }
-          ],
-          "height": 277,
+          "height": 287,
           "series": [
             {
               "color": [
@@ -101,6 +139,24 @@
                 1.0
               ],
               "id": "NT:/telemetry/Arm/stage2/internalVelocity"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/telemetry/drivetrain/modules/FL/azimuth/actualPosition"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/telemetry/drivetrain/modules/FL/azimuth/targetPosition"
             }
           ]
         }
@@ -109,7 +165,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": 258,
+          "height": 288,
           "series": [
             {
               "color": [
@@ -128,6 +184,24 @@
                 1.0
               ],
               "id": "NT:/telemetry/Arm/stage2/targetPosition"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/telemetry/drivetrain/modules/BR/azimuth/targetPosition"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/telemetry/drivetrain/modules/BR/azimuth/actualPosition"
             }
           ]
         }
@@ -136,12 +210,7 @@
     "Plot <2>": {
       "plots": [
         {
-          "axis": [
-            {
-              "autoFit": true
-            }
-          ],
-          "height": 258,
+          "height": 326,
           "series": [
             {
               "color": [
@@ -160,6 +229,24 @@
                 1.0
               ],
               "id": "NT:/telemetry/Arm/stage3/targetPosition"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/telemetry/drivetrain/modules/BL/azimuth/actualPosition"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/telemetry/drivetrain/modules/BL/azimuth/targetPosition"
             }
           ]
         }
@@ -168,12 +255,7 @@
     "Plot <3>": {
       "plots": [
         {
-          "axis": [
-            {
-              "autoFit": true
-            }
-          ],
-          "height": 302,
+          "height": 311,
           "series": [
             {
               "color": [
@@ -192,6 +274,42 @@
                 1.0
               ],
               "id": "NT:/telemetry/Arm/temp"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/telemetry/Arm/stage2/actualPosition"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/telemetry/Arm/stage2/targetPosition"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/telemetry/drivetrain/modules/FR/azimuth/actualPosition"
+            },
+            {
+              "color": [
+                0.5764706134796143,
+                0.4705882668495178,
+                0.3764706254005432,
+                1.0
+              ],
+              "id": "NT:/telemetry/drivetrain/modules/FR/azimuth/targetPosition"
             }
           ]
         }
