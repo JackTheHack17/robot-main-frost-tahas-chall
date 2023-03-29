@@ -166,6 +166,10 @@ public class PinchersofPower extends SubsystemBase  {
     if ( DriverStation.isEnabled() ) {
       spinner.set(intakeSpeed);
       spinner2.set(intakeSpeed);
+    } else {
+      // prevent CAN timeouts when disabled, actual motor stoppage is handled at a lower level
+      spinner.set(0);
+      spinner2.set(0);
     }
 
     Telemetry.setValue("Pincher/leftMotor/setpoint", spinner.get());

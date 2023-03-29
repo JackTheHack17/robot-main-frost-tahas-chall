@@ -594,6 +594,11 @@ public class Arm extends SubsystemBase {
             m_stage1.setVoltage( m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), 0) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
             m_stage2.setVoltage( m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), 0) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
             m_stage3.setVoltage( m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), 0) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
+        } else {
+            // prevent CAN timeouts when disabled, actual motor stoppage is handled at a lower level
+            m_stage1.set(0);
+            m_stage2.set(0);
+            m_stage3.set(0);
         }
     }
     
