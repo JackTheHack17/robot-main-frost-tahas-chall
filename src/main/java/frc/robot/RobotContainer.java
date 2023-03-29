@@ -34,12 +34,12 @@ public class RobotContainer {
   public static final ButtonBoard copilotController = new ButtonBoard(1, 2);
 
   // The robot's subsystems and commands are defined here...
-  public final Pigeon m_gyro = new Pigeon();
-  public final Limelight m_limelight = new Limelight();
-  public final LEDs m_LEDs = new LEDs();
-  public final PinchersofPower m_claw = new PinchersofPower(this);
-  public final Arm m_arm = new Arm(m_claw, copilotController);
-  public final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
+  public Pigeon m_gyro = new Pigeon();
+  public Limelight m_limelight = new Limelight();
+  public LEDs m_LEDs = new LEDs();
+  public PinchersofPower m_claw = new PinchersofPower(this);
+  public Arm m_arm = new Arm(m_claw, copilotController);
+  public Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

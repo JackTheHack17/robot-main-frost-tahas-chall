@@ -1,4 +1,5 @@
 package frc.robot.subsystems;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -6,6 +7,7 @@ import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -27,6 +29,7 @@ public class PinchersofPower extends SubsystemBase  {
   private final CANSparkMax spinner2;
   private final ColorSensorV3 colorSensor;
   private boolean m_cone;
+  private double intakeSpeed = 0;
 
   public PinchersofPower(RobotContainer m_container) {
     this.m_container = m_container;
@@ -78,20 +81,20 @@ public class PinchersofPower extends SubsystemBase  {
     }
   }
 
+  public void spinSlow() {
+    intakeSpeed = POP.SPEEDIN/4;
+  }
+
   public void spinIn() {
-    spinner.set(POP.SPEEDIN);
-    spinner2.set(POP.SPEEDIN);
+    intakeSpeed = POP.SPEEDIN;
   }
 
   public void spinOut() {
-    spinner.set(-POP.SPEEDOUT);
-    spinner2.set(-POP.SPEEDOUT);
+    intakeSpeed = -POP.SPEEDOUT;
   }
 
   public void spinOff() {
-    spinner.set(0);
-    spinner2.set(0);
-
+    intakeSpeed = 0;
   }
 
   public enum GamePieces {
@@ -144,6 +147,9 @@ public class PinchersofPower extends SubsystemBase  {
       if (m_container.getArm().target == positions.Substation && m_cone) {
         closeGrip();
       } else if ( m_cone ) {
+        if ( m_container.getArm().target == positions.ScoreLow) {
+          spinOut();  
+        }
         openGrip();
       } else {
         spinOut();
@@ -157,6 +163,11 @@ public class PinchersofPower extends SubsystemBase  {
 
   @Override
   public void periodic() {
+    if ( DriverStation.isEnabled() ) {
+      spinner.set(intakeSpeed);
+      spinner2.set(intakeSpeed);
+    }
+
     Telemetry.setValue("Pincher/leftMotor/setpoint", spinner.get());
     Telemetry.setValue("Pincher/leftMotor/temperature", spinner.getMotorTemperature());
     Telemetry.setValue("Pincher/leftMotor/outputVoltage", spinner.getAppliedOutput());

@@ -103,7 +103,7 @@ public final class Constants {
     }
 
     public static final class ARM {
-        public static final double JOINT_ANGLE_DEADZONE = 20;
+        public static final double JOINT_ANGLE_DEADZONE = 40;
         public static final double JOINT_COORDINATE_DEADZONE = 0;
 
         public static enum positions {
@@ -129,19 +129,19 @@ public final class Constants {
 
 
 
-        public static ArmPosition scoreHighConePosition  = new ArmPosition(195, 130, 255);
-        public static ArmPosition dipHighConePosition  = new ArmPosition(166, 110, 255);
-        public static ArmPosition scoreHighCubePosition  = new ArmPosition(178, 117, 242);
-        public static ArmPosition scoreMidConePosition   = new ArmPosition(80, 145, 262);
-        public static ArmPosition dipMidConePosition   = new ArmPosition(80, 125, 252);
-        public static ArmPosition scoreMidCubePosition   = new ArmPosition(88, 150, 210);
-        public static ArmPosition idlePosition   = new ArmPosition(78, 204, 161);
-        public static ArmPosition scoreLowPosition      = new ArmPosition(85, 175, 202);
-        public static ArmPosition floorPosition      = new ArmPosition(80, 100, 235);
-        public static ArmPosition floorAltPosition   = new ArmPosition(88, 117, 158);
-        public static ArmPosition substationPosition = new ArmPosition(88, 183, 210);
-        public static ArmPosition scoreHighPlace     = new ArmPosition(160, 125, 250);
-        public static ArmPosition scoreMidPlace      = new ArmPosition(198, 55, 238);
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(195, 145, 275);
+        public static ArmPosition dipHighConePosition  = new ArmPosition(166, 135, 255);
+        public static ArmPosition scoreHighCubePosition  = new ArmPosition(178, 147, 242);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(80, 175, 262);
+        public static ArmPosition dipMidConePosition   = new ArmPosition(80, 155, 252);
+        public static ArmPosition scoreMidCubePosition   = new ArmPosition(88, 180, 210);
+        public static ArmPosition idlePosition   = new ArmPosition(78, 234, 161);
+        public static ArmPosition scoreLowPosition      = new ArmPosition(85, 205, 202);
+        public static ArmPosition floorPosition      = new ArmPosition(80, 117, 235);
+        public static ArmPosition floorAltPosition   = new ArmPosition(88, 127, 158);
+        public static ArmPosition substationPosition = new ArmPosition(88, 205, 217);
+        public static ArmPosition scoreHighPlace     = new ArmPosition(160, 155, 250);
+        public static ArmPosition scoreMidPlace      = new ArmPosition(198, 85, 238);
 
         public static final double THETA_SPEED = 1;
         public static final double X_SPEED = 0.5;

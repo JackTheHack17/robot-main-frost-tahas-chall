@@ -157,7 +157,7 @@ public class Drivetrain extends SubsystemBase {
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = false; // default to field oriented
   
-  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 80, 80, 0);
+  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 60, 60, 0);
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
@@ -344,7 +344,7 @@ public class Drivetrain extends SubsystemBase {
 
     // WPILib swerve command
     m_chassisSpeeds = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED);
-    if ( !isRobotOriented ) m_chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED, Rotation2d.fromDegrees(m_gyro.getYaw()));
+    if ( !isRobotOriented ) m_chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED, m_odometry.getEstimatedPosition().getRotation());
     
     modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
 
@@ -636,30 +636,18 @@ public class Drivetrain extends SubsystemBase {
     // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
     // for every path in the group
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
-      Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceMobilityDock"), 
+      Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceDock"), 
       new PathConstraints(1, 1)
       //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
     );
 
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-    eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).andThen(m_arm.moveToPositionTerminatingCommand(positions.DipHighCone)).andThen(new WaitCommand(1)));
-    eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).andThen(m_arm.moveToPositionTerminatingCommand(positions.DipMidCone)).andThen(new WaitCommand(1)));
+    eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(3).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(1)).andThen(new WaitCommand(.25)));
+    eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(3).andThen(m_arm.moveToPositionCommand(positions.DipMidCone).withTimeout(1)).andThen(new WaitCommand(.25)));
     eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle));
-    eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(1)));
+    eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
     eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
-    eventMap.put("intakeIn", new FunctionalCommand(
-      () -> {}, () -> {
-      m_claw.openGrip();
-      m_claw.intake();
-    }, 
-    (interrupt) -> {
-      m_claw.spinOff();
-    }, 
-    () -> {
-      return m_claw.getColorSensorGamePiece() != GamePieces.None;
-    }, 
-    (Subsystem) m_claw));
     eventMap.put("autobalance", new AutoBalance(this));
     eventMap.put("realign", moveToPositionCommand());
     eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cone); } ));

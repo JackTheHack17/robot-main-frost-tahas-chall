@@ -1,27 +1,9 @@
 {
   "NetworkTables": {
-    "Persistent Values": {
-      "open": false
-    },
     "transitory": {
       "telemetry": {
         "Arm": {
-          "currentPoint": {
-            "open": true
-          },
-          "manualTarget": {
-            "open": true
-          },
-          "open": true,
-          "stage1": {
-            "open": true
-          },
-          "stage2": {
-            "open": true
-          },
-          "stage3": {
-            "open": true
-          }
+          "open": true
         },
         "LEDS": {
           "Blinkin": {
@@ -40,7 +22,10 @@
             "open": true
           }
         },
-        "buttonBoard": {
+        "Pincher": {
+          "compressor": {
+            "open": true
+          },
           "open": true
         },
         "drivetrain": {
@@ -88,8 +73,7 @@
               "open": true
             },
             "open": true
-          },
-          "open": true
+          }
         },
         "general": {
           "autonomous": {
@@ -105,7 +89,9 @@
     }
   },
   "NetworkTables Settings": {
-    "mode": "Client (NT3)"
+    "dsClient": false,
+    "mode": "Client (NT3)",
+    "serverTeam": "5411"
   },
   "Plots": {
     "Plot <0>": {
@@ -160,7 +146,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <1>": {
       "plots": [
@@ -205,7 +194,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <2>": {
       "plots": [
@@ -250,7 +242,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <3>": {
       "plots": [
@@ -313,7 +308,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     }
   }
 }
