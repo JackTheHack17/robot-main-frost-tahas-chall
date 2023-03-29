@@ -17,7 +17,6 @@ import static frc.robot.Constants.CAN.FL_DRIVE_ID;
 import static frc.robot.Constants.CAN.FR_AZIMUTH_ID;
 import static frc.robot.Constants.CAN.FR_CANCODER_ID;
 import static frc.robot.Constants.CAN.FR_DRIVE_ID;
-import static frc.robot.Constants.CAN.SHWERVE_DRIVE_ID;
 import static frc.robot.Constants.DRIVETRAIN.AUTO_BALANCE_Kd;
 import static frc.robot.Constants.DRIVETRAIN.AUTO_BALANCE_Kp;
 import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kD;
@@ -55,10 +54,7 @@ import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -69,8 +65,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -117,7 +113,7 @@ public class Drivetrain extends SubsystemBase {
   private final TalonFX BL_Drive = new TalonFX(BL_DRIVE_ID);
   private final TalonFX BR_Drive = new TalonFX(BR_DRIVE_ID);
 
-  private final CANSparkMax shwerveDrive = new CANSparkMax(SHWERVE_DRIVE_ID, MotorType.kBrushless);
+  //private final CANSparkMax shwerveDrive = new CANSparkMax(SHWERVE_DRIVE_ID, MotorType.kBrushless);
 
   // swerve module azimuth (steering) motors
   private final TalonFX FL_Azimuth = new TalonFX(FL_AZIMUTH_ID);
@@ -214,11 +210,11 @@ public class Drivetrain extends SubsystemBase {
     configAzimuth(BL_Azimuth, BL_Position);
     configAzimuth(BR_Azimuth, BR_Position);
 
-    shwerveDrive.restoreFactoryDefaults();
+    /*shwerveDrive.restoreFactoryDefaults();
     shwerveDrive.clearFaults();
     shwerveDrive.setSmartCurrentLimit(60);
     shwerveDrive.setSecondaryCurrentLimit(60);
-    shwerveDrive.burnFlash();
+    shwerveDrive.burnFlash();*/
 
     // declare scoring positions
     if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {
@@ -336,8 +332,8 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
   
-    Telemetry.setValue("drivetrain/shwervePower", shwerveDrive.get());
-    Telemetry.setValue("drivetrain/shwerveStator", shwerveDrive.getOutputCurrent());
+    //Telemetry.setValue("drivetrain/shwervePower", shwerveDrive.get());
+    //Telemetry.setValue("drivetrain/shwerveStator", shwerveDrive.getOutputCurrent());
   }
 
   public void joystickDrive(double LX, double LY, double RX) {
@@ -672,13 +668,13 @@ public class Drivetrain extends SubsystemBase {
   public void shwerve ( double LX, double LY) {
     // 6in diameter wheels, 10:1 gearbox
     if (isRobotOriented) {
-      shwerveDrive.set(MathUtil.clamp(-LX*10, -1, 1));
+      //shwerveDrive.set(MathUtil.clamp(-LX*10, -1, 1));
     } else {
       noShwerve();
     }
   }
 
   public void noShwerve () {
-    shwerveDrive.set(0);
+    //shwerveDrive.set(0);
   }
 }
