@@ -58,6 +58,9 @@ public class PinchersofPower extends SubsystemBase  {
 
     spinner2.setInverted(true);
 
+    spinner.setCANTimeout(20);
+    spinner2.setCANTimeout(20);
+
     spinner.burnFlash();
     spinner2.burnFlash();
 
