@@ -34,7 +34,7 @@ public class AutoBalance extends ProfiledPIDCommand {
     // Configure additional PID options by calling `getController` here.
     addRequirements(drivetrain);
     this.drivetrain = drivetrain;
-    getController().setTolerance(20); //degrees
+    getController().setTolerance(30); //degrees
 
   }
   

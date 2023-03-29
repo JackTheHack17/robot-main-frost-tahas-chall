@@ -632,7 +632,7 @@ public class Drivetrain extends SubsystemBase {
     // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
     // for every path in the group
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
-      Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceDock"), 
+      Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceMobilityDock"), 
       new PathConstraints(1, 1)
       //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
     );
@@ -644,6 +644,7 @@ public class Drivetrain extends SubsystemBase {
     eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle));
     eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
     eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
+    eventMap.put("intake", m_claw.intakeCommand().andThen(new WaitCommand(.25)));
     eventMap.put("autobalance", new AutoBalance(this));
     eventMap.put("realign", moveToPositionCommand());
     eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cone); } ));
