@@ -18,7 +18,7 @@ public class AutoBalance extends ProfiledPIDCommand {
             // The PID gains
             0.006,
             0,
-            0.0005,
+            0.0016,
             // The motion profile constraints
             new TrapezoidProfile.Constraints(1, 1)),
         // This should return the measurement
@@ -34,7 +34,7 @@ public class AutoBalance extends ProfiledPIDCommand {
     // Configure additional PID options by calling `getController` here.
     addRequirements(drivetrain);
     this.drivetrain = drivetrain;
-    getController().setTolerance(30); //degrees
+    getController().setTolerance(45); //degrees
 
   }
   

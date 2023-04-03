@@ -40,7 +40,6 @@ public class PinchersofPower extends SubsystemBase  {
     //spinner2.follow(spinner, true);
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = true;
-    pusher.set(Value.kForward);
 
     //comp.disable();
 
@@ -137,6 +136,10 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void setMode(GamePieces mode) {
     m_cone = (mode == GamePieces.Cone);
+
+    if(!m_cone){
+      openGrip();
+    }
   }
 
   
@@ -166,7 +169,7 @@ public class PinchersofPower extends SubsystemBase  {
 
   @Override
   public void periodic() {
-    if ( DriverStation.isEnabled() ) {
+    if ( DriverStation.isEnabled() || DriverStation.isAutonomousEnabled() ) {
       spinner.set(intakeSpeed);
       spinner2.set(intakeSpeed);
     } else {

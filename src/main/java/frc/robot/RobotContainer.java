@@ -116,8 +116,8 @@ public class RobotContainer {
     }));
     copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinOff();}));
     
-    driverController.axisGreaterThan(2, 0.1).onTrue(m_swerve.moveToPositionCommand());
-    driverController.axisGreaterThan(3, 0.1).onTrue(m_swerve.moveToPositionCommand());
+    //driverController.axisGreaterThan(2, 0.1).onTrue(m_swerve.moveToPositionCommand());
+    //driverController.axisGreaterThan(3, 0.1).onTrue(m_swerve.moveToPositionCommand());
   }
 
   /**

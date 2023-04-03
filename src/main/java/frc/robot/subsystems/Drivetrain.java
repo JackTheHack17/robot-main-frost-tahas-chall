@@ -79,7 +79,6 @@ import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.AutoBalance;
-import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 public class Drivetrain extends SubsystemBase {
   private Pigeon m_gyro;
@@ -632,23 +631,23 @@ public class Drivetrain extends SubsystemBase {
     // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
     // for every path in the group
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
-      Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceMobilityDock"), 
-      new PathConstraints(1, 1)
+      "PlaceDock",//Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceMobilityDock"), 
+      new PathConstraints(1, 2)
       //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
     );
 
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-    eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(3).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(1)).andThen(new WaitCommand(.25)));
-    eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(3).andThen(m_arm.moveToPositionCommand(positions.DipMidCone).withTimeout(1)).andThen(new WaitCommand(.25)));
+    eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
+    eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(2.75));
     eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle));
     eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
-    eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
-    eventMap.put("intake", m_claw.intakeCommand().andThen(new WaitCommand(.25)));
+    eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(5.5));
+    eventMap.put("intake", m_claw.intakeCommand().andThen(new WaitCommand(.75)));
     eventMap.put("autobalance", new AutoBalance(this));
     eventMap.put("realign", moveToPositionCommand());
-    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cone); } ));
-    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setMode(GamePieces.Cube); } ));
+    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ));
+    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setCone(false); m_claw.openGrip(); } ));
 
     // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
