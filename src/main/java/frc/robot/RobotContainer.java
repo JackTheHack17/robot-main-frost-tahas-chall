@@ -76,8 +76,7 @@ public class RobotContainer {
     driverController.y().whileTrue(new AutoBalance(m_swerve));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
-    copilotController.button(0).onFalse(m_arm.defaultCommand());//added arm default cmd to avoid hitting station on retraction
-    copilotController.button(0).onFalse(m_claw.intakeCommand());
+    copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
     copilotController.button(1).onFalse(m_claw.intakeCommand());
     copilotController.button(2).onTrue(new InstantCommand( () -> m_arm.goToScoreHigh().schedule()));
