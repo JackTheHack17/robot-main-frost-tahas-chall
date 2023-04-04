@@ -7,15 +7,21 @@ import static frc.robot.Constants.ARM.STAGE_1_Ki;
 import static frc.robot.Constants.ARM.STAGE_1_Kp;
 import static frc.robot.Constants.ARM.STAGE_1_LENGTH;
 import static frc.robot.Constants.ARM.STAGE_1_OFFSET;
+import static frc.robot.Constants.ARM.STAGE_1_MAX_SPEED;
+import static frc.robot.Constants.ARM.STAGE_1_MAX_ACCEL;
 import static frc.robot.Constants.ARM.STAGE_2_Kd;
 import static frc.robot.Constants.ARM.STAGE_2_Ki;
 import static frc.robot.Constants.ARM.STAGE_2_Kp;
 import static frc.robot.Constants.ARM.STAGE_2_LENGTH;
 import static frc.robot.Constants.ARM.STAGE_2_OFFSET;
+import static frc.robot.Constants.ARM.STAGE_2_MAX_SPEED;
+import static frc.robot.Constants.ARM.STAGE_2_MAX_ACCEL;
 import static frc.robot.Constants.ARM.STAGE_3_Kd;
 import static frc.robot.Constants.ARM.STAGE_3_Ki;
 import static frc.robot.Constants.ARM.STAGE_3_Kp;
 import static frc.robot.Constants.ARM.STAGE_3_OFFSET;
+import static frc.robot.Constants.ARM.STAGE_3_MAX_SPEED;
+import static frc.robot.Constants.ARM.STAGE_3_MAX_ACCEL;
 import static frc.robot.Constants.ARM.THETA_SPEED;
 import static frc.robot.Constants.ARM.X_SPEED;
 import static frc.robot.Constants.ARM.Y_SPEED;
@@ -39,7 +45,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -58,15 +65,15 @@ import frc.robot.Constants.DIO;
 import frc.robot.RobotContainer;
 
 public class Arm extends SubsystemBase {
-    private final CANSparkMax m_stage1;
-    private final CANSparkMax m_stage2;
-    private final CANSparkMax m_stage3;
-    private final DutyCycleEncoder m_stage1Encoder;  
-    private final DutyCycleEncoder m_stage2Encoder;
-    private final DutyCycleEncoder m_stage3Encoder;
-    private final PIDController m_stage1PID;  
-    private final PIDController m_stage2PID;
-    private final PIDController m_stage3PID;
+    private CANSparkMax m_stage1;
+    private CANSparkMax m_stage2;
+    private CANSparkMax m_stage3;
+    private DutyCycleEncoder m_stage1Encoder;  
+    private DutyCycleEncoder m_stage2Encoder;
+    private DutyCycleEncoder m_stage3Encoder;
+    private ProfiledPIDController m_stage1PID;
+    private ProfiledPIDController m_stage2PID;
+    private ProfiledPIDController m_stage3PID;
     private PinchersofPower m_clawSubsystem;
     private ButtonBoard m_copilotController;
     private double m_stage1Target = 0;
@@ -83,7 +90,6 @@ public class Arm extends SubsystemBase {
     private ArmFeedforward m_stage2FF;
     private ArmFeedforward m_stage3FF;
     private boolean returnToIdle = true;
-
 
     private double tempThetaSpeed = THETA_SPEED;
 
@@ -125,14 +131,14 @@ public class Arm extends SubsystemBase {
         m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
         m_stage1FF = new ArmFeedforward(0.04, 1.3,0,0); // 1.37 1.35 1.3
-        m_stage2FF = new ArmFeedforward(0.04, 1.18, 0,0);
+        m_stage2FF = new ArmFeedforward(0.04, 1.0, 0,0);//kg 1.18
         m_stage3FF = new ArmFeedforward(0.04, 0.52, 0,0);
 
-        m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
+        m_stage1PID = new ProfiledPIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd, new TrapezoidProfile.Constraints(STAGE_1_MAX_SPEED, STAGE_1_MAX_ACCEL));
         m_stage1PID.enableContinuousInput(0, 360);
-        m_stage2PID = new PIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd);
+        m_stage2PID = new ProfiledPIDController(STAGE_2_Kp, STAGE_2_Ki, STAGE_2_Kd, new TrapezoidProfile.Constraints(STAGE_2_MAX_SPEED, STAGE_2_MAX_ACCEL));
         m_stage2PID.enableContinuousInput(0, 360);
-        m_stage3PID = new PIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd);
+        m_stage3PID = new ProfiledPIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd, new TrapezoidProfile.Constraints(STAGE_3_MAX_SPEED, STAGE_3_MAX_ACCEL));
         m_stage3PID.enableContinuousInput(0, 360);
 
         m_stage1PID.setTolerance(0);
@@ -236,13 +242,13 @@ public class Arm extends SubsystemBase {
 
     private void moveToPosition (positions position) {
         ArmPosition target = positionMap.get(position);
-        //if (!movingToIdle || (movingToIdle &&
-          //  Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
-            //Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE)) {
+        if (!movingToIdle || (movingToIdle &&
+            Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
+            Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE)) {
                 moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
-        //} else {
-          //  moveToAngles(target.getStage1Angle(), target.getStage2Angle(), m_stage3Encoder.getAbsolutePosition()*360);   
-        //}
+        } else {
+            moveToAngles(target.getStage1Angle(), target.getStage2Angle(), m_stage3Encoder.getAbsolutePosition()*360);   
+        }
        // if ( lastPosition == positions.Idle && position != positions.Idle && Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - target.getStage2Angle()) > JOINT_ANGLE_DEADZONE) {
          //   moveToAngles(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle());
             //m_manualTargetX = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[0];
