@@ -458,7 +458,12 @@ public class Arm extends SubsystemBase {
                         m_copilotController.setLED(0, true);
                         break;
                     case Idle:
-                        m_clawSubsystem.spinOff();
+                        movingToIdle = true;
+                        if (m_clawSubsystem.wantCone()) {
+                            m_clawSubsystem.spinOff();
+                        } else {
+                            m_clawSubsystem.spinSlow();
+                        }
                         break;
                     default:
                         //m_clawSubsystem.spinOff();
@@ -596,7 +601,7 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("Arm/stage3/targetPosition", m_stage3Target);
         Telemetry.setValue("Arm/stage2/internalVelocity", m_stage2.getEncoder().getVelocity());
 
-        if ( DriverStation.isEnabled() ) {
+        if ( DriverStation.isEnabled() || DriverStation.isAutonomousEnabled() ) {
             if (movingToIdle) {
                 moveToPositionCommand(positions.Idle);
             }
