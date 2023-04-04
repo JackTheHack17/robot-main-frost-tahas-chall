@@ -154,7 +154,7 @@ public class Drivetrain extends SubsystemBase {
   private boolean isRobotOriented = false; // default to field oriented
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 60, 60, 0);
-  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
+  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 21, 20, 0);
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
 
@@ -292,14 +292,14 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/modules/FR/drive/actualSpeed", FR_Actual_Speed);
     Telemetry.setValue("drivetrain/modules/BL/drive/actualSpeed", BL_Actual_Speed);
     Telemetry.setValue("drivetrain/modules/BR/drive/actualSpeed", BR_Actual_Speed);
-    Telemetry.setValue("drivetrain/modules/FL/drive/temperature", FL_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/modules/FR/drive/temperature", FR_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/modules/BL/drive/temperature", BL_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/modules/BR/drive/temperature", BR_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/modules/FL/azimuth/temperature", FL_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/modules/FR/azimuth/temperature", FR_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/modules/BL/azimuth/temperature", BL_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/modules/BR/azimuth/temperature", BR_Azimuth.getTemperature());
+    //Telemetry.setValue("drivetrain/modules/FL/drive/temperature", FL_Drive.getTemperature());
+    //Telemetry.setValue("drivetrain/modules/FR/drive/temperature", FR_Drive.getTemperature());
+    //Telemetry.setValue("drivetrain/modules/BL/drive/temperature", BL_Drive.getTemperature());
+    //Telemetry.setValue("drivetrain/modules/BR/drive/temperature", BR_Drive.getTemperature());
+    //Telemetry.setValue("drivetrain/modules/FL/azimuth/temperature", FL_Azimuth.getTemperature());
+    //Telemetry.setValue("drivetrain/modules/FR/azimuth/temperature", FR_Azimuth.getTemperature());
+    //Telemetry.setValue("drivetrain/modules/BL/azimuth/temperature", BL_Azimuth.getTemperature());
+    //Telemetry.setValue("drivetrain/modules/BR/azimuth/temperature", BR_Azimuth.getTemperature());
     Telemetry.setValue("drivetrain/modules/FL/azimuth/outputVoltage", FL_Azimuth.getMotorOutputVoltage());
     Telemetry.setValue("drivetrain/modules/FR/azimuth/outputVoltage", FR_Azimuth.getMotorOutputVoltage());
     Telemetry.setValue("drivetrain/modules/BL/azimuth/outputVoltage", BL_Azimuth.getMotorOutputVoltage());

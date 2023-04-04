@@ -76,7 +76,7 @@ public final class Constants {
         public static final double MAX_LINEAR_SPEED = 5.4;
         /** maximum rotation speed (radians per second) */
         public static final double MAX_ROTATION_SPEED = Math.PI*2;
-        public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.05;
+        public static final double SWERVE_SLOW_SPEED_PERCENTAGE = 0.1;
         public static final double ROTATION_SCALE_FACTOR = 0.65;
             
         // pid values
@@ -127,19 +127,17 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
 
-
-
         public static ArmPosition scoreHighConePosition  = new ArmPosition(183, 315, 223);
-        public static ArmPosition dipHighConePosition  = new ArmPosition(191, 267, 235);
+        public static ArmPosition dipHighConePosition  = new ArmPosition(183, 290, 213);
         public static ArmPosition scoreHighCubePosition  = new ArmPosition(138, 325, 216);
-        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 349, 225);
-        public static ArmPosition dipMidConePosition   = new ArmPosition(107, 330, 225);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(117, 349, 240);
+        public static ArmPosition dipMidConePosition   = new ArmPosition(107, 345, 225);
         public static ArmPosition scoreMidCubePosition   = new ArmPosition(107, 352, 187);
-        public static ArmPosition idlePosition   = new ArmPosition(107, 53, 120);
+        public static ArmPosition idlePosition   = new ArmPosition(107, 53, 129);
         public static ArmPosition scoreLowPosition      = new ArmPosition(107, 2, 116);
-        public static ArmPosition floorPosition      = new ArmPosition(107, 275, 225);
-        public static ArmPosition floorAltPosition   = new ArmPosition(107, 307, 120);
-        public static ArmPosition substationPosition = new ArmPosition(107, 8, 180);
+        public static ArmPosition floorPosition      = new ArmPosition(107, 290, 225);
+        public static ArmPosition floorAltPosition   = new ArmPosition(107, 319, 120);
+        public static ArmPosition substationPosition = new ArmPosition(120, 20, 180);//allows reach all the way back and from edge
 
         public static final double THETA_SPEED = 1;
         public static final double X_SPEED = 0.5;
@@ -149,23 +147,29 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 20.0;
         public static final double STAGE_2_LENGTH = 29.5;
 
-        public static final double STAGE_1_Kp = 0.035;//kp=.008, 0.025
-        public static final double STAGE_1_Ki = 0;
-        public static final double STAGE_1_Kd = 0;
-        public static final double STAGE_1_MAX_SPEED = 1;
-        public static final double STAGE_1_MAX_ACCEL = 1;
+        public static final double STAGE_1_Kp = 0.0350;//kp=.008, 0.025
+        public static final double STAGE_1_Ki = 0.001;
+        public static final double STAGE_1_Kd = 0.000;//0.0005
+        public static final double STAGE_1_Ks = 0.0005;
+        public static final double STAGE_1_Kg = 0.5;//1.3 causes tiny pulse width modulation
+        public static final double STAGE_1_MAX_SPEED = 200;
+        public static final double STAGE_1_MAX_ACCEL = 160;
         
-        public static final double STAGE_2_Kp = 0.0035;
-        public static final double STAGE_2_Ki = 0.0025;//0.0065
-        public static final double STAGE_2_Kd = 0.0;//0.0035
-        public static final double STAGE_2_MAX_SPEED = 1;
-        public static final double STAGE_2_MAX_ACCEL = 1;
+        public static final double STAGE_2_Kp = 0.0225;//0.008
+        public static final double STAGE_2_Ki = 0.00;//0.0025 //0.0065
+        public static final double STAGE_2_Kd = 0.0065;//0.035 0.0043
+        public static final double STAGE_2_Ks = 0.05;
+        public static final double STAGE_2_Kg = 1.0;//1.4
+        public static final double STAGE_2_MAX_SPEED = 200;
+        public static final double STAGE_2_MAX_ACCEL = 160;
 
-        public static final double STAGE_3_Kp = 0.0025;//0.005
+        public static final double STAGE_3_Kp = 0.0155;//0.005
         public static final double STAGE_3_Ki = 0;
-        public static final double STAGE_3_Kd = 0;
-        public static final double STAGE_3_MAX_SPEED = 1;
-        public static final double STAGE_3_MAX_ACCEL = 1;
+        public static final double STAGE_3_Kd = 0.0005;
+        public static final double STAGE_3_Ks = 0.04;
+        public static final double STAGE_3_Kg = 0.52;
+        public static final double STAGE_3_MAX_SPEED = 500;
+        public static final double STAGE_3_MAX_ACCEL = 200;
     }
 
      public class POP {

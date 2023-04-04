@@ -5,6 +5,8 @@ import static frc.robot.Constants.ARM.JOINT_COORDINATE_DEADZONE;
 import static frc.robot.Constants.ARM.STAGE_1_Kd;
 import static frc.robot.Constants.ARM.STAGE_1_Ki;
 import static frc.robot.Constants.ARM.STAGE_1_Kp;
+import static frc.robot.Constants.ARM.STAGE_1_Ks;
+import static frc.robot.Constants.ARM.STAGE_1_Kg;
 import static frc.robot.Constants.ARM.STAGE_1_LENGTH;
 import static frc.robot.Constants.ARM.STAGE_1_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_1_MAX_SPEED;
@@ -12,6 +14,8 @@ import static frc.robot.Constants.ARM.STAGE_1_MAX_ACCEL;
 import static frc.robot.Constants.ARM.STAGE_2_Kd;
 import static frc.robot.Constants.ARM.STAGE_2_Ki;
 import static frc.robot.Constants.ARM.STAGE_2_Kp;
+import static frc.robot.Constants.ARM.STAGE_2_Ks;
+import static frc.robot.Constants.ARM.STAGE_2_Kg;
 import static frc.robot.Constants.ARM.STAGE_2_LENGTH;
 import static frc.robot.Constants.ARM.STAGE_2_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_2_MAX_SPEED;
@@ -19,6 +23,8 @@ import static frc.robot.Constants.ARM.STAGE_2_MAX_ACCEL;
 import static frc.robot.Constants.ARM.STAGE_3_Kd;
 import static frc.robot.Constants.ARM.STAGE_3_Ki;
 import static frc.robot.Constants.ARM.STAGE_3_Kp;
+import static frc.robot.Constants.ARM.STAGE_3_Ks;
+import static frc.robot.Constants.ARM.STAGE_3_Kg;
 import static frc.robot.Constants.ARM.STAGE_3_OFFSET;
 import static frc.robot.Constants.ARM.STAGE_3_MAX_SPEED;
 import static frc.robot.Constants.ARM.STAGE_3_MAX_ACCEL;
@@ -130,9 +136,9 @@ public class Arm extends SubsystemBase {
         m_stage2Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_2_ENCODER_ID);
         m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
-        m_stage1FF = new ArmFeedforward(0.04, 1.3,0,0); // 1.37 1.35 1.3
-        m_stage2FF = new ArmFeedforward(0.04, 1.0, 0,0);//kg 1.18
-        m_stage3FF = new ArmFeedforward(0.04, 0.52, 0,0);
+        m_stage1FF = new ArmFeedforward(STAGE_1_Ks, STAGE_1_Kg, 0,0); // 1.37 1.35 1.3
+        m_stage2FF = new ArmFeedforward(STAGE_2_Ks, STAGE_2_Kg, 0,0);
+        m_stage3FF = new ArmFeedforward(STAGE_3_Ks, STAGE_3_Kg, 0,0);
 
         m_stage1PID = new ProfiledPIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd, new TrapezoidProfile.Constraints(STAGE_1_MAX_SPEED, STAGE_1_MAX_ACCEL));
         m_stage1PID.enableContinuousInput(0, 360);
@@ -141,8 +147,12 @@ public class Arm extends SubsystemBase {
         m_stage3PID = new ProfiledPIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd, new TrapezoidProfile.Constraints(STAGE_3_MAX_SPEED, STAGE_3_MAX_ACCEL));
         m_stage3PID.enableContinuousInput(0, 360);
 
-        m_stage1PID.setTolerance(0);
-        m_stage2PID.setTolerance(0);
+        m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition()*360);
+        m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360);
+        m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360);
+
+        m_stage1PID.setTolerance(0.0);
+        m_stage2PID.setTolerance(0.0);
         m_stage3PID.setTolerance(0);
 
         m_stage1PID.setIntegratorRange(-0.25, 0.25);
@@ -610,6 +620,13 @@ public class Arm extends SubsystemBase {
             m_stage1.set(0);
             m_stage2.set(0);
             m_stage3.set(0);
+            // calculate but ignore
+            //m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET);
+            //m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET);
+            //m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET);
+            m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET);
+            m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET);
+            m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET);
         }
     }
     
