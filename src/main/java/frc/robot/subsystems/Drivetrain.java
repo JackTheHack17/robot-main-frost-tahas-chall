@@ -640,7 +640,8 @@ public class Drivetrain extends SubsystemBase {
 
       HashMap<String, Command> eventMap = new HashMap<>();
       eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-      eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
+      // eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
+      eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(2.75));
       eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(2.75));
       eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle));
       eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
