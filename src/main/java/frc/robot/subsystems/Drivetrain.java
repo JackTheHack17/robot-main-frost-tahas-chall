@@ -71,6 +71,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -630,39 +631,51 @@ public class Drivetrain extends SubsystemBase {
 
     // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
     // for every path in the group
-    List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
-      "PlaceDock",//Telemetry.getValue("general/autonomous/selectedRoutine", "PlaceMobilityDock"), 
-      new PathConstraints(1, 2)
-      //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
-    );
+    try {
+      List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
+        Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove"), 
+        new PathConstraints(1, 2)
+        //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
+      );
 
-    HashMap<String, Command> eventMap = new HashMap<>();
-    eventMap.put("marker1", new PrintCommand("Passed marker 1"));
-    eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
-    eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(2.75));
-    eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle));
-    eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
-    eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(5.5));
-    eventMap.put("intake", m_claw.intakeCommand().andThen(new WaitCommand(.75)));
-    eventMap.put("autobalance", new AutoBalance(this));
-    eventMap.put("realign", moveToPositionCommand());
-    eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ));
-    eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setCone(false); m_claw.openGrip(); } ));
+      HashMap<String, Command> eventMap = new HashMap<>();
+      eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+      eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
+      eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(2.75));
+      eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle));
+      eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
+      eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(5.5));
+      eventMap.put("intake", m_claw.intakeCommand().andThen(new WaitCommand(.75)));
+      eventMap.put("autobalance", new AutoBalance(this));
+      eventMap.put("realign", moveToPositionCommand());
+      eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ));
+      eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setCone(false); m_claw.openGrip(); } ));
 
-    // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
-    SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
-      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
-      pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose), // Pose2d consumer, used to reset odometry at the beginning of auto
-      this.m_kinematics, // SwerveDriveKinematics
-      new PIDConstants(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      new PIDConstants(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
-      eventMap,
-      true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-      (Subsystem) this // The drive subsystem. Used to properly set the requirements of path following commands
-    );
+      // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
+      SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
+        () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
+        pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose), // Pose2d consumer, used to reset odometry at the beginning of auto
+        this.m_kinematics, // SwerveDriveKinematics
+        new PIDConstants(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+        new PIDConstants(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+        this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+        eventMap,
+        true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+        (Subsystem) this // The drive subsystem. Used to properly set the requirements of path following commands
+      );
 
-    return autoBuilder.fullAuto(pathGroup);
+      return autoBuilder.fullAuto(pathGroup);
+    } catch (Exception e) {
+      // uh oh
+
+      // score a preloaded cone if the auton crashes
+      return new SequentialCommandGroup(
+        new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ),
+        m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)),
+        m_claw.outTakeCommand().andThen(new WaitCommand(.25)),
+        m_arm.moveToPositionTerminatingCommand(positions.Idle)
+      );
+    }
   }
 
   public void shwerve ( double LX, double LY) {

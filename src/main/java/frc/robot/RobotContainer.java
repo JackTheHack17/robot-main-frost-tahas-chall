@@ -50,6 +50,7 @@ public class RobotContainer {
       pathsString += paths[i].getName().substring(0, paths[i].getName().indexOf(".")) + ",";
     }
     Telemetry.setValue("general/autonomous/availableRoutines", pathsString);
+    Telemetry.setValue("general/autonomous/selectedRoutine", "SET ME");
 
     // Configure the button bindings
     configureButtonBindings();
