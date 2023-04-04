@@ -124,9 +124,9 @@ public class Arm extends SubsystemBase {
         m_stage2Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_2_ENCODER_ID);
         m_stage3Encoder = new DutyCycleEncoder(DIO.ARM_STAGE_3_ENCODER_ID);
 
-         m_stage1FF = new ArmFeedforward(0.04, 1.1,0,0.07);
-         m_stage2FF = new ArmFeedforward(0.04, 0.92, 0,0.13);
-        m_stage3FF = new ArmFeedforward(0.04, 0.52, 1.95,0.04);
+        m_stage1FF = new ArmFeedforward(0.04, 1.3,0,0); // 1.37 1.35 1.3
+        m_stage2FF = new ArmFeedforward(0.04, 1.18, 0,0);
+        m_stage3FF = new ArmFeedforward(0.04, 0.52, 0,0);
 
         m_stage1PID = new PIDController(STAGE_1_Kp, STAGE_1_Ki, STAGE_1_Kd);
         m_stage1PID.enableContinuousInput(0, 360);
@@ -136,8 +136,13 @@ public class Arm extends SubsystemBase {
         m_stage3PID.enableContinuousInput(0, 360);
 
         m_stage1PID.setTolerance(0);
-        m_stage2PID.setTolerance(1.5);
+        m_stage2PID.setTolerance(0);
         m_stage3PID.setTolerance(0);
+
+        m_stage1PID.setIntegratorRange(-0.25, 0.25);
+        m_stage2PID.setIntegratorRange(-0.25, 0.25);
+        m_stage3PID.setIntegratorRange(-0.25, 0.25);
+
 
         m_stage1.restoreFactoryDefaults();
         m_stage1.clearFaults();
@@ -231,13 +236,13 @@ public class Arm extends SubsystemBase {
 
     private void moveToPosition (positions position) {
         ArmPosition target = positionMap.get(position);
-        if (!movingToIdle || (movingToIdle &&
-            Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
-            Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE)) {
+        //if (!movingToIdle || (movingToIdle &&
+          //  Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
+            //Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE)) {
                 moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
-        } else {
-            moveToAngles(target.getStage1Angle(), target.getStage2Angle(), m_stage3Encoder.getAbsolutePosition()*360);   
-        }
+        //} else {
+          //  moveToAngles(target.getStage1Angle(), target.getStage2Angle(), m_stage3Encoder.getAbsolutePosition()*360);   
+        //}
        // if ( lastPosition == positions.Idle && position != positions.Idle && Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - target.getStage2Angle()) > JOINT_ANGLE_DEADZONE) {
          //   moveToAngles(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle());
             //m_manualTargetX = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[0];

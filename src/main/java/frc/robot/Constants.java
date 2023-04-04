@@ -123,25 +123,23 @@ public final class Constants {
             IdleShootPosition
         };
 
-        public static final double STAGE_1_OFFSET = 150;
-        public static final double STAGE_2_OFFSET = 155;
-        public static final double STAGE_3_OFFSET = 347;
+        public static final double STAGE_1_OFFSET = 177;
+        public static final double STAGE_2_OFFSET = 270;
+        public static final double STAGE_3_OFFSET = 210;
 
 
 
-        public static ArmPosition scoreHighConePosition  = new ArmPosition(195, 135, 275);
-        public static ArmPosition dipHighConePosition  = new ArmPosition(166, 125, 255);
-        public static ArmPosition scoreHighCubePosition  = new ArmPosition(178, 137, 242);
-        public static ArmPosition scoreMidConePosition   = new ArmPosition(80, 165, 262);
-        public static ArmPosition dipMidConePosition   = new ArmPosition(80, 145, 252);
-        public static ArmPosition scoreMidCubePosition   = new ArmPosition(88, 170, 210);
-        public static ArmPosition idlePosition   = new ArmPosition(78, 224, 161);
-        public static ArmPosition scoreLowPosition      = new ArmPosition(85, 195, 202);
-        public static ArmPosition floorPosition      = new ArmPosition(80, 105, 235);
-        public static ArmPosition floorAltPosition   = new ArmPosition(88, 117, 158);
-        public static ArmPosition substationPosition = new ArmPosition(88, 195, 217);
-        public static ArmPosition scoreHighPlace     = new ArmPosition(160, 145, 250);
-        public static ArmPosition scoreMidPlace      = new ArmPosition(198, 75, 238);
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(191, 283, 225);
+        public static ArmPosition dipHighConePosition  = new ArmPosition(191, 267, 255);
+        public static ArmPosition scoreHighCubePosition  = new ArmPosition(138, 325, 216);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 349, 225);
+        public static ArmPosition dipMidConePosition   = new ArmPosition(107, 330, 225);
+        public static ArmPosition scoreMidCubePosition   = new ArmPosition(107, 352, 187);
+        public static ArmPosition idlePosition   = new ArmPosition(107, 43, 120);
+        public static ArmPosition scoreLowPosition      = new ArmPosition(107, 2, 116);
+        public static ArmPosition floorPosition      = new ArmPosition(107, 275, 225);
+        public static ArmPosition floorAltPosition   = new ArmPosition(107, 307, 120);
+        public static ArmPosition substationPosition = new ArmPosition(107, 8, 180);
 
         public static final double THETA_SPEED = 1;
         public static final double X_SPEED = 0.5;
@@ -151,12 +149,12 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 20.0;
         public static final double STAGE_2_LENGTH = 29.5;
 
-         public static final double STAGE_1_Kp = 0.004;
+         public static final double STAGE_1_Kp = 0.008;
         public static final double STAGE_1_Ki = 0;
         public static final double STAGE_1_Kd = 0;
-         public static final double STAGE_2_Kp = 0.005;
-        public static final double STAGE_2_Ki = 0;
-        public static final double STAGE_2_Kd = 0;
+         public static final double STAGE_2_Kp = 0.01;
+        public static final double STAGE_2_Ki = 0.003;
+        public static final double STAGE_2_Kd = 0.0035;
 
         public static final double STAGE_3_Kp = 0.005;
         public static final double STAGE_3_Ki = 0;
