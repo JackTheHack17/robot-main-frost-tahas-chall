@@ -6,6 +6,8 @@ package frc.robot.commands;
 import static frc.robot.Constants.DRIVETRAIN.ROTATION_SCALE_FACTOR;
 import static frc.robot.Constants.DRIVETRAIN.SWERVE_SLOW_SPEED_PERCENTAGE;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -23,7 +25,7 @@ public class DriveCommand extends CommandBase {
   private double m_RX = 0.0;
 
   private CommandGenericHID driverController;
-  private ButtonBoard copilotController;
+  //private ButtonBoard copilotController; // commented to appease linter
 
   /**
    * Creates a new ExampleCommand.
@@ -33,7 +35,7 @@ public class DriveCommand extends CommandBase {
   public DriveCommand(Drivetrain drivetrain, CommandGenericHID driverController, ButtonBoard copilotController) {
     m_swerve = drivetrain;
     this.driverController = driverController;
-    this.copilotController = copilotController;
+    //this.copilotController = copilotController;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_swerve);
   }
@@ -67,48 +69,26 @@ public class DriveCommand extends CommandBase {
     if ( driverController.getHID().getRawButton(6) ) m_RX += SWERVE_SLOW_SPEED_PERCENTAGE;
     if ( driverController.getHID().getRawButton(5) ) m_RX -= SWERVE_SLOW_SPEED_PERCENTAGE;
 
-    // D-pad slow mode
-    switch (driverController.getHID().getPOV()) {
-      case 0:
-        m_LY += SWERVE_SLOW_SPEED_PERCENTAGE;
-        break;
-      case 45:
-        m_LX += SWERVE_SLOW_SPEED_PERCENTAGE;
-        m_LY += SWERVE_SLOW_SPEED_PERCENTAGE;
-        break;
-      case 90:
-        m_LX += SWERVE_SLOW_SPEED_PERCENTAGE;
-        break;
-      case 135:
-        m_LX += SWERVE_SLOW_SPEED_PERCENTAGE;
-        m_LY -= SWERVE_SLOW_SPEED_PERCENTAGE;
-        break;
-      case 180:
-        m_LY -= SWERVE_SLOW_SPEED_PERCENTAGE;
-        break;
-      case 225:
-        m_LX -= SWERVE_SLOW_SPEED_PERCENTAGE;
-        m_LY -= SWERVE_SLOW_SPEED_PERCENTAGE;
-        break;
-      case 270:
-        m_LX -= SWERVE_SLOW_SPEED_PERCENTAGE;
-        break;
-      case 315:
-        m_LX -= SWERVE_SLOW_SPEED_PERCENTAGE;
-        m_LY += SWERVE_SLOW_SPEED_PERCENTAGE;
-        break;
+    if ( driverController.getHID().getPOV() == -1 ) {
+      m_swerve.joystickDrive(m_LX, m_LY, m_RX);
+    } else {
+      m_swerve.driveFromModuleStates(new SwerveModuleState[]{
+        new SwerveModuleState((m_swerve.modulesInPosition() ? SWERVE_SLOW_SPEED_PERCENTAGE : 0), Rotation2d.fromDegrees(driverController.getHID().getPOV())),
+        new SwerveModuleState((m_swerve.modulesInPosition() ? SWERVE_SLOW_SPEED_PERCENTAGE : 0), Rotation2d.fromDegrees(driverController.getHID().getPOV())),
+        new SwerveModuleState((m_swerve.modulesInPosition() ? SWERVE_SLOW_SPEED_PERCENTAGE : 0), Rotation2d.fromDegrees(driverController.getHID().getPOV())),
+        new SwerveModuleState((m_swerve.modulesInPosition() ? SWERVE_SLOW_SPEED_PERCENTAGE : 0), Rotation2d.fromDegrees(driverController.getHID().getPOV()))
+      });
     }
     
-    m_swerve.joystickDrive(m_LX, m_LY, m_RX);
-
-    if ( copilotController.getRawButton(16) ) {
-      // shwerve engaged
-      copilotController.setLED(16, true);
-      m_swerve.shwerve(m_LX, m_LY);
-    } else {
-      m_swerve.noShwerve();
-      copilotController.setLED(16, false);
-    }
+    // shwerve ded
+    // if ( copilotController.getRawButton(16) ) {
+    //   // shwerve engaged
+    //   copilotController.setLED(16, true);
+    //   m_swerve.shwerve(m_LX, m_LY);
+    // } else {
+    //   m_swerve.noShwerve();
+    //   copilotController.setLED(16, false);
+    // }
   }
 
   // Called once the command ends or is interrupted.
