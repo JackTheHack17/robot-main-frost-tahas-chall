@@ -638,16 +638,16 @@ public class Drivetrain extends SubsystemBase {
     try {
       List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
         Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove"), 
-        new PathConstraints(1, 2)
+        new PathConstraints(1.5, 3)
         //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
       );
 
       HashMap<String, Command> eventMap = new HashMap<>();
       eventMap.put("marker1", new PrintCommand("Passed marker 1"));
       // eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
-      eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(2.75));
+      eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(1.5));
       eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(2.75));
-      eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle));
+      eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle).withTimeout(1));
       eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
       eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(5.5));
       eventMap.put("intake", m_claw.intakeCommand().andThen(new WaitCommand(.75)));
