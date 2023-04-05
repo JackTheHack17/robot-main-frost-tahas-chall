@@ -252,10 +252,6 @@ public class Drivetrain extends SubsystemBase {
     PathPlannerServer.startServer(6969);
   }
 
-  public boolean modulesInPosition () {
-    return ( Math.max(Math.max(Math.abs(FL_Actual_Position - FL_Target), Math.abs(FR_Actual_Position - FR_Target)), Math.max(Math.abs(BL_Actual_Position - BL_Target), Math.abs(BR_Actual_Position - BR_Target))) < 1);
-  }
-
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
