@@ -69,6 +69,6 @@ public class ButtonBoard {
     }
 
     public Translation2d getJoystick () {
-        return new Translation2d(getAxis(0), getAxis(1));
+        return new Translation2d(getAxis(0), -getAxis(1));
     }
 }

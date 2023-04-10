@@ -3,8 +3,10 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.commands;
+import static frc.robot.Constants.DRIVETRAIN.ROTATION_SCALE_FACTOR;
 import static frc.robot.Constants.DRIVETRAIN.SWERVE_SLOW_SPEED_PERCENTAGE;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.ButtonBoard;
@@ -43,21 +45,27 @@ public class DriveCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    
+    if (DriverStation.isAutonomous()) return;
+
     // fetch joystick axis values
     m_LX = driverController.getRawAxis(0); // left x axis (strafe)
     m_LY = -driverController.getRawAxis(1); // left y axis (strafe)
     m_RX = driverController.getRawAxis(4); // right x axis (rotation)
 
     // deadzones
-    m_LX = ( Math.abs(m_LX) < 0.2 ) ? 0 : m_LX;
-    m_LY = ( Math.abs(m_LY) < 0.2 ) ? 0 : m_LY;
-    m_RX = ( Math.abs(m_RX) < 0.2 ) ? 0 : m_RX;
+    m_LX = ( Math.abs(m_LX) < 0.1 ) ? 0 : m_LX;
+    m_LY = ( Math.abs(m_LY) < 0.1 ) ? 0 : m_LY;
+    m_RX = ( Math.abs(m_RX) < 0.1 ) ? 0 : m_RX;
 
     // square joysticks
     m_LX = m_LX * m_LX * ( Math.abs(m_LX) / (m_LX == 0 ? 1 : m_LX ) );
     m_LY = m_LY * m_LY * ( Math.abs(m_LY) / (m_LY == 0 ? 1 : m_LY ) );
     m_RX = m_RX * m_RX * ( Math.abs(m_RX) / (m_RX == 0 ? 1 : m_RX ) );
+
+    m_RX *= ROTATION_SCALE_FACTOR;
+
+    if ( driverController.getHID().getRawButton(6) ) m_RX += SWERVE_SLOW_SPEED_PERCENTAGE;
+    if ( driverController.getHID().getRawButton(5) ) m_RX -= SWERVE_SLOW_SPEED_PERCENTAGE;
 
     // D-pad slow mode
     switch (driverController.getHID().getPOV()) {
