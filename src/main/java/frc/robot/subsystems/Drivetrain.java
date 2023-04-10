@@ -154,7 +154,7 @@ public class Drivetrain extends SubsystemBase {
   private boolean isRobotOriented = false; // default to field oriented
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 60, 60, 0);
-  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 21, 20, 0);
+  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
 
@@ -634,7 +634,7 @@ public class Drivetrain extends SubsystemBase {
     try {
       List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
         Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove"), 
-        new PathConstraints(1.5, 3)
+        new PathConstraints(1.5, 2.5)
         //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
       );
 
@@ -642,15 +642,19 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("marker1", new PrintCommand("Passed marker 1"));
       // eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
       eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(1.5));
+      eventMap.put("placeMidCone", m_arm.goToScoreMid().withTimeout(1.5));
       eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(2.75));
       eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle).withTimeout(1));
       eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
-      eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(5.5));
+      eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(2.5));
+      eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(4));
       eventMap.put("intake", m_claw.intakeCommand().andThen(new WaitCommand(.75)));
       eventMap.put("autobalance", new AutoBalance(this));
       eventMap.put("realign", moveToPositionCommand());
       eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ));
       eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setCone(false); m_claw.openGrip(); } ));
+      eventMap.put("wait", new WaitCommand(0.25));
+
 
       // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
       SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(

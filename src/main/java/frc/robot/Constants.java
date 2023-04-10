@@ -67,10 +67,10 @@ public final class Constants {
         public static final double DRIVE_GEAR_RATIO = 6.75;
 
         // encoder offsets (degrees)
-        public static final double FL_ECODER_OFFSET = -313.682+2;
-        public static final double FR_ECODER_OFFSET = -166.553+90+2;
-        public static final double BL_ECODER_OFFSET = -246.006-45-2-3;
-        public static final double BR_ECODER_OFFSET = -204.258-45-2-3;
+        public static final double FL_ECODER_OFFSET = -311.5;
+        public static final double FR_ECODER_OFFSET = -254.146+180;
+        public static final double BL_ECODER_OFFSET = -232.312;
+        public static final double BR_ECODER_OFFSET = -257.697;
         
         /** maximum strafe speed (meters per second) */
         public static final double MAX_LINEAR_SPEED = 5.4;
@@ -128,16 +128,16 @@ public final class Constants {
         public static final double STAGE_3_OFFSET = 210;
 
         public static ArmPosition scoreHighConePosition  = new ArmPosition(183, 325, 223);
-        public static ArmPosition dipHighConePosition  = new ArmPosition(183, 290, 213);
+        public static ArmPosition dipHighConePosition    = new ArmPosition(183, 290, 213);
         public static ArmPosition scoreHighCubePosition  = new ArmPosition(164, 327, 216);
         public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 355, 240);
-        public static ArmPosition dipMidConePosition   = new ArmPosition(107, 345, 225);
+        public static ArmPosition dipMidConePosition     = new ArmPosition(107, 345, 225);
         public static ArmPosition scoreMidCubePosition   = new ArmPosition(107, 357, 187);
-        public static ArmPosition idlePosition   = new ArmPosition(107, 53, 129);
-        public static ArmPosition scoreLowPosition      = new ArmPosition(107, 2, 116);
-        public static ArmPosition floorPosition      = new ArmPosition(107, 290, 225);
-        public static ArmPosition floorAltPosition   = new ArmPosition(107, 319, 120);
-        public static ArmPosition substationPosition = new ArmPosition(120, 20, 180);//allows reach all the way back and from edge
+        public static ArmPosition idlePosition           = new ArmPosition(107, 53,  129);
+        public static ArmPosition scoreLowPosition       = new ArmPosition(107, 2,   116);
+        public static ArmPosition floorPosition          = new ArmPosition(107, 290, 225);
+        public static ArmPosition floorAltPosition       = new ArmPosition(107, 319, 120);
+        public static ArmPosition substationPosition     = new ArmPosition(120, 25,  180);
 
         public static final double THETA_SPEED = 1;
         public static final double X_SPEED = 0.5;
