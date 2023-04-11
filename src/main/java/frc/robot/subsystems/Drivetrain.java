@@ -106,24 +106,24 @@ public class Drivetrain extends SubsystemBase {
   private SwerveModuleState[] modules;
 
   // swerve module CANCoders
-  private final CANCoder FL_Position = new CANCoder(FL_CANCODER_ID);
-  private final CANCoder FR_Position = new CANCoder(FR_CANCODER_ID);
-  private final CANCoder BL_Position = new CANCoder(BL_CANCODER_ID);
-  private final CANCoder BR_Position = new CANCoder(BR_CANCODER_ID);
+  private final CANCoder FL_Position = new CANCoder(FL_CANCODER_ID, "drivetrain");
+  private final CANCoder FR_Position = new CANCoder(FR_CANCODER_ID, "drivetrain");
+  private final CANCoder BL_Position = new CANCoder(BL_CANCODER_ID, "drivetrain");
+  private final CANCoder BR_Position = new CANCoder(BR_CANCODER_ID, "drivetrain");
 
   // swerve module drive motors
-  private final TalonFX FL_Drive = new TalonFX(FL_DRIVE_ID);
-  private final TalonFX FR_Drive = new TalonFX(FR_DRIVE_ID);
-  private final TalonFX BL_Drive = new TalonFX(BL_DRIVE_ID);
-  private final TalonFX BR_Drive = new TalonFX(BR_DRIVE_ID);
+  private final TalonFX FL_Drive = new TalonFX(FL_DRIVE_ID, "drivetrain");
+  private final TalonFX FR_Drive = new TalonFX(FR_DRIVE_ID, "drivetrain");
+  private final TalonFX BL_Drive = new TalonFX(BL_DRIVE_ID, "drivetrain");
+  private final TalonFX BR_Drive = new TalonFX(BR_DRIVE_ID, "drivetrain");
 
   private final CANSparkMax shwerveDrive = new CANSparkMax(SHWERVE_DRIVE_ID, MotorType.kBrushless);
 
   // swerve module azimuth (steering) motors
-  private final TalonFX FL_Azimuth = new TalonFX(FL_AZIMUTH_ID);
-  private final TalonFX FR_Azimuth = new TalonFX(FR_AZIMUTH_ID);
-  private final TalonFX BL_Azimuth = new TalonFX(BL_AZIMUTH_ID);
-  private final TalonFX BR_Azimuth = new TalonFX(BR_AZIMUTH_ID);
+  private final TalonFX FL_Azimuth = new TalonFX(FL_AZIMUTH_ID, "drivetrain");
+  private final TalonFX FR_Azimuth = new TalonFX(FR_AZIMUTH_ID, "drivetrain");
+  private final TalonFX BL_Azimuth = new TalonFX(BL_AZIMUTH_ID, "drivetrain");
+  private final TalonFX BR_Azimuth = new TalonFX(BR_AZIMUTH_ID, "drivetrain");
 
   // swerve module target rotations (degrees)
   private double FL_Target = 0.0;

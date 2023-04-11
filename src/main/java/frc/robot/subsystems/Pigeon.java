@@ -19,7 +19,7 @@ public class Pigeon extends SubsystemBase {
 
     /** Creates a new ExampleSubsystem. */
   public Pigeon () {
-    pigeon = new Pigeon2(PIGEON_ID);
+    pigeon = new Pigeon2(PIGEON_ID, "drivetrain");
   }
 
   public Pigeon2 getPigeon () {
