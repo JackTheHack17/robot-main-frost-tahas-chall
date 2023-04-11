@@ -80,7 +80,7 @@ public final class Constants {
         public static final double ROTATION_SCALE_FACTOR = 0.65;
             
         // pid values
-        public static final double AZIMUTH_kP = 0.0125; //0.01625; // sds: 0.2; rylan: 0.65
+        public static final double AZIMUTH_kP = 0.01125; //0.01625; // sds: 0.2; rylan: 0.65
         public static final double AZIMUTH_kD = 0.00025;
 
         // calculated via JVN calculator

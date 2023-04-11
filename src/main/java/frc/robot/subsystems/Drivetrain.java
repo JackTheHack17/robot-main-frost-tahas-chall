@@ -185,6 +185,11 @@ public class Drivetrain extends SubsystemBase {
     BL_PID.enableContinuousInput(0, 360);
     BR_PID.enableContinuousInput(0, 360);
     
+    FL_PID.setTolerance(0);
+    FR_PID.setTolerance(0);
+    BL_PID.setTolerance(0);
+    BR_PID.setTolerance(0);
+
     Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
     Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
     Telemetry.setValue("drivetrain/PathPlanner/translationKd", _translationKd);
