@@ -340,44 +340,58 @@ public class Arm extends SubsystemBase {
                     m_copilotController.setLED(12, false);
                     m_copilotController.setLED(13, false);
                     m_copilotController.setLED(14, false);
+                    m_copilotController.setLED(0, true);
+                    m_copilotController.setLED(1, true);
+                    m_copilotController.setLED(2, true);
+                    m_copilotController.setLED(3, true);
+                    m_copilotController.setLED(4, true);
+                    m_copilotController.setLED(5, true);
+                    m_copilotController.setLED(6, true);
+                } else {
+                    m_copilotController.setLED(10, true);
+                    m_copilotController.setLED(11, true);
+                    m_copilotController.setLED(12, true);
+                    m_copilotController.setLED(13, true);
+                    m_copilotController.setLED(14, true);
+                    m_copilotController.setLED(0, false);
+                    m_copilotController.setLED(1, false);
+                    m_copilotController.setLED(2, false);
+                    m_copilotController.setLED(3, false);
+                    m_copilotController.setLED(4, false);
+                    m_copilotController.setLED(5, false);
+                    m_copilotController.setLED(6, false);
                 }
-                m_copilotController.setLED(0, false);
-                m_copilotController.setLED(1, false);
-                m_copilotController.setLED(2, false);
-                m_copilotController.setLED(3, false);
-                m_copilotController.setLED(4, false);
-                m_copilotController.setLED(5, false);
         
                 switch (position) {
                     case ScoreHighCone:
-                        m_copilotController.setLED(2, true);
+                        //m_copilotController.setLED(2, true);
                         break;
                     case ScoreHighCube:
-                        m_copilotController.setLED(2, true);
+                        //m_copilotController.setLED(2, true);
                         break;
                     case ScoreMidCone:
-                        m_copilotController.setLED(4, true);
+                        //m_copilotController.setLED(4, true);
                         break;
                     case ScoreMidCube:
-                        m_copilotController.setLED(4, true);
+                        //m_copilotController.setLED(4, true);
                         break;
                     case ScoreLow:
-                        m_copilotController.setLED(5, true);
+                        //m_copilotController.setLED(5, true);
                         break;
                     case Floor:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        m_copilotController.setLED(1, true);
+                        //m_copilotController.setLED(1, true);
                         break;
                     case FloorAlt:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        m_copilotController.setLED(3, true);
+                        //m_copilotController.setLED(3, true);
                         break;
                     case Substation:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        m_copilotController.setLED(0, true);
+                        //m_copilotController.setLED(0, true);
                         break;
                     case Idle:
                         movingToIdle = true;

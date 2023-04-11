@@ -164,8 +164,8 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d _robotPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
-  private double _translationKp = 0.0015;
-  private double _translationKi = 0.0004;
+  private double _translationKp = 0.001;
+  private double _translationKi = 0;
   private double _translationKd = 0;
   private double _rotationKp = 0.00005;
   private double _rotationKi = 0;
@@ -634,7 +634,7 @@ public class Drivetrain extends SubsystemBase {
     try {
       List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
         Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove"), 
-        new PathConstraints(1.5, 2.5)
+        new PathConstraints(0.5, .25)
         //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
       );
 
