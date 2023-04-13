@@ -23,6 +23,7 @@ public final class Constants {
         public static final int ARM_STAGE_1_ENCODER_ID = 7;
         public static final int ARM_STAGE_2_ENCODER_ID = 8;
         public static final int ARM_STAGE_3_ENCODER_ID = 9;
+        public static final int GRIP_LIMIT_SWITCH = 0;
     }
 
     public class CAN {
