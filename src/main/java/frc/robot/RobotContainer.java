@@ -127,6 +127,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return m_swerve.getAutonomousCommand();
+    // InstantCommand to set speeds to 0
+    return m_swerve.getAutonomousCommand().andThen(new InstantCommand( () -> m_swerve.stopModules()));
   }
 }

@@ -68,10 +68,10 @@ public final class Constants {
         public static final double DRIVE_GEAR_RATIO = 6.75;
 
         // encoder offsets (degrees)
-        public static final double FL_ECODER_OFFSET = -311.5;
-        public static final double FR_ECODER_OFFSET = -254.146+180;
-        public static final double BL_ECODER_OFFSET = -232.312;
-        public static final double BR_ECODER_OFFSET = -257.697;
+        public static final double FL_ECODER_OFFSET = -313.506;
+        public static final double FR_ECODER_OFFSET = -69.082;
+        public static final double BL_ECODER_OFFSET = -45.791 + 180;
+        public static final double BR_ECODER_OFFSET = -257.783 ;
         
         /** maximum strafe speed (meters per second) */
         public static final double MAX_LINEAR_SPEED = 5.4;
@@ -81,12 +81,13 @@ public final class Constants {
         public static final double ROTATION_SCALE_FACTOR = 0.65;
             
         // pid values
-        public static final double AZIMUTH_kP = 0.01125; //0.01625; // sds: 0.2; rylan: 0.65
-        public static final double AZIMUTH_kD = 0.00025;
+        public static final double AZIMUTH_kP = 0.01; //0.0053 sds: 0.2; rylan: 0.65
+        public static final double AZIMUTH_kD = 0;//0.00025
+        public static final double AZIMUTH_kF = 0.05;
 
         // calculated via JVN calculator
-        public static final double DRIVE_kP = 0.044057;
-        public static final double DRIVE_kF = 0.028998;
+        public static final double DRIVE_kP = 0.06; //0.044057
+        public static final double DRIVE_kF = 0.06; //0.028998
 
         /* Maximum distance for a valid waypoint (meters) */
         public static final double MAX_WAYPOINT_DISTANCE = 0.5;

@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
-import static edu.wpi.first.math.MathUtil.clamp;
 import static edu.wpi.first.math.MathUtil.inputModulus;
 import static frc.robot.Constants.CAN.BL_AZIMUTH_ID;
 import static frc.robot.Constants.CAN.BL_CANCODER_ID;
@@ -22,6 +21,7 @@ import static frc.robot.Constants.DRIVETRAIN.AUTO_BALANCE_Kd;
 import static frc.robot.Constants.DRIVETRAIN.AUTO_BALANCE_Kp;
 import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kD;
 import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kP;
+import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_kF;
 import static frc.robot.Constants.DRIVETRAIN.BL_ECODER_OFFSET;
 import static frc.robot.Constants.DRIVETRAIN.BR_ECODER_OFFSET;
 import static frc.robot.Constants.DRIVETRAIN.DRIVE_GEAR_RATIO;
@@ -70,6 +70,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -168,12 +170,14 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d _robotPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
-  private double _translationKp = 0.001;
+  private double _translationKp = 0.018;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 0.00005;
+  private double _rotationKp = 0.00005;//0.00005
   private double _rotationKi = 0;
   private double _rotationKd = 0;
+
+  private Field2d field2d = new Field2d();
 
   /** Creates a new ExampleSubsystem. */
   public Drivetrain(CommandGenericHID driverController, Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight, LEDs m_LEDs) {
@@ -273,16 +277,16 @@ public class Drivetrain extends SubsystemBase {
     _rotationKd = Telemetry.getValue("drivetrain/PathPlanner/rotationKd", 0);
 
     // 'actual' read sensor positions of each module
-    FL_Actual_Position = ((FL_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
-    FR_Actual_Position = ((FR_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
-    BL_Actual_Position = ((BL_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
-    BR_Actual_Position = ((BR_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
+    FL_Actual_Position = ((FL_Azimuth.getSelectedSensorPosition() / 2048) * 360) % 360;//CHANGED ALL 4096 TO 2048 PER CTRE
+    FR_Actual_Position = ((FR_Azimuth.getSelectedSensorPosition() / 2048) * 360) % 360;
+    BL_Actual_Position = ((BL_Azimuth.getSelectedSensorPosition() / 2048) * 360) % 360;
+    BR_Actual_Position = ((BR_Azimuth.getSelectedSensorPosition() / 2048) * 360) % 360;
 
     // 'actual' read encoder speeds per module (meters per second)
-    FL_Actual_Speed = 2.0*(((FL_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
-    FR_Actual_Speed = 2.0*(((FR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
-    BL_Actual_Speed = 2.0*(((BL_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
-    BR_Actual_Speed = 2.0*(((BR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
+    FL_Actual_Speed = 2.0*(((FL_Drive.getSelectedSensorVelocity() / 2048) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
+    FR_Actual_Speed = 2.0*(((FR_Drive.getSelectedSensorVelocity() / 2048) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
+    BL_Actual_Speed = 2.0*(((BL_Drive.getSelectedSensorVelocity() / 2048) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
+    BR_Actual_Speed = 2.0*(((BR_Drive.getSelectedSensorVelocity() / 2048) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
 
     // dashboard data
     Telemetry.setValue("drivetrain/modules/FL/azimuth/targetPosition", FL_Target % 360);
@@ -343,6 +347,9 @@ public class Drivetrain extends SubsystemBase {
   
     //Telemetry.setValue("drivetrain/shwervePower", shwerveDrive.get());
     //Telemetry.setValue("drivetrain/shwerveStator", shwerveDrive.getOutputCurrent());
+
+    field2d.setRobotPose(_robotPose);
+    SmartDashboard.putData(field2d);
   }
 
   public void joystickDrive(double LX, double LY, double RX) {
@@ -373,16 +380,28 @@ public class Drivetrain extends SubsystemBase {
     BL_Speed = modules[2].speedMetersPerSecond;
     BR_Speed = modules[3].speedMetersPerSecond;
 
-    FL_Azimuth.set(ControlMode.PercentOutput, clamp(FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360), -1, 1));
-    FR_Azimuth.set(ControlMode.PercentOutput, clamp(FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360), -1, 1));
-    BL_Azimuth.set(ControlMode.PercentOutput, clamp(BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360), -1, 1));
-    BR_Azimuth.set(ControlMode.PercentOutput, clamp(BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360), -1, 1));
+    FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
+    FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
+    BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360) + AZIMUTH_kF * Math.signum(BL_PID.getPositionError()));
+    BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360) + AZIMUTH_kF * Math.signum(BR_PID.getPositionError()));
 
     // pass wheel speeds to motor controllers
-    FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
-    FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
-    BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
-    BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*4096)/10);
+    FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+  }
+
+  public void stopModules () {
+    FL_Drive.set(ControlMode.PercentOutput, 0);
+    FR_Drive.set(ControlMode.PercentOutput, 0);
+    BL_Drive.set(ControlMode.PercentOutput, 0);
+    BR_Drive.set(ControlMode.PercentOutput, 0);
+
+    FL_Azimuth.set(ControlMode.PercentOutput, 0);
+    FR_Azimuth.set(ControlMode.PercentOutput, 0);
+    BL_Azimuth.set(ControlMode.PercentOutput, 0);
+    BR_Azimuth.set(ControlMode.PercentOutput, 0);
   }
 
   public Command moveToPositionCommand () {
@@ -415,10 +434,11 @@ public class Drivetrain extends SubsystemBase {
       new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
-    ).andThen(() -> {
-      m_LEDs.flashGreen();
-      m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1);
-    }).alongWith(new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)));
+    
+    );//.andThen(() -> {
+      //m_LEDs.flashGreen();
+      //m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1);
+   // }//).alongWith(new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)));
   }
 
   public Command autoBalanceCommand () {
@@ -511,8 +531,6 @@ public class Drivetrain extends SubsystemBase {
     positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(BR_Actual_Position));
     return positions;
   }
-
-  
 
   public Command getAutonomousCommand () {
    // switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
