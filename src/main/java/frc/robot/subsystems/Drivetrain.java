@@ -34,6 +34,7 @@ import static frc.robot.Constants.DRIVETRAIN.MAX_ROTATION_SPEED;
 import static frc.robot.Constants.DRIVETRAIN.MAX_WAYPOINT_DISTANCE;
 import static frc.robot.Constants.DRIVETRAIN.ROBOT_WIDTH;
 import static frc.robot.Constants.DRIVETRAIN.WHEEL_DIAMETER;
+import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_DEADBAND;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,6 +70,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -77,6 +79,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -161,6 +164,7 @@ public class Drivetrain extends SubsystemBase {
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 60, 60, 0);
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
+  private static final double SCALER = 0.02;
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
 
@@ -170,10 +174,10 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d _robotPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
-  private double _translationKp = 0.018;//0.004 0.001
+  private double _translationKp = 2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 0.00005;//0.00005
+  private double _rotationKp = 15;//0.00005
   private double _rotationKi = 0;
   private double _rotationKd = 0;
 
@@ -277,10 +281,10 @@ public class Drivetrain extends SubsystemBase {
     _rotationKd = Telemetry.getValue("drivetrain/PathPlanner/rotationKd", 0);
 
     // 'actual' read sensor positions of each module
-    FL_Actual_Position = ((FL_Azimuth.getSelectedSensorPosition() / 2048) * 360) % 360;//CHANGED ALL 4096 TO 2048 PER CTRE
-    FR_Actual_Position = ((FR_Azimuth.getSelectedSensorPosition() / 2048) * 360) % 360;
-    BL_Actual_Position = ((BL_Azimuth.getSelectedSensorPosition() / 2048) * 360) % 360;
-    BR_Actual_Position = ((BR_Azimuth.getSelectedSensorPosition() / 2048) * 360) % 360;
+    FL_Actual_Position = FL_Position.getAbsolutePosition();
+    FR_Actual_Position = FR_Position.getAbsolutePosition();
+    BL_Actual_Position = BL_Position.getAbsolutePosition();
+    BR_Actual_Position = BR_Position.getAbsolutePosition();
 
     // 'actual' read encoder speeds per module (meters per second)
     FL_Actual_Speed = 2.0*(((FL_Drive.getSelectedSensorVelocity() / 2048) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER;
@@ -331,7 +335,12 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/modules/BR/drive/statorCurrent", BR_Drive.getStatorCurrent());
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
 
-    forwardKinematics = m_kinematics.toChassisSpeeds(new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
+    forwardKinematics = m_kinematics.toChassisSpeeds(
+      new SwerveModuleState(Math.abs(FL_Actual_Speed), Rotation2d.fromDegrees(FL_Actual_Position)), 
+      new SwerveModuleState(Math.abs(FR_Actual_Speed), Rotation2d.fromDegrees(FR_Actual_Position)), 
+      new SwerveModuleState(Math.abs(BL_Actual_Speed), Rotation2d.fromDegrees(BL_Actual_Position)), 
+      new SwerveModuleState(Math.abs(BR_Actual_Speed), Rotation2d.fromDegrees(BR_Actual_Position))
+    );
 
     Telemetry.setValue("drivetrain/kinematics/robot/forwardSpeed", forwardKinematics.vxMetersPerSecond);
     Telemetry.setValue("drivetrain/kinematics/robot/rightwardSpeed", -forwardKinematics.vyMetersPerSecond);
@@ -492,8 +501,12 @@ public class Drivetrain extends SubsystemBase {
     motor.setInverted(TalonFXInvertType.CounterClockwise);
     motor.setNeutralMode(NeutralMode.Brake);
     motor.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    motor.setSelectedSensorPosition(0);
     motor.config_kP(0, DRIVE_kP);
     motor.config_kF(0, DRIVE_kF);
+    motor.configVoltageCompSaturation(12);
+    motor.enableVoltageCompensation(true);
   }
 
   /** runs the configuration methods to apply the config variables 
@@ -510,6 +523,7 @@ public class Drivetrain extends SubsystemBase {
     motor.setSelectedSensorPosition(position.getAbsolutePosition());
     motor.config_kP(0, AZIMUTH_kP);
     motor.config_kD(0, AZIMUTH_kD);
+    motor.configNeutralDeadband(AZIMUTH_DEADBAND);
   }
   
   /** runs the configuration methods to apply the config variables 
@@ -525,14 +539,17 @@ public class Drivetrain extends SubsystemBase {
 
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
-    positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(FL_Actual_Position));
-    positions[1] = new SwerveModulePosition((FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(FR_Actual_Position));
-    positions[2] = new SwerveModulePosition((BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(BL_Actual_Position));
-    positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(BR_Actual_Position));
+    positions[0] = new SwerveModulePosition(SCALER*(FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(FL_Actual_Position));
+    positions[1] = new SwerveModulePosition(SCALER*(FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(FR_Actual_Position));
+    positions[2] = new SwerveModulePosition(SCALER*(BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(BL_Actual_Position));
+    positions[3] = new SwerveModulePosition(SCALER*(BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(BR_Actual_Position));
     return positions;
   }
 
   public Command getAutonomousCommand () {
+    if (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove").equals("special")) {
+      return new InstantCommand(()->setRobotOriented(true)).andThen(new RepeatCommand(new InstantCommand(()->joystickDrive(0, 0.5, 0))).withTimeout(1).andThen(new InstantCommand(()->stopModules())));
+    }
    // switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
       // case "dontMove":
       //   return new InstantCommand();
@@ -661,8 +678,8 @@ public class Drivetrain extends SubsystemBase {
     try {
       List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(
         Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove"), 
-        new PathConstraints(0.5, .25)
-        //PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
+        //new PathConstraints(0.5, .25)
+        PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "Mobility"))
       );
 
       HashMap<String, Command> eventMap = new HashMap<>();
@@ -671,11 +688,11 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(1.5));
       eventMap.put("placeMidCone", m_arm.goToScoreMid().withTimeout(1.5));
       eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(2.75));
-      eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle).withTimeout(1));
+      eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle).withTimeout(0.5));
       eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
-      eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(2.5));
-      eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(4));
-      eventMap.put("intake", m_claw.intakeCommand().andThen(new WaitCommand(.75)));
+      eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
+      eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(1));
+      eventMap.put("intake", new WaitCommand(0.5).andThen(m_claw.intakeCommand().andThen(new WaitCommand(.75))));
       eventMap.put("autobalance", new AutoBalance(this));
       eventMap.put("realign", moveToPositionCommand());
       eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ));
@@ -699,6 +716,8 @@ public class Drivetrain extends SubsystemBase {
       return autoBuilder.fullAuto(pathGroup);
     } catch (Exception e) {
       // uh oh
+
+      DriverStation.reportError("it crashed LOL " + e.getLocalizedMessage(), true);
 
       // score a preloaded cone if the auton crashes
       return new SequentialCommandGroup(

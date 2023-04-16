@@ -68,10 +68,10 @@ public final class Constants {
         public static final double DRIVE_GEAR_RATIO = 6.75;
 
         // encoder offsets (degrees)
-        public static final double FL_ECODER_OFFSET = -313.506;
-        public static final double FR_ECODER_OFFSET = -69.082;
+        public static final double FL_ECODER_OFFSET = -313.506+0.5;
+        public static final double FR_ECODER_OFFSET = -69.082+0.5;
         public static final double BL_ECODER_OFFSET = -45.791 + 180;
-        public static final double BR_ECODER_OFFSET = -257.783 ;
+        public static final double BR_ECODER_OFFSET = -257.783;
         
         /** maximum strafe speed (meters per second) */
         public static final double MAX_LINEAR_SPEED = 5.4;
@@ -81,13 +81,14 @@ public final class Constants {
         public static final double ROTATION_SCALE_FACTOR = 0.65;
             
         // pid values
-        public static final double AZIMUTH_kP = 0.01; //0.0053 sds: 0.2; rylan: 0.65
-        public static final double AZIMUTH_kD = 0;//0.00025
-        public static final double AZIMUTH_kF = 0.05;
+        public static final double AZIMUTH_kP = 0.0105;//0.0115//0.0125;//0.025 //0.05//0.1 //0.01 //0.0053 sds: 0.2; rylan: 0.65
+        public static final double AZIMUTH_kD = 0.000265;//0.000275;//0.0003;//0.0004;//0.0005;//0.0006;//0.0006125;//0.0006125//0.000625//0.00065//0.0006;//0.00055//0.0005;//0.002//0.001//0.00075 //0.0005;//0.00025
+        public static final double AZIMUTH_kF = 0.05;//0.05
+        public static final double AZIMUTH_DEADBAND = 0.06;//0.1;//0.06;//0.075over slop;//0.1Over slop//0.05 under slop
 
         // calculated via JVN calculator
-        public static final double DRIVE_kP = 0.06; //0.044057
-        public static final double DRIVE_kF = 0.06; //0.028998
+        public static final double DRIVE_kP =0.088062; //0.04;//0.07;//0.06; //0.044057
+        public static final double DRIVE_kF = 0.028998;//0.04//0.06; //0.028998
 
         /* Maximum distance for a valid waypoint (meters) */
         public static final double MAX_WAYPOINT_DISTANCE = 0.5;
@@ -129,17 +130,17 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
 
-        public static ArmPosition scoreHighConePosition  = new ArmPosition(183, 325, 223);
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(183, 345, 223);
         public static ArmPosition dipHighConePosition    = new ArmPosition(183, 290, 213);
         public static ArmPosition scoreHighCubePosition  = new ArmPosition(164, 327, 216);
-        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 355, 240);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 385, 240);
         public static ArmPosition dipMidConePosition     = new ArmPosition(107, 345, 225);
         public static ArmPosition scoreMidCubePosition   = new ArmPosition(107, 357, 187);
-        public static ArmPosition idlePosition           = new ArmPosition(107, 53,  129);
+        public static ArmPosition idlePosition           = new ArmPosition(107, 40,  129);
         public static ArmPosition scoreLowPosition       = new ArmPosition(107, 2,   116);
         public static ArmPosition floorPosition          = new ArmPosition(107, 290, 225);
         public static ArmPosition floorAltPosition       = new ArmPosition(107, 319, 120);
-        public static ArmPosition substationPosition     = new ArmPosition(120, 25,  180);
+        public static ArmPosition substationPosition     = new ArmPosition(120, 15,  185);
 
         public static final double THETA_SPEED = 1;
         public static final double X_SPEED = 0.5;
@@ -154,24 +155,24 @@ public final class Constants {
         public static final double STAGE_1_Kd = 0.000;//0.0005
         public static final double STAGE_1_Ks = 0.04;//0.0005
         public static final double STAGE_1_Kg = 1.1;//1.3 causes tiny pulse width modulation; 0.5
-        public static final double STAGE_1_MAX_SPEED = 250;
-        public static final double STAGE_1_MAX_ACCEL = 160;
+        public static final double STAGE_1_MAX_SPEED = 500;
+        public static final double STAGE_1_MAX_ACCEL = 130;//
         
-        public static final double STAGE_2_Kp = 0.0325;//0.008
+        public static final double STAGE_2_Kp = 0.035;//0.04//0.0325//0.008
         public static final double STAGE_2_Ki = 0.00;//0.0025 //0.0065
-        public static final double STAGE_2_Kd = 0.0040;//0.035 0.0043
-        public static final double STAGE_2_Ks = 0.04;//0.05
-        public static final double STAGE_2_Kg = 0.92;//1.4, 1.0
-        public static final double STAGE_2_MAX_SPEED = 250;
-        public static final double STAGE_2_MAX_ACCEL = 170;
+        public static final double STAGE_2_Kd = 0.00420;//0.035 0.0043
+        public static final double STAGE_2_Ks = 0.02;///0.03;//0.05
+        public static final double STAGE_2_Kg = 0.82;//0.92//1.4, 1.0
+        public static final double STAGE_2_MAX_SPEED = 200;//250;
+        public static final double STAGE_2_MAX_ACCEL = 170;//150
 
         public static final double STAGE_3_Kp = 0.0155;//0.005
         public static final double STAGE_3_Ki = 0;
         public static final double STAGE_3_Kd = 0.0005;
         public static final double STAGE_3_Ks = 0.04;
         public static final double STAGE_3_Kg = 0.52;
-        public static final double STAGE_3_MAX_SPEED = 500;
-        public static final double STAGE_3_MAX_ACCEL = 300;
+        public static final double STAGE_3_MAX_SPEED = 900; //500
+        public static final double STAGE_3_MAX_ACCEL = 220;//300
     }
 
      public class POP {
