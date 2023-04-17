@@ -151,8 +151,8 @@ public class Arm extends SubsystemBase {
         m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360);
         m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360);
 
-        m_stage1PID.setTolerance(0.0);
-        m_stage2PID.setTolerance(3.0);//2//1//0
+        m_stage1PID.setTolerance(3.0);//0
+        m_stage2PID.setTolerance(5.0);//3//2//1//0
         m_stage3PID.setTolerance(0);
 
         m_stage1PID.setIntegratorRange(-0.25, 0.25);
@@ -307,7 +307,7 @@ public class Arm extends SubsystemBase {
     //Added an if condition for different positions based on game piece
     public Command goToScoreHigh(){
         if(m_clawSubsystem.wantCone()){
-            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(0.75), goToDipHigh());
+            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(1.25), goToDipHigh());
         }
         else{
             return moveToPositionCommand(positions.ScoreHighCube);

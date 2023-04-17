@@ -2,15 +2,15 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 1.9001959432490299,
-        "y": 4.838383105337639
+        "x": 1.885132005558129,
+        "y": 5.011504728891811
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7591997994024853,
-        "y": 4.838383105337639
+        "x": 2.9594869189738384,
+        "y": 4.280108131644835
       },
-      "holonomicAngle": -180.0,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -29,37 +29,42 @@
     },
     {
       "anchorPoint": {
-        "x": 3.789742008055445,
-        "y": 4.84
+        "x": 6.37,
+        "y": 4.580717732864038
       },
       "prevControl": {
-        "x": 3.2744709037289654,
-        "y": 4.8256852570848
+        "x": 5.548881672049059,
+        "y": 5.010160020320041
       },
       "nextControl": {
-        "x": 4.305013112381925,
-        "y": 4.8543147429152
+        "x": 5.548881672049059,
+        "y": 5.010160020320041
       },
-      "holonomicAngle": 180.0,
-      "isReversal": false,
+      "holonomicAngle": 0.0,
+      "isReversal": true,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false,
+      "isStopPoint": true,
       "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
+        "names": [
+          "cubeMode",
+          "pickupLowAlt",
+          "intake",
+          "tuck"
+        ],
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
     },
     {
       "anchorPoint": {
-        "x": 6.509543161943467,
-        "y": 5.525490765267245
+        "x": 1.8429369715882291,
+        "y": 4.437570303712036
       },
       "prevControl": {
-        "x": 5.63634384411626,
-        "y": 4.9958452774048405
+        "x": 2.7304510323306364,
+        "y": 4.952901048659241
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -69,16 +74,18 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "autobalance"
+          "placeHighCube",
+          "release",
+          "tuck"
         ],
-        "executionBehavior": "parallel",
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
     }
   ],
-  "maxVelocity": 1.5,
-  "maxAcceleration": null,
+  "maxVelocity": 4.0,
+  "maxAcceleration": 2.0,
   "isReversed": null,
   "markers": []
 }

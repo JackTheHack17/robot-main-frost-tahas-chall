@@ -130,8 +130,8 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
 
-        public static ArmPosition scoreHighConePosition  = new ArmPosition(183, 345, 223);
-        public static ArmPosition dipHighConePosition    = new ArmPosition(183, 290, 213);
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(193, 289, 243);
+        public static ArmPosition dipHighConePosition    = new ArmPosition(181, 279, 243);
         public static ArmPosition scoreHighCubePosition  = new ArmPosition(164, 327, 216);
         public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 385, 240);
         public static ArmPosition dipMidConePosition     = new ArmPosition(107, 345, 225);
@@ -139,7 +139,7 @@ public final class Constants {
         public static ArmPosition idlePosition           = new ArmPosition(107, 40,  129);
         public static ArmPosition scoreLowPosition       = new ArmPosition(107, 2,   116);
         public static ArmPosition floorPosition          = new ArmPosition(107, 290, 225);
-        public static ArmPosition floorAltPosition       = new ArmPosition(107, 319, 120);
+        public static ArmPosition floorAltPosition       = new ArmPosition(107, 312, 120);
         public static ArmPosition substationPosition     = new ArmPosition(120, 15,  185);
 
         public static final double THETA_SPEED = 1;
@@ -150,29 +150,29 @@ public final class Constants {
         public static final double STAGE_1_LENGTH = 20.0;
         public static final double STAGE_2_LENGTH = 29.5;
 
-        public static final double STAGE_1_Kp = 0.0350;//kp=.008, 0.025
+        public static final double STAGE_1_Kp = 0.0450;//kp=.008, 0.025
         public static final double STAGE_1_Ki = 0.001;
-        public static final double STAGE_1_Kd = 0.000;//0.0005
-        public static final double STAGE_1_Ks = 0.04;//0.0005
+        public static final double STAGE_1_Kd = 0.0001;//0.0005
+        public static final double STAGE_1_Ks = 0.04;//0.04;//0.0005
         public static final double STAGE_1_Kg = 1.1;//1.3 causes tiny pulse width modulation; 0.5
-        public static final double STAGE_1_MAX_SPEED = 500;
-        public static final double STAGE_1_MAX_ACCEL = 130;//
+        public static final double STAGE_1_MAX_SPEED = 600;
+        public static final double STAGE_1_MAX_ACCEL = 200;//200//170;//160;//140;//130
         
         public static final double STAGE_2_Kp = 0.035;//0.04//0.0325//0.008
         public static final double STAGE_2_Ki = 0.00;//0.0025 //0.0065
-        public static final double STAGE_2_Kd = 0.00420;//0.035 0.0043
+        public static final double STAGE_2_Kd = 0.00620;//0.00420//0.035 0.0043
         public static final double STAGE_2_Ks = 0.02;///0.03;//0.05
         public static final double STAGE_2_Kg = 0.82;//0.92//1.4, 1.0
-        public static final double STAGE_2_MAX_SPEED = 200;//250;
-        public static final double STAGE_2_MAX_ACCEL = 170;//150
+        public static final double STAGE_2_MAX_SPEED = 600;//250;
+        public static final double STAGE_2_MAX_ACCEL = 200;//200//190;//180;//160;//170//150
 
-        public static final double STAGE_3_Kp = 0.0155;//0.005
+        public static final double STAGE_3_Kp = 0.0025;//0.0255//0.0155;//0.005
         public static final double STAGE_3_Ki = 0;
-        public static final double STAGE_3_Kd = 0.0005;
+        public static final double STAGE_3_Kd = 0.0001;//0.000
         public static final double STAGE_3_Ks = 0.04;
         public static final double STAGE_3_Kg = 0.52;
-        public static final double STAGE_3_MAX_SPEED = 900; //500
-        public static final double STAGE_3_MAX_ACCEL = 220;//300
+        public static final double STAGE_3_MAX_SPEED = 500; //500
+        public static final double STAGE_3_MAX_ACCEL = 280;//250;//230;//300
     }
 
      public class POP {

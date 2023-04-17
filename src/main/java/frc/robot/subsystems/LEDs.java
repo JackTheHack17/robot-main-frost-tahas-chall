@@ -1,8 +1,4 @@
 package frc.robot.subsystems;
-import java.util.Arrays;
-
-import com.ctre.phoenix.led.ColorFlowAnimation;
-
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
@@ -20,10 +16,7 @@ public class LEDs extends SubsystemBase {
   private int m_r2 = 0;
   private int m_g2 = 0;
   private int m_b2 = 0;
-  private double[] color = {0, 0, 0};
-  private int leader = 0;
-  private int trailLength = 4;
-  private int[] trail = {1, 2, 3, 4};
+
 
   public LEDs () {
 
@@ -68,18 +61,8 @@ public class LEDs extends SubsystemBase {
   
   @Override
   public void periodic() {
-    // TODO iterate leader and trail to advance the sequence
-
-    color = RGBtoHSV(m_r, m_g, m_b);
-    int temp = 0;
-
     for (var i = 0; i < m_ledBuffer.getLength(); i++) {
-      if (i == leader) {
-        m_ledBuffer.setHSV(i, (int) color[0], (int) color[1], 1);
-      } else {
-        temp = Arrays.stream(trail).boxed().toList().indexOf(i);
-        m_ledBuffer.setHSV(i, (int) color[0], (int) color[1], (temp == -1 ? 0 : (int) ((trailLength - temp)/trailLength)));
-      }
+      m_ledBuffer.setRGB(i, m_r, m_g, m_b);
     }
 
     m_led.setData(m_ledBuffer);
@@ -88,43 +71,4 @@ public class LEDs extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {}
-
-  public static double[] RGBtoHSV(double r, double g, double b){
-
-    double h, s, v;
-
-    double min, max, delta;
-
-    min = Math.min(Math.min(r, g), b);
-    max = Math.max(Math.max(r, g), b);
-
-    // V
-    v = max;
-
-     delta = max - min;
-
-    // S
-     if( max != 0 )
-        s = delta / max;
-     else {
-        s = 0;
-        h = -1;
-        return new double[]{h,s,v};
-     }
-
-    // H
-     if( r == max )
-        h = ( g - b ) / delta; // between yellow & magenta
-     else if( g == max )
-        h = 2 + ( b - r ) / delta; // between cyan & yellow
-     else
-        h = 4 + ( r - g ) / delta; // between magenta & cyan
-
-     h *= 60;    // degrees
-
-    if( h < 0 )
-        h += 360;
-
-    return new double[]{h,s,v};
-  }
 }

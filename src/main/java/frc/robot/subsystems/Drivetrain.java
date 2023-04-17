@@ -174,10 +174,10 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d _robotPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
-  private double _translationKp = 2;//0.018;//0.03;//0.004 0.001
+  private double _translationKp = 3.75;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 15;//0.00005
+  private double _rotationKp = 6.25;//12.5;//15;//0.00005
   private double _rotationKi = 0;
   private double _rotationKd = 0;
 
@@ -685,14 +685,14 @@ public class Drivetrain extends SubsystemBase {
       HashMap<String, Command> eventMap = new HashMap<>();
       eventMap.put("marker1", new PrintCommand("Passed marker 1"));
       // eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
-      eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(1.5));
+      eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(2));
       eventMap.put("placeMidCone", m_arm.goToScoreMid().withTimeout(1.5));
       eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(2.75));
       eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle).withTimeout(0.5));
       eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
       eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
-      eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(1));
-      eventMap.put("intake", new WaitCommand(0.5).andThen(m_claw.intakeCommand().andThen(new WaitCommand(.75))));
+      eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(0.75));
+      eventMap.put("intake", new WaitCommand(0.5).andThen(m_claw.intakeCommand().andThen(new WaitCommand(.5))));
       eventMap.put("autobalance", new AutoBalance(this));
       eventMap.put("realign", moveToPositionCommand());
       eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ));
