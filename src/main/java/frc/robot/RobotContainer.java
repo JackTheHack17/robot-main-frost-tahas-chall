@@ -2,6 +2,7 @@ package frc.robot;
 import java.io.File;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -41,6 +42,7 @@ public class RobotContainer {
   public PinchersofPower m_claw = new PinchersofPower(this);
   public Arm m_arm = new Arm(m_claw, copilotController);
   public Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
+  private UsbCamera rawCamera;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -60,7 +62,9 @@ public class RobotContainer {
     m_arm.setDefaultCommand(m_arm.defaultCommand());
     m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController, copilotController));
 
-    CameraServer.startAutomaticCapture();
+    rawCamera = CameraServer.startAutomaticCapture("Aim Camera", 0);
+    rawCamera.setFPS(30);
+    rawCamera.setResolution(640, 480);
   }
 
   public Arm getArm() {
@@ -77,7 +81,6 @@ public class RobotContainer {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().whileTrue(new AutoBalance(m_swerve));
-
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
