@@ -175,7 +175,7 @@ public class PinchersofPower extends SubsystemBase  {
       spinner.set(intakeSpeed);
       spinner2.set(intakeSpeed);
 
-      if ( limitSwitch.get() && m_container.m_arm.target == positions.Substation ) {
+      if ( !limitSwitch.get() && (m_container.m_arm.target == positions.Substation || m_container.m_arm.target == positions.Floor) && m_cone ) {
         closeGrip();
       }
     } else {
@@ -184,6 +184,7 @@ public class PinchersofPower extends SubsystemBase  {
       spinner2.set(0);
     }
 
+    Telemetry.setValue("Pincher/limitSwitch", !limitSwitch.get());
     Telemetry.setValue("Pincher/leftMotor/setpoint", spinner.get());
     Telemetry.setValue("Pincher/leftMotor/temperature", spinner.getMotorTemperature());
     Telemetry.setValue("Pincher/leftMotor/outputVoltage", spinner.getAppliedOutput());

@@ -251,13 +251,14 @@ public class Arm extends SubsystemBase {
     }
 
     private void moveToPosition (positions position) {
-        ArmPosition target = positionMap.get(position);
+        target = position;
+        ArmPosition internalTarget = positionMap.get(position);
         if (!movingToIdle || (movingToIdle &&
             Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target) < JOINT_ANGLE_DEADZONE &&
             Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - m_stage2Target) < JOINT_ANGLE_DEADZONE)) {
-                moveToAngles(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle());
+                moveToAngles(internalTarget.getStage1Angle(), internalTarget.getStage2Angle(), internalTarget.getStage3Angle());
         } else {
-            moveToAngles(target.getStage1Angle(), target.getStage2Angle(), m_stage3Encoder.getAbsolutePosition()*360);   
+            moveToAngles(internalTarget.getStage1Angle(), internalTarget.getStage2Angle(), m_stage3Encoder.getAbsolutePosition()*360);   
         }
        // if ( lastPosition == positions.Idle && position != positions.Idle && Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - target.getStage2Angle()) > JOINT_ANGLE_DEADZONE) {
          //   moveToAngles(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle());
@@ -320,7 +321,7 @@ public class Arm extends SubsystemBase {
 
     public Command goToScoreMid(){
         if(m_clawSubsystem.wantCone()){
-            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreMidCone).withTimeout(0.75), goToDipMid());
+            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreMidCone).withTimeout(1.25), goToDipMid());//0.85 sec
         }
         else{
             return moveToPositionCommand(positions.ScoreMidCube);
@@ -395,11 +396,7 @@ public class Arm extends SubsystemBase {
                         break;
                     case Idle:
                         movingToIdle = true;
-                        if (m_clawSubsystem.wantCone()) {
-                            m_clawSubsystem.spinOff();
-                        } else {
-                            m_clawSubsystem.spinSlow();
-                        }
+                        m_clawSubsystem.spinSlow();
                         break;
                     default:
                         //m_clawSubsystem.spinOff();
