@@ -1,6 +1,7 @@
 package frc.robot;
 import java.io.File;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -58,6 +59,8 @@ public class RobotContainer {
    // m_LEDs.rainbow();
     m_arm.setDefaultCommand(m_arm.defaultCommand());
     m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController, copilotController));
+
+    CameraServer.startAutomaticCapture();
   }
 
   public Arm getArm() {
