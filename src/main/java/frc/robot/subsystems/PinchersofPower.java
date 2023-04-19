@@ -175,7 +175,7 @@ public class PinchersofPower extends SubsystemBase  {
       spinner.set(intakeSpeed);
       spinner2.set(intakeSpeed);
 
-      if ( !limitSwitch.get() && (m_container.m_arm.target == positions.Substation || m_container.m_arm.target == positions.Floor) && m_cone ) {
+      if ( !limitSwitch.get() && (m_container.m_arm.target == positions.Substation || m_container.m_arm.target == positions.Floor) && m_cone && !RobotContainer.copilotController.getRawButton(15) ) {
         closeGrip();
       }
     } else {
