@@ -46,7 +46,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    Telemetry.flushTable();
+    //Telemetry.flushTable();
 
     File[] paths = new File(Filesystem.getDeployDirectory(), "pathplanner").listFiles();
     String pathsString = "";
