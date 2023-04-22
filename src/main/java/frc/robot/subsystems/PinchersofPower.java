@@ -138,6 +138,7 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void setMode(GamePieces mode) {
     m_cone = (mode == GamePieces.Cone);
+    spinSlow();
 
     if(!m_cone){
       openGrip();
@@ -158,6 +159,7 @@ public class PinchersofPower extends SubsystemBase  {
         if ( m_container.getArm().target == positions.ScoreLow) {
           spinOut();  
         }
+        spinOff();
         openGrip();
       } else {
         spinOut();

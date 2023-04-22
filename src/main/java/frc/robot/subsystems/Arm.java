@@ -308,7 +308,7 @@ public class Arm extends SubsystemBase {
     //Added an if condition for different positions based on game piece
     public Command goToScoreHigh(){
         if(m_clawSubsystem.wantCone()){
-            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(1.25), goToDipHigh());
+            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(1.0), goToDipHigh());
         }
         else{
             return moveToPositionCommand(positions.ScoreHighCube);
@@ -400,6 +400,7 @@ public class Arm extends SubsystemBase {
                         break;
                     default:
                         //m_clawSubsystem.spinOff();
+                        m_clawSubsystem.spinSlow();
                         break;
                 }
             }, 
@@ -439,45 +440,42 @@ public class Arm extends SubsystemBase {
         
                 switch (position) {
                     case ScoreHighCone:
-                        m_copilotController.setLED(2, true);
+                        //m_copilotController.setLED(2, true);
                         break;
                     case ScoreHighCube:
-                        m_copilotController.setLED(2, true);
+                        //m_copilotController.setLED(2, true);
                         break;
                     case ScoreMidCone:
-                        m_copilotController.setLED(4, true);
+                        //m_copilotController.setLED(4, true);
                         break;
                     case ScoreMidCube:
-                        m_copilotController.setLED(4, true);
+                        //m_copilotController.setLED(4, true);
                         break;
                     case ScoreLow:
-                        m_copilotController.setLED(5, true);
+                        //m_copilotController.setLED(5, true);
                         break;
                     case Floor:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        m_copilotController.setLED(1, true);
+                        //m_copilotController.setLED(1, true);
                         break;
                     case FloorAlt:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        m_copilotController.setLED(3, true);
+                        //m_copilotController.setLED(3, true);
                         break;
                     case Substation:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        m_copilotController.setLED(0, true);
+                        //m_copilotController.setLED(0, true);
                         break;
                     case Idle:
                         movingToIdle = true;
-                        if (m_clawSubsystem.wantCone()) {
-                            m_clawSubsystem.spinOff();
-                        } else {
-                            m_clawSubsystem.spinSlow();
-                        }
+                        m_clawSubsystem.spinSlow();
                         break;
                     default:
                         //m_clawSubsystem.spinOff();
+                        m_clawSubsystem.spinSlow();
                         break;
                 }
             }, 

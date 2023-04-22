@@ -130,10 +130,10 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
 
-        public static ArmPosition scoreHighConePosition  = new ArmPosition(193, 263, 233);
-        public static ArmPosition dipHighConePosition    = new ArmPosition(181, 263, 215);
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(203, 263, 233);
+        public static ArmPosition dipHighConePosition    = new ArmPosition(193, 253, 215);
         public static ArmPosition scoreHighCubePosition  = new ArmPosition(150, 304, 211);
-        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 338, 220);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 325, 220);
         public static ArmPosition dipMidConePosition     = new ArmPosition(107, 325, 210);
         public static ArmPosition scoreMidCubePosition   = new ArmPosition(107, 351, 187);
         public static ArmPosition idlePosition           = new ArmPosition(107, 26,  129);
@@ -152,19 +152,19 @@ public final class Constants {
 
         public static final double STAGE_1_Kp = 0.0450;//kp=.008, 0.025
         public static final double STAGE_1_Ki = 0.001;
-        public static final double STAGE_1_Kd = 0.0001;//0.0005
+        public static final double STAGE_1_Kd = 0.0003;//0.0005
         public static final double STAGE_1_Ks = 0.04;//0.04;//0.0005
         public static final double STAGE_1_Kg = 1.1;//1.3 causes tiny pulse width modulation; 0.5
         public static final double STAGE_1_MAX_SPEED = 600;
-        public static final double STAGE_1_MAX_ACCEL = 190;//200//170;//160;//140;//130
+        public static final double STAGE_1_MAX_ACCEL = 140;//180;//200//170;//160;//140;//130
         
         public static final double STAGE_2_Kp = 0.014;//0.035//0.04//0.0325//0.008
         public static final double STAGE_2_Ki = 0.00;//0.0025 //0.0065
-        public static final double STAGE_2_Kd = 0.0051;//0.0042//0.00420//0.035 0.0043
+        public static final double STAGE_2_Kd = 0.0056;//0.0051;//0.0042//0.00420//0.035 0.0043
         public static final double STAGE_2_Ks = 0.025;///0.03;//0.05
         public static final double STAGE_2_Kg = 0.75;//0.92//1.4, 1.0
         public static final double STAGE_2_MAX_SPEED = 600;//250;
-        public static final double STAGE_2_MAX_ACCEL = 190;//200//190;//180;//160;//170//150
+        public static final double STAGE_2_MAX_ACCEL = 160;//210;//200//190;//180;//160;//170//150
 
         public static final double STAGE_3_Kp = 0.02;//0.0255//0.0155;//0.005
         public static final double STAGE_3_Ki = 0;

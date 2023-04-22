@@ -66,15 +66,12 @@
         "x": 2.6375265224406435,
         "y": 4.995823814993602
       },
-      "nextControl": {
-        "x": 1.6833348624336701,
-        "y": 4.441807898525168
-      },
+      "nextControl": null,
       "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": true,
+      "isStopPoint": false,
       "stopEvent": {
         "names": [
           "placeHighCube",
@@ -82,28 +79,6 @@
           "tuck"
         ],
         "executionBehavior": "sequential",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 6.380710475706667,
-        "y": 4.652291447440038
-      },
-      "prevControl": {
-        "x": 3.7038535505642445,
-        "y": 5.267825392793642
-      },
-      "nextControl": null,
-      "holonomicAngle": 0.0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
       }

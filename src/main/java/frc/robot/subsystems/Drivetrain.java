@@ -693,7 +693,7 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("intake", new WaitCommand(0.5).andThen(m_claw.intakeCommand().andThen(new WaitCommand(.25))));
       eventMap.put("autobalance", new AutoBalance(this));
       eventMap.put("realign", moveToPositionCommand());
-      eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ));
+      eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); m_claw.spinSlow(); } ));
       eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setCone(false); m_claw.openGrip(); } ));
       eventMap.put("wait", new WaitCommand(0.25));
 
@@ -719,6 +719,7 @@ public class Drivetrain extends SubsystemBase {
 
       // score a preloaded cone if the auton crashes
       return new SequentialCommandGroup(
+        new InstantCommand( () -> stopModules() ),
         new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); } ),
         m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)),
         m_claw.outTakeCommand().andThen(new WaitCommand(.25)),

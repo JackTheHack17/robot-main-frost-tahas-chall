@@ -42,7 +42,7 @@ public class RobotContainer {
   public PinchersofPower m_claw = new PinchersofPower(this);
   public Arm m_arm = new Arm(m_claw, copilotController);
   public Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
-  private UsbCamera rawCamera;
+  //private UsbCamera rawCamera;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -64,9 +64,9 @@ public class RobotContainer {
     m_arm.setDefaultCommand(m_arm.defaultCommand());
     m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController, copilotController));
 
-    rawCamera = CameraServer.startAutomaticCapture("Aim Camera", 0);
-    rawCamera.setFPS(30);
-    rawCamera.setResolution(640, 480);
+    //rawCamera = CameraServer.startAutomaticCapture("Aim Camera", 0);
+    //rawCamera.setFPS(30);
+    //rawCamera.setResolution(640, 480);
   }
 
   public Arm getArm() {
