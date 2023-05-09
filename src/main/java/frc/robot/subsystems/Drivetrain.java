@@ -50,16 +50,16 @@ import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -68,13 +68,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -84,6 +84,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.ARM.positions;
+import frc.robot.commands.Align;
+import frc.robot.commands.movetoGoal;
 import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 public class Drivetrain extends SubsystemBase {
@@ -396,25 +398,35 @@ public class Drivetrain extends SubsystemBase {
     return m_gyro.getPitch();
   }
 
-  public Command pathToCommand (Pose2d target) {
-    PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
-      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default")),
-      new PathPoint(new Translation2d(m_odometry.getEstimatedPosition().getX(),m_odometry.getEstimatedPosition().getY()), new Rotation2d(Math.toRadians(m_gyro.getYaw())), Math.hypot(forwardKinematics.vxMetersPerSecond, forwardKinematics.vxMetersPerSecond)),
-      new PathPoint(new Translation2d(target.getX(), target.getY()), target.getRotation())
-    );
-    return new PPSwerveControllerCommand(
-      _toTarget,
-      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
-      this.m_kinematics, // SwerveDriveKinematics
-      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
-      (Subsystem) this
-    ).andThen(() -> {
-      m_LEDs.flashGreen();
-      m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1);
-    }).alongWith(new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)));
+  public Command pathToCommand(Pose2d target) {
+    Pose2d currentPose = m_odometry.getEstimatedPosition();
+
+    ProfiledPIDController tController = new ProfiledPIDController(_translationKp, _translationKi, _translationKd, 
+                                                  new TrapezoidProfile.Constraints(1, 1));
+    ProfiledPIDController rController = new ProfiledPIDController(_rotationKp, _rotationKi, _rotationKd, 
+                                                  new TrapezoidProfile.Constraints(1, 1));
+
+    SimpleMotorFeedforward tFF = new SimpleMotorFeedforward(0, 0, 0);
+    SimpleMotorFeedforward rFF = new SimpleMotorFeedforward(0, 0, 0);
+
+    Align swerveAlign = new Align(()->currentPose.getY(), 
+                                  ()->currentPose.getRotation().getDegrees(), 
+                                  tController, 
+                                  rController, 
+                                  tFF, 
+                                  rFF, 
+                                  target.getY(), 
+                                  target.getRotation().getDegrees(),
+                                  this);
+
+    movetoGoal swerveMovetoGoal = new movetoGoal(() -> currentPose.getX(), 
+                                                tController, 
+                                                rFF, 
+                                                target.getX(), 
+                                                this);
+
+
+    return new SequentialCommandGroup( swerveAlign, swerveMovetoGoal );
   }
 
   public Command autoBalanceCommand () {

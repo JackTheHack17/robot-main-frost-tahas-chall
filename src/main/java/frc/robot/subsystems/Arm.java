@@ -51,13 +51,11 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.ArmPosition;
 import frc.lib.ButtonBoard;
-import frc.lib.KinematicsSolver;
 import frc.lib.Telemetry;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.Constants.CAN;
 import frc.robot.Constants.DIO;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 public class Arm extends SubsystemBase {
     private final CANSparkMax m_stage1;
