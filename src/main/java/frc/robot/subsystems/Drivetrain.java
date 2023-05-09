@@ -81,6 +81,7 @@ import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.Align;
+import frc.robot.commands.AutoBalance;
 import frc.robot.commands.movetoGoal;
 import frc.robot.subsystems.PinchersofPower.GamePieces;
 
