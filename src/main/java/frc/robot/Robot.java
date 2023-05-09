@@ -4,6 +4,15 @@
 
 package frc.robot;
 
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -25,6 +34,11 @@ public class Robot extends TimedRobot {
 
   private PowerDistribution PDH = new PowerDistribution();
 
+  //private UsbCamera rawCamera;
+  //private CvSource outputCamera;
+  //private CvSink inputCamera;
+  //private Mat mat;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -33,6 +47,16 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
+
+    //rawCamera = CameraServer.startAutomaticCapture("raw camera", 0);
+    //rawCamera.setFPS(30);
+    //rawCamera.setResolution(640, 480);
+
+    //outputCamera = CameraServer.putVideo("Aim Camera", 640, 480);
+    //inputCamera = CameraServer.getVideo();
+
+    //mat = new Mat();
+
     m_robotContainer = new RobotContainer();
   }
 
@@ -45,6 +69,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    //inputCamera.grabFrame(mat);
+
+    //Imgproc.line(mat, new Point(320,480), new Point(320,0), new Scalar(255, 0, 0));
+
+    //outputCamera.putFrame(mat);
+
     Telemetry.setValue("general/PDH/voltage", PDH.getVoltage());
     Telemetry.setValue("general/PDH/current", PDH.getTotalCurrent());
     Telemetry.setValue("general/PDH/temperature", PDH.getTemperature());

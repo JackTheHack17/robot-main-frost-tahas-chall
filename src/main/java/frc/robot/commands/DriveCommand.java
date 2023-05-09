@@ -6,6 +6,7 @@ package frc.robot.commands;
 import static frc.robot.Constants.DRIVETRAIN.ROTATION_SCALE_FACTOR;
 import static frc.robot.Constants.DRIVETRAIN.SWERVE_SLOW_SPEED_PERCENTAGE;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -24,6 +25,10 @@ public class DriveCommand extends CommandBase {
 
   private CommandGenericHID driverController;
   private ButtonBoard copilotController;
+
+  private SlewRateLimiter LXSlewRateLimiter = new SlewRateLimiter(2, -2, 0);
+  private SlewRateLimiter LYSlewRateLimiter = new SlewRateLimiter(2, -2, 0);
+  private SlewRateLimiter RXSlewRateLimiter = new SlewRateLimiter(2, -2, 0);
 
   /**
    * Creates a new ExampleCommand.
@@ -53,9 +58,9 @@ public class DriveCommand extends CommandBase {
     m_RX = driverController.getRawAxis(4); // right x axis (rotation)
 
     // deadzones
-    m_LX = ( Math.abs(m_LX) < 0.1 ) ? 0 : m_LX;
-    m_LY = ( Math.abs(m_LY) < 0.1 ) ? 0 : m_LY;
-    m_RX = ( Math.abs(m_RX) < 0.1 ) ? 0 : m_RX;
+    m_LX = ( Math.abs(m_LX) < 0.15 ) ? 0 : m_LX;
+    m_LY = ( Math.abs(m_LY) < 0.15 ) ? 0 : m_LY;
+    m_RX = ( Math.abs(m_RX) < 0.15 ) ? 0 : m_RX;
 
     // square joysticks
     m_LX = m_LX * m_LX * ( Math.abs(m_LX) / (m_LX == 0 ? 1 : m_LX ) );
@@ -99,7 +104,7 @@ public class DriveCommand extends CommandBase {
         break;
     }
     
-    m_swerve.joystickDrive(m_LX, m_LY, m_RX);
+    m_swerve.joystickDrive(LXSlewRateLimiter.calculate(m_LX), LYSlewRateLimiter.calculate(m_LY), RXSlewRateLimiter.calculate(m_RX));
 
     if ( copilotController.getRawButton(16) ) {
       // shwerve engaged

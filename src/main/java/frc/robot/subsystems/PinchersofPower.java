@@ -6,6 +6,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -30,6 +31,7 @@ public class PinchersofPower extends SubsystemBase  {
   private final ColorSensorV3 colorSensor;
   private boolean m_cone;
   private double intakeSpeed = 0;
+  private DigitalInput limitSwitch = new DigitalInput(Constants.DIO.GRIP_LIMIT_SWITCH);
 
   public PinchersofPower(RobotContainer m_container) {
     this.m_container = m_container;
@@ -136,6 +138,7 @@ public class PinchersofPower extends SubsystemBase  {
 
   public void setMode(GamePieces mode) {
     m_cone = (mode == GamePieces.Cone);
+    spinSlow();
 
     if(!m_cone){
       openGrip();
@@ -156,6 +159,7 @@ public class PinchersofPower extends SubsystemBase  {
         if ( m_container.getArm().target == positions.ScoreLow) {
           spinOut();  
         }
+        spinOff();
         openGrip();
       } else {
         spinOut();
@@ -172,12 +176,17 @@ public class PinchersofPower extends SubsystemBase  {
     if ( DriverStation.isEnabled() || DriverStation.isAutonomousEnabled() ) {
       spinner.set(intakeSpeed);
       spinner2.set(intakeSpeed);
+
+      if ( !limitSwitch.get() && (m_container.m_arm.target == positions.Substation || m_container.m_arm.target == positions.Floor) && m_cone && !RobotContainer.copilotController.getRawButton(15) ) {
+        closeGrip();
+      }
     } else {
       // prevent CAN timeouts when disabled, actual motor stoppage is handled at a lower level
       spinner.set(0);
       spinner2.set(0);
     }
 
+    Telemetry.setValue("Pincher/limitSwitch", !limitSwitch.get());
     Telemetry.setValue("Pincher/leftMotor/setpoint", spinner.get());
     Telemetry.setValue("Pincher/leftMotor/temperature", spinner.getMotorTemperature());
     Telemetry.setValue("Pincher/leftMotor/outputVoltage", spinner.getAppliedOutput());

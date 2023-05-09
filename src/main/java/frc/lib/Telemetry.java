@@ -70,4 +70,8 @@ public class Telemetry {
     public static boolean getValue ( String key, boolean defaultValue ) {
         return getTelemetryTable().getEntry(key).getBoolean(defaultValue);
     }
+
+    public static void flushTable () {
+        NetworkTableInstance.getDefault().flush();
+    }
 }
