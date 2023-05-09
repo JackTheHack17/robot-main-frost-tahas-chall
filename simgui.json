@@ -16,6 +16,17 @@
     }
   },
   "NetworkTables": {
+    "retained": {
+      "telemetry": {
+        "general": {
+          "autonomous": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      }
+    },
     "transitory": {
       "telemetry": {
         "Arm": {
@@ -53,10 +64,44 @@
         "general": {
           "PDH": {
             "open": true
-          }
+          },
+          "autonomous": {
+            "open": true
+          },
+          "open": true
         },
         "open": true
       }
     }
+  },
+  "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Connections": {
+      "open": true
+    },
+    "NT3@127.0.0.1:49272": {
+      "Publishers": {
+        "open": true
+      },
+      "Subscribers": {
+        "open": true
+      },
+      "open": true
+    },
+    "NT3@127.0.0.1:50186": {
+      "Publishers": {
+        "open": true
+      },
+      "Subscribers": {
+        "open": true
+      },
+      "open": true
+    },
+    "Server": {
+      "open": true
+    },
+    "visible": true
   }
 }

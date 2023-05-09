@@ -55,7 +55,7 @@ public class Robot extends TimedRobot {
     
     if (!DriverStation.isEnabled()) {
       if ( RobotContainer.copilotController.getRawButton(9) ) {
-        DriverStation.reportWarning("Manual Override Enabled! Do not Enable Robot without Disabling Manual Override!", false);
+        //DriverStation.reportWarning("Manual Override Enabled! Do not Enable Robot without Disabling Manual Override!", false);
       }
     }
 
@@ -86,5 +86,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    m_robotContainer.m_swerve.setRobotOriented(false);
   }
 }

@@ -1,6 +1,5 @@
 package frc.robot;
 import java.io.File;
-import java.time.Instant;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -35,12 +34,12 @@ public class RobotContainer {
   public static final ButtonBoard copilotController = new ButtonBoard(1, 2);
 
   // The robot's subsystems and commands are defined here...
-  public final Pigeon m_gyro = new Pigeon();
-  public final Limelight m_limelight = new Limelight();
-  public final LEDs m_LEDs = new LEDs();
-  public final PinchersofPower m_claw = new PinchersofPower(this);
-  public final Arm m_arm = new Arm(m_claw, copilotController);
-  public final Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
+  public Pigeon m_gyro = new Pigeon();
+  public Limelight m_limelight = new Limelight();
+  public LEDs m_LEDs = new LEDs();
+  public PinchersofPower m_claw = new PinchersofPower(this);
+  public Arm m_arm = new Arm(m_claw, copilotController);
+  public Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -51,6 +50,7 @@ public class RobotContainer {
       pathsString += paths[i].getName().substring(0, paths[i].getName().indexOf(".")) + ",";
     }
     Telemetry.setValue("general/autonomous/availableRoutines", pathsString);
+    Telemetry.setValue("general/autonomous/selectedRoutine", "SET ME");
 
     // Configure the button bindings
     configureButtonBindings();
@@ -76,7 +76,7 @@ public class RobotContainer {
     driverController.y().whileTrue(new AutoBalance(m_swerve));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
-    copilotController.button(0).onFalse(m_claw.intakeCommand());
+    copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
     copilotController.button(1).onFalse(m_claw.intakeCommand());
     copilotController.button(2).onTrue(new InstantCommand( () -> m_arm.goToScoreHigh().schedule()));
@@ -90,7 +90,7 @@ public class RobotContainer {
     copilotController.button(4).onFalse(m_arm.defaultCommand());
     copilotController.button(5).whileTrue(m_arm.moveToPositionCommand(positions.ScoreLow));
     copilotController.button(5).onFalse(m_claw.intakeCommand());
-    copilotController.button(6).onTrue((m_claw.outTakeCommand()));
+    copilotController.button(6).onTrue(new SequentialCommandGroup((m_claw.outTakeCommand()), new WaitCommand(0.25), m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(6).onFalse(m_claw.spinOffCommand());
     copilotController.button(8).onTrue(m_LEDs.turnYellow().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cone))).alongWith(new InstantCommand( () -> m_claw.setCone(true)).alongWith(new InstantCommand( () -> {copilotController.setLED(7, false);copilotController.setLED(8, true);}))));
     copilotController.button(7).onTrue(m_LEDs.turnPurple().alongWith(new InstantCommand( () -> m_claw.setMode(GamePieces.Cube))).alongWith(new InstantCommand( () -> m_claw.setCone(false)).alongWith(new InstantCommand( () -> {copilotController.setLED(7, true);copilotController.setLED(8, false);}))));
@@ -117,8 +117,8 @@ public class RobotContainer {
     }));
     copilotController.button(13).onFalse(new InstantCommand( () -> {if (copilotController.getRawButton(9)) m_claw.spinOff();}));
     
-    driverController.axisGreaterThan(2, 0.1).onTrue(m_swerve.moveToPositionCommand());
-    driverController.axisGreaterThan(3, 0.1).onTrue(m_swerve.moveToPositionCommand());
+    //driverController.axisGreaterThan(2, 0.1).onTrue(m_swerve.moveToPositionCommand());
+    //driverController.axisGreaterThan(3, 0.1).onTrue(m_swerve.moveToPositionCommand());
   }
 
   /**
