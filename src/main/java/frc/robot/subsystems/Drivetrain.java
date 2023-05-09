@@ -433,6 +433,9 @@ public class Drivetrain extends SubsystemBase {
     ProfiledPIDController rController = new ProfiledPIDController(_rotationKp, _rotationKi, _rotationKd, 
                                                   new TrapezoidProfile.Constraints(1, 1));
 
+    tController.setTolerance(0.02);
+    rController.setTolerance(0.02);
+
     SimpleMotorFeedforward tFF = new SimpleMotorFeedforward(0, 0, 0);
     SimpleMotorFeedforward rFF = new SimpleMotorFeedforward(0, 0, 0);
 
@@ -445,13 +448,11 @@ public class Drivetrain extends SubsystemBase {
                                   target.getY(), 
                                   target.getRotation().getDegrees(),
                                   this);
-
     movetoGoal swerveMovetoGoal = new movetoGoal(() -> currentPose.getX(), 
                                                 tController, 
                                                 rFF, 
                                                 target.getX(), 
                                                 this);
-
 
     return new SequentialCommandGroup( swerveAlign, swerveMovetoGoal );
   }
