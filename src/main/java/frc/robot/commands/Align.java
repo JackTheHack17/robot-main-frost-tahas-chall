@@ -1,7 +1,6 @@
 package frc.robot.commands;
 import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
@@ -13,19 +12,15 @@ public class Align extends CommandBase {
   TrapezoidProfile.Constraints rotProfile;
   ProfiledPIDController yPPID;
   ProfiledPIDController rotPPID;
-  SimpleMotorFeedforward yFF;
-  SimpleMotorFeedforward rotFF;
   double ySetpoint;
   double rotationSetpoint;
   Drivetrain swerve;
 
-  public Align(DoubleSupplier yCurrent, DoubleSupplier rotationCurrent, ProfiledPIDController yPPID, ProfiledPIDController rotPPID, SimpleMotorFeedforward yFF, SimpleMotorFeedforward rFF,  double ySetpoint, double rotationSetpoint, Drivetrain swerve) {
+  public Align(DoubleSupplier yCurrent, DoubleSupplier rotationCurrent, ProfiledPIDController yPPID, ProfiledPIDController rotPPID,  double ySetpoint, double rotationSetpoint, Drivetrain swerve) {
     this.yCurrent = yCurrent;
     this.rotationCurrent = rotationCurrent;
     this.yPPID = yPPID;
     this.rotPPID = rotPPID;
-    this.yFF = yFF;
-    this.rotFF = rFF;
     this.ySetpoint = ySetpoint;
     this.rotationSetpoint = rotationSetpoint;
     this.swerve = swerve;
@@ -40,8 +35,8 @@ public class Align extends CommandBase {
 
   @Override
   public void execute() {
-    double yOutput = yPPID.calculate(yCurrent.getAsDouble(), ySetpoint) + yFF.calculate(yPPID.getSetpoint().velocity);
-    double rotOutput = rotPPID.calculate(rotationCurrent.getAsDouble(), rotationSetpoint) + rotFF.calculate(rotPPID.getSetpoint().velocity);
+    double yOutput = yPPID.calculate(yCurrent.getAsDouble(), ySetpoint);
+    double rotOutput = rotPPID.calculate(rotationCurrent.getAsDouble(), rotationSetpoint);
     swerve.joystickDrive(0, yOutput, rotOutput);
   }
 

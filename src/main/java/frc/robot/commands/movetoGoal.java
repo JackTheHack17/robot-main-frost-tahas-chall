@@ -12,10 +12,9 @@ public class movetoGoal extends CommandBase {
   double xSetpoint;
   Drivetrain swerve;
 
-  public movetoGoal(DoubleSupplier xCurrent, ProfiledPIDController xPPID, SimpleMotorFeedforward xFF,  double xSetpoint, Drivetrain swerve) {
+  public movetoGoal(DoubleSupplier xCurrent, ProfiledPIDController xPPID,double xSetpoint, Drivetrain swerve) {
     this.xCurrent = xCurrent;
     this.xPPID = xPPID;
-    this.xFF = xFF;
     this.xSetpoint = xSetpoint;
     this.swerve = swerve;
     addRequirements(swerve);
