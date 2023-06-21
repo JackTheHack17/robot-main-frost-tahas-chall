@@ -29,12 +29,17 @@
       }
     },
     "transitory": {
+      "SmartDashboard": {
+        "PPSwerveControllerCommand": {
+          "open": true
+        },
+        "open": true
+      },
       "telemetry": {
         "Arm": {
           "manualTarget": {
             "open": true
-          },
-          "open": true
+          }
         },
         "drivetrain": {
           "kinematics": {
