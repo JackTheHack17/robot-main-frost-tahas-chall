@@ -44,6 +44,7 @@ import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
@@ -444,6 +445,23 @@ public class Drivetrain extends SubsystemBase {
     return pathToCommand( closest );
   }
 
+  // This piece of code most likely has a bug, as I can't test it
+  // Check if the waypoints are correct, we are using the first apriltag, which is red
+  // So make sure the field is configured for red in terms of the waypoints
+  // Way point generation is on line 242
+  // If, you want just use one of the waypoints on thePPPathToCommand method to see if it works
+  public Command PPmoveToPositionCommand () {
+    Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+    if (closest == null) return new InstantCommand();
+    if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
+      m_LEDs.flashRed();
+      m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
+      return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
+    }
+
+    return PPpathToCommand( closest );
+  }
+
   public double getGyroAngle(){
     return m_gyro.getPitch();
   }
@@ -475,9 +493,12 @@ public class Drivetrain extends SubsystemBase {
     return new SequentialCommandGroup( swerveAlign, swerveMovetoGoal );
   }
 
+  // This is the bulk of the position system. Uses path generated points to move to a target.
+  // Uses path planner, and does closes in on a target in an x,y. This command only works with a given target
+  // Potential Bugs: May not correct ofr rotation errpr
   public Command PPpathToCommand (Pose2d target) {
     PathPlannerTrajectory _alignToTarget = PathPlanner.generatePath(
-      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default")),
+      new PathConstraints(4, 3),
       new PathPoint(new Translation2d(
         m_odometry.getEstimatedPosition().getX(), 
         m_odometry.getEstimatedPosition().getY()), 
@@ -493,7 +514,7 @@ public class Drivetrain extends SubsystemBase {
     );
 
     PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
-      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default")),
+      new PathConstraints(4, 3),
       new PathPoint(
         new Translation2d(
           m_odometry.getEstimatedPosition().getX(), 

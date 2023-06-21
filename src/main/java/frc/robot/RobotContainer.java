@@ -1,5 +1,8 @@
 package frc.robot;
 import java.io.File;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -80,6 +83,8 @@ public class RobotContainer {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().whileTrue(new AutoBalance(m_swerve));
+    // This command uses the robot odometry to drive to a specific location on the field
+    driverController.x().onTrue(m_swerve.PPmoveToPositionCommand());
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
