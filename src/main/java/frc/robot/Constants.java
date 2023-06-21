@@ -130,16 +130,16 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
 
-        public static ArmPosition scoreHighConePosition  = new ArmPosition(203, 263, 233);
-        public static ArmPosition dipHighConePosition    = new ArmPosition(193, 253, 215);
-        public static ArmPosition scoreHighCubePosition  = new ArmPosition(150, 304, 211);
-        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 325, 220);
-        public static ArmPosition dipMidConePosition     = new ArmPosition(107, 325, 210);
-        public static ArmPosition scoreMidCubePosition   = new ArmPosition(107, 351, 187);
-        public static ArmPosition idlePosition           = new ArmPosition(107, 26,  129);
-        public static ArmPosition scoreLowPosition       = new ArmPosition(107, 350,   116);
-        public static ArmPosition floorPosition          = new ArmPosition(107, 265, 225);
-        public static ArmPosition floorAltPosition       = new ArmPosition(107, 293, 120); // s2 306
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(203, 253, 233);
+        public static ArmPosition dipHighConePosition    = new ArmPosition(193, 243, 215);
+        public static ArmPosition scoreHighCubePosition  = new ArmPosition(150, 294, 211);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 315, 220);
+        public static ArmPosition dipMidConePosition     = new ArmPosition(107, 315, 210);
+        public static ArmPosition scoreMidCubePosition   = new ArmPosition(107, 341, 187);
+        public static ArmPosition idlePosition           = new ArmPosition(107, 16,  129);
+        public static ArmPosition scoreLowPosition       = new ArmPosition(107, 340,   116);
+        public static ArmPosition floorPosition          = new ArmPosition(107, 255, 225);
+        public static ArmPosition floorAltPosition       = new ArmPosition(107, 283, 120); // s2 306
         public static ArmPosition substationPosition     = new ArmPosition(120, 1,   170);
 
         public static final double THETA_SPEED = 1;
