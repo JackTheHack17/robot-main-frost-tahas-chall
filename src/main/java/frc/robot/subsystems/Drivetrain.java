@@ -57,7 +57,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -66,7 +65,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -84,10 +82,9 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.ARM.positions;
-import frc.robot.commands.Align;
 import frc.robot.commands.AutoBalance;
-import frc.robot.commands.movetoGoal;
 
 public class Drivetrain extends SubsystemBase {
   private Pigeon m_gyro;
@@ -239,39 +236,43 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.burnFlash();
 
     // declare scoring positions
-    if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+    if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {  
       // red alliance waypoints
-      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.70, 5.05, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 3.84, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 3.28, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 2.18, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 1.60, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 0.47, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(14.70, 1.03, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(14.70, 2.75, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(14.70, 4.42, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(14.70, 5.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.70, 3.84, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.70, 3.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.70, 2.18, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.70, 1.60, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.70, 0.47, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.70, 1.03, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.70, 2.75, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.70, 4.42, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
-      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.84, 5.05, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 3.84, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 3.28, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 2.18, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 1.60, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 0.47, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.84, 1.03, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.84, 2.75, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.84, 4.42, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.84, 5.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 3.84, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 3.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 2.18, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 1.60, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 0.47, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.84, 1.03, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.84, 2.75, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.84, 4.42, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
     }
 
     PathPlannerServer.startServer(6969);
+
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointX", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointY", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointAngle", 0);
   }
 
   @Override
@@ -434,17 +435,6 @@ public class Drivetrain extends SubsystemBase {
     BR_Azimuth.set(ControlMode.PercentOutput, 0);
   }
 
-  public Command moveToPositionCommand () {
-    Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
-    if (closest == null) return new InstantCommand();
-    if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
-      m_LEDs.flashRed();
-      m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
-      return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
-    }
-    return pathToCommand( closest );
-  }
-
   // This piece of code most likely has a bug, as I can't test it
   // Check if the waypoints are correct, we are using the first apriltag, which is red
   // So make sure the field is configured for red in terms of the waypoints
@@ -453,44 +443,21 @@ public class Drivetrain extends SubsystemBase {
   public Command PPmoveToPositionCommand () {
     Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
     if (closest == null) return new InstantCommand();
-    if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
-      m_LEDs.flashRed();
-      m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
-      return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
-    }
+    // if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
+    //   m_LEDs.flashRed();
+    //   m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
+    //   return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
+    // }
+
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointX", closest.getX());
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointY", closest.getY());
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointAngle", closest.getRotation().getDegrees()); 
 
     return PPpathToCommand( closest );
   }
 
   public double getGyroAngle(){
     return m_gyro.getPitch();
-  }
-
-  public Command pathToCommand(Pose2d target) {
-    Pose2d currentPose = m_odometry.getEstimatedPosition();
-
-    ProfiledPIDController tController = new ProfiledPIDController(_translationKp, _translationKi, _translationKd, 
-                                                  new TrapezoidProfile.Constraints(1, 1));
-    ProfiledPIDController rController = new ProfiledPIDController(_rotationKp, _rotationKi, _rotationKd, 
-                                                  new TrapezoidProfile.Constraints(1, 1));
-
-    tController.setTolerance(0.02);
-    rController.setTolerance(0.02);
-
-    Align swerveAlign = new Align(()->currentPose.getY(), 
-                                  ()->currentPose.getRotation().getDegrees(), 
-                                  tController, 
-                                  rController,
-                                  target.getY(), 
-                                  target.getRotation().getDegrees(),
-                                  this);
-
-    movetoGoal swerveMovetoGoal = new movetoGoal(() -> currentPose.getX(), 
-                                                tController,
-                                                target.getX(), 
-                                                this);
-
-    return new SequentialCommandGroup( swerveAlign, swerveMovetoGoal );
   }
 
   // This is the bulk of the position system. Uses path generated points to move to a target.
@@ -519,9 +486,10 @@ public class Drivetrain extends SubsystemBase {
         new Translation2d(
           m_odometry.getEstimatedPosition().getX(), 
           target.getY()), 
-          new Rotation2d(Math.toRadians(m_gyro.getYaw())), 
+          target.getRotation(), 
           2),
-
+// In Order to fuse everything into one path just take this path point add it to the align to target path point
+// and then only use the align command not a sequential command
       new PathPoint(
         new Translation2d(
           target.getX(), 
@@ -529,6 +497,8 @@ public class Drivetrain extends SubsystemBase {
           target.getRotation()
         )
     );
+
+    
 
     Command align = new PPSwerveControllerCommand(
       _alignToTarget,
@@ -821,7 +791,7 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(0.7));
       eventMap.put("intake", new WaitCommand(0.5).andThen(m_claw.intakeCommand().andThen(new WaitCommand(.25))));
       eventMap.put("autobalance", new AutoBalance(this));
-      eventMap.put("realign", moveToPositionCommand());
+      eventMap.put("realign", PPmoveToPositionCommand());
       eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); m_claw.spinSlow(); } ));
       eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setCone(false); m_claw.openGrip(); } ));
       eventMap.put("wait", new WaitCommand(0.25));

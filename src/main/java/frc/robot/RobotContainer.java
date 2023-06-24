@@ -1,5 +1,7 @@
 package frc.robot;
 import java.io.File;
+
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -140,5 +142,13 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // InstantCommand to set speeds to 0
     return m_swerve.getAutonomousCommand().andThen(new InstantCommand( () -> m_swerve.stopModules()));
+  }
+
+  public static DriverStation.Alliance getDriverAlliance() {
+    // What to do for competition
+    //return DriverStation.getAlliance();
+
+    // What to do for testing
+    return DriverStation.Alliance.Red;
   }
 }
