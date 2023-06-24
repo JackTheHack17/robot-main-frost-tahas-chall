@@ -469,7 +469,8 @@ public class Drivetrain extends SubsystemBase {
       new PathPoint(new Translation2d(
         m_odometry.getEstimatedPosition().getX(), 
         m_odometry.getEstimatedPosition().getY()), 
-        new Rotation2d(Math.toRadians(m_gyro.getYaw())), 
+        new Rotation2d(Math.toRadians(m_gyro.getYaw())),
+        // You can get rid of this if you want
         2),
 
       new PathPoint(
