@@ -249,8 +249,8 @@ public class Drivetrain extends SubsystemBase {
       _cubeWaypoints.add(new Pose2d(14.70, 1.03, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(14.70, 2.75, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(14.70, 4.42, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
       _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(Math.PI)));
@@ -264,8 +264,8 @@ public class Drivetrain extends SubsystemBase {
       _cubeWaypoints.add(new Pose2d(1.84, 1.03, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(1.84, 2.75, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(1.84, 4.42, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
     }
 
     PathPlannerServer.startServer(6969);
