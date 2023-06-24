@@ -489,7 +489,7 @@ public class Drivetrain extends SubsystemBase {
           target.getRotation(), 
           2),
 // In Order to fuse everything into one path just take this path point add it to the align to target path point
-// and then only use the align command not a sequential command
+// and then only use the align command not a sequential command, using 2 paths for testing purposes
       new PathPoint(
         new Translation2d(
           target.getX(), 
@@ -498,7 +498,7 @@ public class Drivetrain extends SubsystemBase {
         )
     );
 
-    
+
 
     Command align = new PPSwerveControllerCommand(
       _alignToTarget,
