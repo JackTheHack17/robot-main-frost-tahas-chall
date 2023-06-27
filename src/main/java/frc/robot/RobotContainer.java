@@ -78,11 +78,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {
-    driverController.x()
-      .whileTrue(m_swerve.PPpathToCommand(m_limelight.getPose()))
-      .onFalse(new InstantCommand(() -> m_swerve.stopModules()));
-      
+  private void configureButtonBindings() {      
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().whileTrue(new AutoBalance(m_swerve));
