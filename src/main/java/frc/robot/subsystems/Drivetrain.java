@@ -180,7 +180,7 @@ public class Drivetrain extends SubsystemBase {
   private double _translationKp = 3.75;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 6.25;//12.5;//15;//0.00005
+  private double _rotationKp = 0.05;//6.25;//12.5;//15;//0.00005
   private double _rotationKi = 0;
   private double _rotationKd = 0;
 
@@ -239,19 +239,32 @@ public class Drivetrain extends SubsystemBase {
     // declare scoring positions
     if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {  
       // red alliance waypoints
-      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.70, 5.05, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.70, 3.84, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.70, 3.28, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.70, 2.18, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.70, 1.60, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.70, 0.47, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.70, 1.03, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.70, 2.75, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.70, 4.42, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 5.05, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 3.84, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 3.28, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 2.18, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.60, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 0.47, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 1.03, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 2.75, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 4.42, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
       _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(Math.PI)));
@@ -351,7 +364,7 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
-    //if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
+    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
@@ -482,14 +495,15 @@ public class Drivetrain extends SubsystemBase {
   // Way point generation is on line 242
   // If, you want just use one of the waypoints on thePPPathToCommand method to see if it works
   public Command PPmoveToPositionCommand () {
-    Pose2d actualPose = m_odometry.getEstimatedPosition();
+    Pose2d robotPose = new Pose2d(new Translation2d(-_robotPose.getX(), _robotPose.getY()), _robotPose.getRotation());
+    Pose2d actualPose = robotPose;
 
     Telemetry.setValue("drivetrain/PathPlanner/X", actualPose.getX());
     Telemetry.setValue("drivetrain/PathPlanner/Y", actualPose.getY());
     Telemetry.setValue("drivetrain/PathPlanner/Angle", actualPose.getRotation().getDegrees());    
 
-    Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
-    //Pose2d closest = new Pose2d(new Translation2d(14.70, 1.07), new Rotation2d());
+     Pose2d closest = robotPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+    //Pose2d closest = new Pose2d(new Translation2d(12.8, 1.07), new Rotation2d());
     if (closest == null) return new InstantCommand();
     // if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
     //   m_LEDs.flashRed();
@@ -513,7 +527,7 @@ public class Drivetrain extends SubsystemBase {
   // Potential Bugs: May not correct ofr rotation errpr
   public Command PPpathToCommand (Pose2d target) {
     PathPlannerTrajectory _alignToTarget = PathPlanner.generatePath(
-      new PathConstraints(2, 1),
+      new PathConstraints(1, 0.5),
       new PathPoint(new Translation2d(
         m_odometry.getEstimatedPosition().getX(), 
         m_odometry.getEstimatedPosition().getY()), 
@@ -530,7 +544,7 @@ public class Drivetrain extends SubsystemBase {
     );
 
     PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
-      new PathConstraints(2, 1),
+      new PathConstraints(1, 0.5),
       new PathPoint(
         new Translation2d(
           m_odometry.getEstimatedPosition().getX(), 
@@ -555,7 +569,7 @@ public class Drivetrain extends SubsystemBase {
       this.m_kinematics, // SwerveDriveKinematics
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      new PIDController(0, 0, 0), // PID constants to correct for rotation error (used to create the rotation controller)
+      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
     );
@@ -566,7 +580,7 @@ public class Drivetrain extends SubsystemBase {
       this.m_kinematics, // SwerveDriveKinematics
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      new PIDController(0, 0, 0), // PID constants to correct for rotation error (used to create the rotation controller)
+      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
     );
