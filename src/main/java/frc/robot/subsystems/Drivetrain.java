@@ -238,8 +238,8 @@ public class Drivetrain extends SubsystemBase {
     // declare scoring positions
     if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {  
       // red alliance waypoints
-      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.70, 5.05, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.70, 3.84, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.70, 3.28, new Rotation2d(0)));
@@ -354,7 +354,7 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
-    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
+    //if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
@@ -418,6 +418,50 @@ public class Drivetrain extends SubsystemBase {
           BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
       
     }
+    public void driveFromModuleStatesInverted ( SwerveModuleState[] modules ) {
+      SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
+  
+      modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
+      modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
+      modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
+      modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
+  
+      FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
+      FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
+      BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
+      BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
+
+      FL_Speed = modules[0].speedMetersPerSecond;
+      FR_Speed = modules[1].speedMetersPerSecond;
+      BL_Speed = modules[2].speedMetersPerSecond;
+      BR_Speed = modules[3].speedMetersPerSecond;
+
+      FL_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? FL_LastAngle : FL_Target;
+      FR_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? FR_LastAngle : FR_Target;
+      BL_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? BL_LastAngle : BL_Target;
+      BR_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? BR_LastAngle : BR_Target;
+  
+      FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
+      FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
+      BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360) + AZIMUTH_kF * Math.signum(BL_PID.getPositionError()));
+      BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360) + AZIMUTH_kF * Math.signum(BR_PID.getPositionError()));
+
+      FL_LastAngle = FL_Target;
+      FR_LastAngle = FR_Target;
+      BL_LastAngle = BL_Target;
+      BR_LastAngle = BR_Target;
+  
+      // pass wheel speeds to motor controllers
+          FL_Drive.set(ControlMode.Velocity, -(FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+          FR_Drive.set(ControlMode.Velocity, -(FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+          BL_Drive.set(ControlMode.Velocity, -(BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+          BR_Drive.set(ControlMode.Velocity, -(BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      
+    }
+
+    public void resetOdometry(){
+      m_odometry.resetPosition(new Rotation2d(), getSwerveModulePositions(), new Pose2d());
+    }
 
     public boolean tolerance(double measure) {
       return measure <= 5;
@@ -441,7 +485,9 @@ public class Drivetrain extends SubsystemBase {
   // Way point generation is on line 242
   // If, you want just use one of the waypoints on thePPPathToCommand method to see if it works
   public Command PPmoveToPositionCommand () {
+
     Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+    //Pose2d closest = new Pose2d(new Translation2d(14.70, 1.07), new Rotation2d());
     if (closest == null) return new InstantCommand();
     // if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
     //   m_LEDs.flashRed();
@@ -465,7 +511,7 @@ public class Drivetrain extends SubsystemBase {
   // Potential Bugs: May not correct ofr rotation errpr
   public Command PPpathToCommand (Pose2d target) {
     PathPlannerTrajectory _alignToTarget = PathPlanner.generatePath(
-      new PathConstraints(4, 3),
+      new PathConstraints(2, 1),
       new PathPoint(new Translation2d(
         m_odometry.getEstimatedPosition().getX(), 
         m_odometry.getEstimatedPosition().getY()), 
@@ -482,7 +528,7 @@ public class Drivetrain extends SubsystemBase {
     );
 
     PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
-      new PathConstraints(4, 3),
+      new PathConstraints(2, 1),
       new PathPoint(
         new Translation2d(
           m_odometry.getEstimatedPosition().getX(), 
@@ -507,7 +553,7 @@ public class Drivetrain extends SubsystemBase {
       this.m_kinematics, // SwerveDriveKinematics
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      new PIDController(0, 0, 0), // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
     );
@@ -518,7 +564,7 @@ public class Drivetrain extends SubsystemBase {
       this.m_kinematics, // SwerveDriveKinematics
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
       new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      new PIDController(0, 0, 0), // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
     );
