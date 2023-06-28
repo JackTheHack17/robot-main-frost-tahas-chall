@@ -174,6 +174,7 @@ public class Drivetrain extends SubsystemBase {
   private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
 
   private Pose2d _robotPose = new Pose2d();
+  private Pose2d _targetPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
   private double _translationKp = 3.75;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
@@ -269,14 +270,6 @@ public class Drivetrain extends SubsystemBase {
     }
 
     PathPlannerServer.startServer(6969);
-
-    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointX", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointY", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointAngle", 0);
-
-    Telemetry.setValue("drivetrain/PathPlanner/X", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/Y", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/Angle", 0);
   }
 
   @Override
@@ -464,7 +457,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose){
-      m_odometry.resetPosition(new Rotation2d(), getSwerveModulePositions(), pose);
+      m_odometry.resetPosition(new Rotation2d(Math.toDegrees(m_gyro.getYaw())), getSwerveModulePositions(), pose);
     }
 
     public boolean tolerance(double measure) {

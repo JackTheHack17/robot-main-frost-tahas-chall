@@ -61,17 +61,13 @@
           }
         },
         "drivetrain": {
-          "PathPlanner": {
-            "open": true
-          },
           "gyro": {
             "open": true
           },
           "kinematics": {
             "field": {
               "open": true
-            },
-            "open": true
+            }
           },
           "modules": {
             "BL": {
@@ -81,8 +77,7 @@
               "drive": {
                 "open": true
               }
-            },
-            "open": true
+            }
           },
           "odometry": {
             "field": {
@@ -98,8 +93,7 @@
           },
           "autonomous": {
             "open": true
-          },
-          "open": true
+          }
         },
         "open": true
       }

@@ -81,7 +81,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {      
-    driverController.a().onTrue(new InstantCommand(() -> m_swerve.resetOdometry(new Pose2d(0, 0, new Rotation2d(0))))); // Reset odometry to current position
+    driverController.a().onTrue(new InstantCommand(() -> m_swerve.resetOdometry(new Pose2d(13, 0, new Rotation2d(0))))); // Reset odometry to current position
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().whileTrue(new AutoBalance(m_swerve));
     // This command uses the robot odometry to drive to a specific location on the field
