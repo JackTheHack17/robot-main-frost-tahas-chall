@@ -61,6 +61,9 @@
           }
         },
         "drivetrain": {
+          "PathPlanner": {
+            "open": true
+          },
           "gyro": {
             "open": true
           },
