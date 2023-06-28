@@ -457,7 +457,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose){
-      m_odometry.resetPosition(new Rotation2d(Math.toDegrees(m_gyro.getYaw())), getSwerveModulePositions(), pose);
+      m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose);
     }
 
     public boolean tolerance(double measure) {
@@ -484,9 +484,9 @@ public class Drivetrain extends SubsystemBase {
   public Command PPmoveToPositionCommand () {
     Pose2d actualPose = m_odometry.getEstimatedPosition();
 
-    Telemetry.setValue("drivetrain/PathPlanner/X", actualPose.getX());
-    Telemetry.setValue("drivetrain/PathPlanner/Y", actualPose.getY());
-    Telemetry.setValue("drivetrain/PathPlanner/Angle", actualPose.getRotation().getDegrees());    
+    // Telemetry.setValue("drivetrain/PathPlanner/X", actualPose.getX());
+    // Telemetry.setValue("drivetrain/PathPlanner/Y", actualPose.getY());
+    // Telemetry.setValue("drivetrain/PathPlanner/Angle", actualPose.getRotation().getDegrees());    
 
     Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
     //Pose2d closest = new Pose2d(new Translation2d(14.70, 1.07), new Rotation2d());
@@ -497,9 +497,9 @@ public class Drivetrain extends SubsystemBase {
     //   return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
     // }
 
-    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointX", closest.getX());
-    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointY", closest.getY());
-    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointAngle", closest.getRotation().getDegrees()); 
+    // Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointX", closest.getX());
+    // Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointY", closest.getY());
+    // Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointAngle", closest.getRotation().getDegrees()); 
 
     return PPpathToCommand( closest );
   }
