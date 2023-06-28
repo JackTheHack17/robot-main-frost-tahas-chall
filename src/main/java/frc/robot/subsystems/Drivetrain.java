@@ -273,6 +273,10 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointX", 0);
     Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointY", 0);
     Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointAngle", 0);
+
+    Telemetry.setValue("drivetrain/PathPlanner/X", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/Y", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/Angle", 0);
   }
 
   @Override
@@ -485,6 +489,11 @@ public class Drivetrain extends SubsystemBase {
   // Way point generation is on line 242
   // If, you want just use one of the waypoints on thePPPathToCommand method to see if it works
   public Command PPmoveToPositionCommand () {
+    Pose2d actualPose = m_odometry.getEstimatedPosition();
+
+    Telemetry.setValue("drivetrain/PathPlanner/X", actualPose.getX());
+    Telemetry.setValue("drivetrain/PathPlanner/Y", actualPose.getY());
+    Telemetry.setValue("drivetrain/PathPlanner/Angle", actualPose.getRotation().getDegrees());    
 
     Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
     //Pose2d closest = new Pose2d(new Translation2d(14.70, 1.07), new Rotation2d());
