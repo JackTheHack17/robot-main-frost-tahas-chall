@@ -463,8 +463,8 @@ public class Drivetrain extends SubsystemBase {
       
     }
 
-    public void resetOdometry(){
-      m_odometry.resetPosition(new Rotation2d(), getSwerveModulePositions(), new Pose2d());
+    public void resetOdometry(Pose2d pose){
+      m_odometry.resetPosition(new Rotation2d(), getSwerveModulePositions(), pose);
     }
 
     public boolean tolerance(double measure) {

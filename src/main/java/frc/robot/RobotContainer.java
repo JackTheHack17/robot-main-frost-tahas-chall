@@ -22,6 +22,8 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PinchersofPower;
 import frc.robot.subsystems.PinchersofPower.GamePieces;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -42,7 +44,7 @@ public class RobotContainer {
   public Arm m_arm = new Arm(m_claw, copilotController);
   public Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
   //private UsbCamera rawCamera;
-
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     //Telemetry.flushTable();
@@ -79,7 +81,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {      
-    driverController.a().onTrue(new InstantCommand(m_swerve::resetOdometry));
+    driverController.a().onTrue(new InstantCommand(() -> m_swerve.resetOdometry(new Pose2d(0, 0, new Rotation2d(0))))); // Reset odometry to current position
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().whileTrue(new AutoBalance(m_swerve));
     // This command uses the robot odometry to drive to a specific location on the field
