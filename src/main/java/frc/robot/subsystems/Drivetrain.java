@@ -174,7 +174,6 @@ public class Drivetrain extends SubsystemBase {
   private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
 
   private Pose2d _robotPose = new Pose2d();
-  private Pose2d _targetPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
   private double _translationKp = 3.75;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
@@ -367,7 +366,7 @@ public class Drivetrain extends SubsystemBase {
     if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
-    Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
+    Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", _robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
   
     //Telemetry.setValue("drivetrain/shwervePower", shwerveDrive.get());
@@ -428,46 +427,6 @@ public class Drivetrain extends SubsystemBase {
           BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
       
     }
-    public void driveFromModuleStatesInverted ( SwerveModuleState[] modules ) {
-      SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
-  
-      modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
-      modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
-      modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
-      modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
-  
-      FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
-      FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
-      BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
-      BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
-
-      FL_Speed = modules[0].speedMetersPerSecond;
-      FR_Speed = modules[1].speedMetersPerSecond;
-      BL_Speed = modules[2].speedMetersPerSecond;
-      BR_Speed = modules[3].speedMetersPerSecond;
-
-      FL_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? FL_LastAngle : FL_Target;
-      FR_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? FR_LastAngle : FR_Target;
-      BL_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? BL_LastAngle : BL_Target;
-      BR_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? BR_LastAngle : BR_Target;
-  
-      FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
-      FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
-      BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360) + AZIMUTH_kF * Math.signum(BL_PID.getPositionError()));
-      BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360) + AZIMUTH_kF * Math.signum(BR_PID.getPositionError()));
-
-      FL_LastAngle = FL_Target;
-      FR_LastAngle = FR_Target;
-      BL_LastAngle = BL_Target;
-      BR_LastAngle = BR_Target;
-  
-      // pass wheel speeds to motor controllers
-          FL_Drive.set(ControlMode.Velocity, -(FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-          FR_Drive.set(ControlMode.Velocity, -(FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-          BL_Drive.set(ControlMode.Velocity, -(BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-          BR_Drive.set(ControlMode.Velocity, -(BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-      
-    }
 
     public void resetOdometry(Pose2d pose){
       m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose);
@@ -495,14 +454,13 @@ public class Drivetrain extends SubsystemBase {
   // Way point generation is on line 242
   // If, you want just use one of the waypoints on thePPPathToCommand method to see if it works
   public Command PPmoveToPositionCommand () {
-    Pose2d robotPose = new Pose2d(new Translation2d(-_robotPose.getX(), _robotPose.getY()), _robotPose.getRotation());
-    Pose2d actualPose = robotPose;
+    Pose2d actualPose = _robotPose;
 
     Telemetry.setValue("drivetrain/PathPlanner/X", actualPose.getX());
     Telemetry.setValue("drivetrain/PathPlanner/Y", actualPose.getY());
     Telemetry.setValue("drivetrain/PathPlanner/Angle", actualPose.getRotation().getDegrees());    
 
-     Pose2d closest = robotPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+     Pose2d closest = actualPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
     //Pose2d closest = new Pose2d(new Translation2d(12.8, 1.07), new Rotation2d());
     if (closest == null) return new InstantCommand();
     // if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
