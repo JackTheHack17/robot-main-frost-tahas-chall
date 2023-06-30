@@ -27,7 +27,6 @@ import static frc.robot.Constants.DRIVETRAIN.FL_ECODER_OFFSET;
 import static frc.robot.Constants.DRIVETRAIN.FR_ECODER_OFFSET;
 import static frc.robot.Constants.DRIVETRAIN.MAX_LINEAR_SPEED;
 import static frc.robot.Constants.DRIVETRAIN.MAX_ROTATION_SPEED;
-import static frc.robot.Constants.DRIVETRAIN.MAX_WAYPOINT_DISTANCE;
 import static frc.robot.Constants.DRIVETRAIN.ROBOT_WIDTH;
 import static frc.robot.Constants.DRIVETRAIN.WHEEL_DIAMETER;
 import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_DEADBAND;
@@ -56,6 +55,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -66,7 +66,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
@@ -169,7 +168,6 @@ public class Drivetrain extends SubsystemBase {
   private static final double SCALER = 0.02;
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
-
   private List<Pose2d> _coneWaypoints = new ArrayList<Pose2d>();
   private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
 
@@ -363,7 +361,11 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
-    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
+    if ( m_limelight.hastarget()) {
+        m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency(),
+        VecBuilder.fill(0.9, 0.9, Math.toRadians(180)));
+    }
+
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", _robotPose.getX());
@@ -421,10 +423,10 @@ public class Drivetrain extends SubsystemBase {
       BR_LastAngle = BR_Target;
   
       // pass wheel speeds to motor controllers
-          FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-          FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-          BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-          BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
       
     }
 
@@ -646,15 +648,6 @@ public class Drivetrain extends SubsystemBase {
     encoder.setPositionToAbsolute();
   }
 
-  // private SwerveModulePosition[] getSwerveModulePositions() {
-  //   SwerveModulePosition[] positions = new SwerveModulePosition[4];
-  //   positions[0] = new SwerveModulePosition((FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(FL_Actual_Position));
-  //   positions[1] = new SwerveModulePosition((FR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(FR_Actual_Position));
-  //   positions[2] = new SwerveModulePosition((BL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(BL_Actual_Position));
-  //   positions[3] = new SwerveModulePosition((BR_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO, Rotation2d.fromDegrees(BR_Actual_Position));
-  //   return positions;
-  // }
-
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     positions[0] = new SwerveModulePosition(SCALER*(FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(FL_Actual_Position));
@@ -668,128 +661,6 @@ public class Drivetrain extends SubsystemBase {
     if (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove").equals("special")) {
       return new InstantCommand(()->setRobotOriented(true)).andThen(new RepeatCommand(new InstantCommand(()->joystickDrive(0, 0.5, 0))).withTimeout(1).andThen(new InstantCommand(()->stopModules())));
     }
-   // switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
-      // case "dontMove":
-      //   return new InstantCommand();
-      // case "backupBackup":
-      //   return new SequentialCommandGroup(
-      //     new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //     new InstantCommand(() -> setRobotOriented(false)),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0.1, 0);
-      //     }).repeatedly().withTimeout(10),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //       setRobotOriented(false);
-      //     })
-      //   );
-      // case "backupScoreOneBackupCone":
-      //     return new SequentialCommandGroup(
-      //       new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //       new InstantCommand(() -> setRobotOriented(false)),
-      //       new InstantCommand(() -> m_claw.setMode(GamePieces.Cone)),
-      //       m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
-      //       m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, -0.1, 0);
-      //       }).repeatedly().withTimeout(1),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0, 0);
-      //       }),
-      //       new WaitCommand(0.1),
-      //       m_claw.outTakeCommand(),
-      //       new WaitCommand(0.5),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0.1, 0);
-      //       }).repeatedly().withTimeout(1),
-      //       new ParallelCommandGroup(
-      //         m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0.1, 0);
-      //         }).repeatedly().withTimeout(0)
-      //       ),
-      //       //new InstantCommand(() -> {
-      //       //  joystickDrive(0.1, 0, 0);
-      //       //}).repeatedly().withTimeout(0.2),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0, 0);
-      //       })
-      //     );
-      //   case "middleCharge":
-      //       return new SequentialCommandGroup(
-      //         new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //         new InstantCommand(() -> setRobotOriented(false)),
-      //         new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
-      //         m_claw.intakeCommand(),
-      //         new WaitCommand(0.2),
-      //         m_claw.spinOffCommand(),
-      //         m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
-      //         m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, -0.1, 0);
-      //         }).repeatedly().withTimeout(1),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         }),
-      //         new WaitCommand(0.1),
-      //         m_claw.outTakeCommand(),
-      //         new WaitCommand(0.5),
-      //         m_claw.spinOffCommand(),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0.1, 0);
-      //         }).repeatedly().withTimeout(1),
-      //         new ParallelCommandGroup(
-      //           m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //           new InstantCommand(() -> {
-      //             joystickDrive(0, 0.1, 0);
-      //           }).repeatedly().withTimeout(5)
-      //         ),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         }),
-      //         new WaitCommand(0.5),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, -0.1, 0);
-      //         }).repeatedly().withTimeout(1.5),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         })
-      //       );
-      //   case "backupScoreOneBackupCube":
-      //   return new SequentialCommandGroup(
-      //     new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //     new InstantCommand(() -> setRobotOriented(false)),
-      //     new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
-      //     m_claw.intakeCommand(),
-      //     new WaitCommand(0.2),
-      //     m_claw.spinOffCommand(),
-      //     m_arm.moveToPositionCommand(positions.Idle).withTimeout(1
-      //     ),
-      //     m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, -0.1, 0);
-      //     }).repeatedly().withTimeout(1),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //     }),
-      //     new WaitCommand(0.1),
-      //     m_claw.outTakeCommand(),
-      //     new WaitCommand(0.5),
-      //     m_claw.spinOffCommand(),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0.1, 0);
-      //     }).repeatedly().withTimeout(1),
-      //     new ParallelCommandGroup(
-      //       m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0.1, 0);
-      //       }).repeatedly().withTimeout(3)
-      //     ),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //     })
-      //   );
-    //}
 
     // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
     // for every path in the group
