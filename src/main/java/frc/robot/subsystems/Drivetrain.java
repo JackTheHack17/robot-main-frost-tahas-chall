@@ -174,10 +174,10 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d _robotPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
-  private double _translationKp = 3.75;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
+  private double _translationKp = 5.5;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 0.05;//6.25;//12.5;//15;//0.00005
+  private double _rotationKp = 3.75;//6.25;//12.5;//15;//0.00005
   private double _rotationKi = 0;
   private double _rotationKd = 0;
 
@@ -236,32 +236,32 @@ public class Drivetrain extends SubsystemBase {
     // declare scoring positions
     if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {  
       // red alliance waypoints
-      // _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 5.05, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 3.84, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 3.28, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 2.18, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 1.60, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 0.47, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(12.8, 1.03, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(12.8, 2.75, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(12.8, 4.42, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 5.15, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 3.94, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 3.38, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 2.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 1.70, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 0.57, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.83, 1.13, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.83, 2.95, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.83, 4.52, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
       _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(Math.PI)));
