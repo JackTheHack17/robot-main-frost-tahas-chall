@@ -482,7 +482,7 @@ public class Drivetrain extends SubsystemBase {
     return m_gyro.getPitch();
   }
 
-  // This is the bulk of the position system. Uses path generated points to move to a target.
+   // This is the bulk of the position system. Uses path generated points to move to a target.
   // Uses path planner, and does closes in on a target in an x,y. This command only works with a given target
   // Potential Bugs: May not correct ofr rotation errpr
   public Command PPpathToCommand (Pose2d target) {
@@ -501,6 +501,8 @@ public class Drivetrain extends SubsystemBase {
           target.getY()), 
           target.getRotation()
         )
+
+        
     );
 
     PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
@@ -521,15 +523,23 @@ public class Drivetrain extends SubsystemBase {
         )
     );
 
+    PIDController tPID = new PIDController(_translationKp, _translationKi, _translationKd);
+    tPID.setTolerance(0);
+    tPID.setIntegratorRange(-0, 0);
+
+    PIDController rPID = new PIDController(_rotationKp, _rotationKi, _rotationKd);
+    rPID.setTolerance(0);
+    rPID.setIntegratorRange(-0, 0);
+
 
 
     Command align = new PPSwerveControllerCommand(
       _alignToTarget,
       () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
       this.m_kinematics, // SwerveDriveKinematics
-      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      tPID, // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      tPID, // PID constants to correct for rotation error (used to create the rotation controller)
+      rPID, // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
     );
@@ -538,9 +548,9 @@ public class Drivetrain extends SubsystemBase {
       _toTarget,
       () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
       this.m_kinematics, // SwerveDriveKinematics
-      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      tPID, // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      tPID, // PID constants to correct for rotation error (used to create the rotation controller)
+      rPID, // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
     );
