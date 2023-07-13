@@ -2,9 +2,16 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Limelight": "Subsystem",
+      "/LiveWindow/Ungrouped/DigitalInput[1]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[7]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[8]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[9]": "Digital Input",
+      "/LiveWindow/Ungrouped/PIDController[10]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[11]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[12]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[13]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[14]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
@@ -12,7 +19,17 @@
       "/LiveWindow/Ungrouped/PIDController[5]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[6]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[7]": "PIDController",
-      "/LiveWindow/Ungrouped/Scheduler": "Scheduler"
+      "/LiveWindow/Ungrouped/PIDController[8]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[9]": "PIDController",
+      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/SmartDashboard/Field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Field": {
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
   "NetworkTables": {
@@ -28,19 +45,32 @@
       }
     },
     "transitory": {
+      "SmartDashboard": {
+        "Field": {
+          "open": true
+        },
+        "PPSwerveControllerCommand": {
+          "open": true
+        },
+        "open": true
+      },
       "telemetry": {
         "Arm": {
           "manualTarget": {
             "open": true
-          },
-          "open": true
+          }
         },
         "drivetrain": {
+          "PathPlanner": {
+            "open": true
+          },
+          "gyro": {
+            "open": true
+          },
           "kinematics": {
             "field": {
               "open": true
-            },
-            "open": true
+            }
           },
           "modules": {
             "BL": {
@@ -49,17 +79,16 @@
               },
               "drive": {
                 "open": true
-              },
-              "open": true
-            },
-            "open": true
+              }
+            }
           },
           "odometry": {
             "field": {
               "open": true
             },
             "open": true
-          }
+          },
+          "open": true
         },
         "general": {
           "PDH": {
@@ -67,8 +96,7 @@
           },
           "autonomous": {
             "open": true
-          },
-          "open": true
+          }
         },
         "open": true
       }

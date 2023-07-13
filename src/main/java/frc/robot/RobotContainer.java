@@ -1,6 +1,7 @@
 package frc.robot;
 import java.io.File;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -21,6 +22,8 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PinchersofPower;
 import frc.robot.subsystems.PinchersofPower.GamePieces;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,7 +44,7 @@ public class RobotContainer {
   public Arm m_arm = new Arm(m_claw, copilotController);
   public Drivetrain m_swerve = new Drivetrain(driverController, m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
   //private UsbCamera rawCamera;
-
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     //Telemetry.flushTable();
@@ -77,10 +80,12 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {
-    driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
+  private void configureButtonBindings() {      
+    driverController.a().onTrue(new InstantCommand(() -> m_swerve.resetOdometry(new Pose2d(0, 4, new Rotation2d(0))))); // Reset odometry to current position
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().whileTrue(new AutoBalance(m_swerve));
+    // This command uses the robot odometry to drive to a specific location on the field
+    driverController.x().onTrue(new InstantCommand(() -> m_swerve.PPmoveToPositionCommand().schedule()));
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(1).whileTrue(m_arm.moveToPositionCommand(positions.Floor));
@@ -135,5 +140,13 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // InstantCommand to set speeds to 0
     return m_swerve.getAutonomousCommand().andThen(new InstantCommand( () -> m_swerve.stopModules()));
+  }
+
+  public static DriverStation.Alliance getDriverAlliance() {
+    // What to do for competition
+    //return DriverStation.getAlliance();
+
+    // What to do for testing
+    return DriverStation.Alliance.Red;
   }
 }

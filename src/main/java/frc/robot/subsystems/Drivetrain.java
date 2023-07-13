@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 import static edu.wpi.first.math.MathUtil.inputModulus;
 import static frc.robot.Constants.CAN.BL_AZIMUTH_ID;
@@ -31,7 +27,6 @@ import static frc.robot.Constants.DRIVETRAIN.FL_ECODER_OFFSET;
 import static frc.robot.Constants.DRIVETRAIN.FR_ECODER_OFFSET;
 import static frc.robot.Constants.DRIVETRAIN.MAX_LINEAR_SPEED;
 import static frc.robot.Constants.DRIVETRAIN.MAX_ROTATION_SPEED;
-import static frc.robot.Constants.DRIVETRAIN.MAX_WAYPOINT_DISTANCE;
 import static frc.robot.Constants.DRIVETRAIN.ROBOT_WIDTH;
 import static frc.robot.Constants.DRIVETRAIN.WHEEL_DIAMETER;
 import static frc.robot.Constants.DRIVETRAIN.AZIMUTH_DEADBAND;
@@ -48,6 +43,7 @@ import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
@@ -59,6 +55,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -69,7 +66,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
@@ -85,6 +81,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.AutoBalance;
 
@@ -134,6 +131,12 @@ public class Drivetrain extends SubsystemBase {
   private double BL_Target = 0.0;
   private double BR_Target = 0.0;
 
+  // Last angle of each module
+  private double FL_LastAngle = 0.0;
+  private double FR_LastAngle = 0.0;
+  private double BL_LastAngle = 0.0;
+  private double BR_LastAngle = 0.0;
+
   // swerve module wheel speeds (percent output)
   private double FL_Speed = 0.0;
   private double FR_Speed = 0.0;
@@ -165,17 +168,16 @@ public class Drivetrain extends SubsystemBase {
   private static final double SCALER = 0.02;
 
   private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
-
   private List<Pose2d> _coneWaypoints = new ArrayList<Pose2d>();
   private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
 
   private Pose2d _robotPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
-  private double _translationKp = 3.75;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
+  private double _translationKp = 5.5;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 6.25;//12.5;//15;//0.00005
+  private double _rotationKp = 3.75;//6.25;//12.5;//15;//0.00005
   private double _rotationKi = 0;
   private double _rotationKd = 0;
 
@@ -222,7 +224,7 @@ public class Drivetrain extends SubsystemBase {
     // config azimuth (steering) motors
     configAzimuth(FL_Azimuth, FL_Position);
     configAzimuth(FR_Azimuth, FR_Position);
-    configAzimuth(BL_Azimuth, BL_Position);
+    configAzimuth(BL_Azimuth, BL_Position, 0.0075, 0.0048); //0.009//0..01
     configAzimuth(BR_Azimuth, BR_Position);
 
     shwerveDrive.restoreFactoryDefaults();
@@ -232,34 +234,47 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.burnFlash();
 
     // declare scoring positions
-    if (DriverStation.getAlliance() == DriverStation.Alliance.Red) {
+    if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {  
       // red alliance waypoints
       _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.70, 5.05, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 3.84, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 3.28, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 2.18, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 1.60, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(14.70, 0.47, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(14.70, 1.03, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(14.70, 2.75, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(14.70, 4.42, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(14.83, 5.15, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 3.94, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 3.38, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 2.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 1.70, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.83, 0.57, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.83, 1.13, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.83, 2.95, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.83, 4.52, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
+      // _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
-      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.84, 5.05, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 3.84, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 3.28, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 2.18, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 1.60, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.84, 0.47, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.84, 1.03, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.84, 2.75, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.84, 4.42, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.84, 5.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 3.84, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 3.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 2.18, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 1.60, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.84, 0.47, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.84, 1.03, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.84, 2.75, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.84, 4.42, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
     }
@@ -307,14 +322,14 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/modules/FR/drive/actualSpeed", FR_Actual_Speed);
     Telemetry.setValue("drivetrain/modules/BL/drive/actualSpeed", BL_Actual_Speed);
     Telemetry.setValue("drivetrain/modules/BR/drive/actualSpeed", BR_Actual_Speed);
-    //Telemetry.setValue("drivetrain/modules/FL/drive/temperature", FL_Drive.getTemperature());
-    //Telemetry.setValue("drivetrain/modules/FR/drive/temperature", FR_Drive.getTemperature());
-    //Telemetry.setValue("drivetrain/modules/BL/drive/temperature", BL_Drive.getTemperature());
-    //Telemetry.setValue("drivetrain/modules/BR/drive/temperature", BR_Drive.getTemperature());
-    //Telemetry.setValue("drivetrain/modules/FL/azimuth/temperature", FL_Azimuth.getTemperature());
-    //Telemetry.setValue("drivetrain/modules/FR/azimuth/temperature", FR_Azimuth.getTemperature());
-    //Telemetry.setValue("drivetrain/modules/BL/azimuth/temperature", BL_Azimuth.getTemperature());
-    //Telemetry.setValue("drivetrain/modules/BR/azimuth/temperature", BR_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/modules/FL/drive/temperature", FL_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/modules/FR/drive/temperature", FR_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/modules/BL/drive/temperature", BL_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/modules/BR/drive/temperature", BR_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/modules/FL/azimuth/temperature", FL_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/modules/FR/azimuth/temperature", FR_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/modules/BL/azimuth/temperature", BL_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/modules/BR/azimuth/temperature", BR_Azimuth.getTemperature());
     Telemetry.setValue("drivetrain/modules/FL/azimuth/outputVoltage", FL_Azimuth.getMotorOutputVoltage());
     Telemetry.setValue("drivetrain/modules/FR/azimuth/outputVoltage", FR_Azimuth.getMotorOutputVoltage());
     Telemetry.setValue("drivetrain/modules/BL/azimuth/outputVoltage", BL_Azimuth.getMotorOutputVoltage());
@@ -346,10 +361,14 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
-    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
+    if ( m_limelight.hastarget()) {
+        m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency(),
+        VecBuilder.fill(0.9, 0.9, Math.toRadians(180)));
+    }
+
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
-    Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
+    Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", _robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
   
     //Telemetry.setValue("drivetrain/shwervePower", shwerveDrive.get());
@@ -371,33 +390,53 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void driveFromModuleStates ( SwerveModuleState[] modules ) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
+      SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
+  
+      modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
+      modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
+      modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
+      modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
+  
+      FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
+      FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
+      BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
+      BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
 
-    modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
-    modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
-    modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
-    modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
+      FL_Speed = modules[0].speedMetersPerSecond;
+      FR_Speed = modules[1].speedMetersPerSecond;
+      BL_Speed = modules[2].speedMetersPerSecond;
+      BR_Speed = modules[3].speedMetersPerSecond;
 
-    FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
-    FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
-    BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
-    BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
-    FL_Speed = modules[0].speedMetersPerSecond;
-    FR_Speed = modules[1].speedMetersPerSecond;
-    BL_Speed = modules[2].speedMetersPerSecond;
-    BR_Speed = modules[3].speedMetersPerSecond;
+      FL_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? FL_LastAngle : FL_Target;
+      FR_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? FR_LastAngle : FR_Target;
+      BL_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? BL_LastAngle : BL_Target;
+      BR_Target = (Math.abs(modules[0].speedMetersPerSecond) <= (Constants.DRIVETRAIN.MAX_LINEAR_SPEED * 0.01)) ? BR_LastAngle : BR_Target;
+  
+      FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
+      FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
+      BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360) + AZIMUTH_kF * Math.signum(BL_PID.getPositionError()));
+      BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360) + AZIMUTH_kF * Math.signum(BR_PID.getPositionError()));
 
-    FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
-    FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
-    BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360) + AZIMUTH_kF * Math.signum(BL_PID.getPositionError()));
-    BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360) + AZIMUTH_kF * Math.signum(BR_PID.getPositionError()));
+      FL_LastAngle = FL_Target;
+      FR_LastAngle = FR_Target;
+      BL_LastAngle = BL_Target;
+      BR_LastAngle = BR_Target;
+  
+      // pass wheel speeds to motor controllers
+      FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+      
+    }
 
-    // pass wheel speeds to motor controllers
-    FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-    FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-    BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-    BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
-  }
+    public void resetOdometry(Pose2d pose){
+      m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose);
+    }
+
+    public boolean tolerance(double measure) {
+      return measure <= 5;
+    }
 
   public void stopModules () {
     FL_Drive.set(ControlMode.PercentOutput, 0);
@@ -411,41 +450,112 @@ public class Drivetrain extends SubsystemBase {
     BR_Azimuth.set(ControlMode.PercentOutput, 0);
   }
 
-  public Command moveToPositionCommand () {
-    Pose2d closest = m_odometry.getEstimatedPosition().nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+  // This piece of code most likely has a bug, as I can't test it
+  // Check if the waypoints are correct, we are using the first apriltag, which is red
+  // So make sure the field is configured for red in terms of the waypoints
+  // Way point generation is on line 242
+  // If, you want just use one of the waypoints on thePPPathToCommand method to see if it works
+  public Command PPmoveToPositionCommand () {
+    Pose2d actualPose = _robotPose;
+
+    Telemetry.setValue("drivetrain/PathPlanner/X", actualPose.getX());
+    Telemetry.setValue("drivetrain/PathPlanner/Y", actualPose.getY());
+    Telemetry.setValue("drivetrain/PathPlanner/Angle", actualPose.getRotation().getDegrees());    
+
+     Pose2d closest = actualPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+    //Pose2d closest = new Pose2d(new Translation2d(12.8, 1.07), new Rotation2d());
     if (closest == null) return new InstantCommand();
-    if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
-      m_LEDs.flashRed();
-      m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
-      return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
-    }
-    return pathToCommand( closest );
+    // if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
+    //   m_LEDs.flashRed();
+    //   m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
+    //   return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
+    // }
+
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointX", closest.getX());
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointY", closest.getY());
+    Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointAngle", closest.getRotation().getDegrees()); 
+
+    return PPpathToCommand( closest );
   }
 
   public double getGyroAngle(){
     return m_gyro.getPitch();
   }
 
-  public Command pathToCommand (Pose2d target) {
-    PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
-      PathPlanner.getConstraintsFromPath(Telemetry.getValue("general/autonomous/selectedRoutine", "default")),
-      new PathPoint(new Translation2d(m_odometry.getEstimatedPosition().getX(),m_odometry.getEstimatedPosition().getY()), new Rotation2d(Math.toRadians(m_gyro.getYaw())), Math.hypot(forwardKinematics.vxMetersPerSecond, forwardKinematics.vxMetersPerSecond)),
-      new PathPoint(new Translation2d(target.getX(), target.getY()), target.getRotation())
+   // This is the bulk of the position system. Uses path generated points to move to a target.
+  // Uses path planner, and does closes in on a target in an x,y. This command only works with a given target
+  // Potential Bugs: May not correct ofr rotation errpr
+  public Command PPpathToCommand (Pose2d target) {
+    PathPlannerTrajectory _alignToTarget = PathPlanner.generatePath(
+      new PathConstraints(1, 0.5),
+      new PathPoint(new Translation2d(
+        m_odometry.getEstimatedPosition().getX(), 
+        m_odometry.getEstimatedPosition().getY()), 
+        new Rotation2d(Math.toRadians(m_gyro.getYaw())),
+        // You can get rid of this if you want
+        2),
+
+      new PathPoint(
+        new Translation2d(
+          m_odometry.getEstimatedPosition().getX(), 
+          target.getY()), 
+          target.getRotation()
+        )
+
+        
     );
-    return new PPSwerveControllerCommand(
+
+    PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
+      new PathConstraints(1, 0.5),
+      new PathPoint(
+        new Translation2d(
+          m_odometry.getEstimatedPosition().getX(), 
+          target.getY()), 
+          target.getRotation(), 
+          2),
+// In Order to fuse everything into one path just take this path point add it to the align to target path point
+// and then only use the align command not a sequential command, using 2 paths for testing purposes
+      new PathPoint(
+        new Translation2d(
+          target.getX(), 
+          target.getY()), 
+          target.getRotation()
+        )
+    );
+
+    PIDController tPID = new PIDController(_translationKp, _translationKi, _translationKd);
+    tPID.setTolerance(0);
+    tPID.setIntegratorRange(-0, 0);
+
+    PIDController rPID = new PIDController(_rotationKp, _rotationKi, _rotationKd);
+    rPID.setTolerance(0);
+    rPID.setIntegratorRange(-0, 0);
+
+
+
+    Command align = new PPSwerveControllerCommand(
+      _alignToTarget,
+      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
+      this.m_kinematics, // SwerveDriveKinematics
+      tPID, // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      tPID, // PID constants to correct for rotation error (used to create the rotation controller)
+      rPID, // PID constants to correct for rotation error (used to create the rotation controller)
+      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+      (Subsystem) this
+    );
+
+    Command toGoal = new PPSwerveControllerCommand(
       _toTarget,
       () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
       this.m_kinematics, // SwerveDriveKinematics
-      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      new PIDController(_translationKp, _translationKi, _translationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-      new PIDController(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
+      tPID, // PID constants to correct for translation error (used to create the X and Y PID controllers)
+      tPID, // PID constants to correct for rotation error (used to create the rotation controller)
+      rPID, // PID constants to correct for rotation error (used to create the rotation controller)
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
-    
-    );//.andThen(() -> {
-      //m_LEDs.flashGreen();
-      //m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1);
-   // }//).alongWith(new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)));
+    );
+
+    return new SequentialCommandGroup(align, toGoal);
   }
 
   public Command autoBalanceCommand () {
@@ -524,6 +634,19 @@ public class Drivetrain extends SubsystemBase {
     motor.configNeutralDeadband(AZIMUTH_DEADBAND);
   }
   
+  private void configAzimuth (TalonFX motor, CANCoder position, double kp, double kd) {
+    motor.configFactoryDefault();
+    motor.setInverted(TalonFXInvertType.CounterClockwise);
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configRemoteFeedbackFilter(position, 0);
+    motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
+    motor.configStatorCurrentLimit(AZIMUTH_CURRENT_LIMIT);
+    motor.setSelectedSensorPosition(position.getAbsolutePosition());
+    motor.config_kP(0, kp);
+    motor.config_kD(0, kd);
+    motor.configNeutralDeadband(AZIMUTH_DEADBAND);
+  }
+
   /** runs the configuration methods to apply the config variables 
    * @param encoder - the device to configure
    * @param offset - the measured constant offset in degrees
@@ -548,128 +671,6 @@ public class Drivetrain extends SubsystemBase {
     if (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove").equals("special")) {
       return new InstantCommand(()->setRobotOriented(true)).andThen(new RepeatCommand(new InstantCommand(()->joystickDrive(0, 0.5, 0))).withTimeout(1).andThen(new InstantCommand(()->stopModules())));
     }
-   // switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
-      // case "dontMove":
-      //   return new InstantCommand();
-      // case "backupBackup":
-      //   return new SequentialCommandGroup(
-      //     new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //     new InstantCommand(() -> setRobotOriented(false)),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0.1, 0);
-      //     }).repeatedly().withTimeout(10),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //       setRobotOriented(false);
-      //     })
-      //   );
-      // case "backupScoreOneBackupCone":
-      //     return new SequentialCommandGroup(
-      //       new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //       new InstantCommand(() -> setRobotOriented(false)),
-      //       new InstantCommand(() -> m_claw.setMode(GamePieces.Cone)),
-      //       m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
-      //       m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, -0.1, 0);
-      //       }).repeatedly().withTimeout(1),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0, 0);
-      //       }),
-      //       new WaitCommand(0.1),
-      //       m_claw.outTakeCommand(),
-      //       new WaitCommand(0.5),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0.1, 0);
-      //       }).repeatedly().withTimeout(1),
-      //       new ParallelCommandGroup(
-      //         m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0.1, 0);
-      //         }).repeatedly().withTimeout(0)
-      //       ),
-      //       //new InstantCommand(() -> {
-      //       //  joystickDrive(0.1, 0, 0);
-      //       //}).repeatedly().withTimeout(0.2),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0, 0);
-      //       })
-      //     );
-      //   case "middleCharge":
-      //       return new SequentialCommandGroup(
-      //         new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //         new InstantCommand(() -> setRobotOriented(false)),
-      //         new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
-      //         m_claw.intakeCommand(),
-      //         new WaitCommand(0.2),
-      //         m_claw.spinOffCommand(),
-      //         m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
-      //         m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, -0.1, 0);
-      //         }).repeatedly().withTimeout(1),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         }),
-      //         new WaitCommand(0.1),
-      //         m_claw.outTakeCommand(),
-      //         new WaitCommand(0.5),
-      //         m_claw.spinOffCommand(),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0.1, 0);
-      //         }).repeatedly().withTimeout(1),
-      //         new ParallelCommandGroup(
-      //           m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //           new InstantCommand(() -> {
-      //             joystickDrive(0, 0.1, 0);
-      //           }).repeatedly().withTimeout(5)
-      //         ),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         }),
-      //         new WaitCommand(0.5),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, -0.1, 0);
-      //         }).repeatedly().withTimeout(1.5),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         })
-      //       );
-      //   case "backupScoreOneBackupCube":
-      //   return new SequentialCommandGroup(
-      //     new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //     new InstantCommand(() -> setRobotOriented(false)),
-      //     new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
-      //     m_claw.intakeCommand(),
-      //     new WaitCommand(0.2),
-      //     m_claw.spinOffCommand(),
-      //     m_arm.moveToPositionCommand(positions.Idle).withTimeout(1
-      //     ),
-      //     m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, -0.1, 0);
-      //     }).repeatedly().withTimeout(1),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //     }),
-      //     new WaitCommand(0.1),
-      //     m_claw.outTakeCommand(),
-      //     new WaitCommand(0.5),
-      //     m_claw.spinOffCommand(),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0.1, 0);
-      //     }).repeatedly().withTimeout(1),
-      //     new ParallelCommandGroup(
-      //       m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0.1, 0);
-      //       }).repeatedly().withTimeout(3)
-      //     ),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //     })
-      //   );
-    //}
 
     // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
     // for every path in the group
@@ -692,7 +693,7 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(0.7));
       eventMap.put("intake", new WaitCommand(0.5).andThen(m_claw.intakeCommand().andThen(new WaitCommand(.25))));
       eventMap.put("autobalance", new AutoBalance(this));
-      eventMap.put("realign", moveToPositionCommand());
+      eventMap.put("realign", PPmoveToPositionCommand());
       eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); m_claw.spinSlow(); } ));
       eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setCone(false); m_claw.openGrip(); } ));
       eventMap.put("wait", new WaitCommand(0.25));
