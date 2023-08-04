@@ -106,7 +106,7 @@ public final class Constants {
     }
 
     public static final class ARM {
-        public static final double JOINT_ANGLE_DEADZONE = 20;
+        public static final double JOINT_ANGLE_DEADZONE = 40;
         public static final double JOINT_COORDINATE_DEADZONE = 0;
 
         public static enum positions {
@@ -121,26 +121,28 @@ public final class Constants {
             ScoreLow,
             Floor,
             FloorAlt,
+            FloorAltCube,
             Substation,
             Idle,
             IdleShootPosition
         };
 
-        public static final double STAGE_1_OFFSET = 177;
+        public static final double STAGE_1_OFFSET = 203;
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
 
-        public static ArmPosition scoreHighConePosition  = new ArmPosition(203, 253, 233);
-        public static ArmPosition dipHighConePosition    = new ArmPosition(193, 243, 215);
-        public static ArmPosition scoreHighCubePosition  = new ArmPosition(150, 294, 211);
-        public static ArmPosition scoreMidConePosition   = new ArmPosition(107, 315, 220);
-        public static ArmPosition dipMidConePosition     = new ArmPosition(107, 315, 210);
-        public static ArmPosition scoreMidCubePosition   = new ArmPosition(107, 341, 187);
-        public static ArmPosition idlePosition           = new ArmPosition(107, 16,  129);
-        public static ArmPosition scoreLowPosition       = new ArmPosition(107, 340,   116);
-        public static ArmPosition floorPosition          = new ArmPosition(107, 255, 225);
-        public static ArmPosition floorAltPosition       = new ArmPosition(107, 283, 120); // s2 306
-        public static ArmPosition substationPosition     = new ArmPosition(120, 1,   170);
+        public static ArmPosition scoreHighConePosition  = new ArmPosition(227, 262, 145);
+        public static ArmPosition dipHighConePosition    = new ArmPosition(217, 226, 136);
+        public static ArmPosition scoreHighCubePosition  = new ArmPosition(133.5, 328, 160);
+        public static ArmPosition scoreMidConePosition   = new ArmPosition(133.5, 306, 139);
+        public static ArmPosition dipMidConePosition     = new ArmPosition(133.5, 282, 139);
+        public static ArmPosition scoreMidCubePosition   = new ArmPosition(133.5, 344, 110);
+        public static ArmPosition idlePosition           = new ArmPosition(133.5, 354,  39);//131 217 50
+        public static ArmPosition scoreLowPosition       = new ArmPosition(133.5, 317,   55);
+        public static ArmPosition floorPosition          = new ArmPosition(133.5, 232, 141);
+        public static ArmPosition floorAltPosition       = new ArmPosition(133.5, 260, 38); // s2 306
+        public static ArmPosition floorAltCubePosition   = new ArmPosition(133.5, 255, 90);
+        public static ArmPosition substationPosition     = new ArmPosition(133.5, 326,   107);
 
         public static final double THETA_SPEED = 1;
         public static final double X_SPEED = 0.5;
@@ -155,30 +157,30 @@ public final class Constants {
         public static final double STAGE_1_Kd = 0.0003;//0.0005
         public static final double STAGE_1_Ks = 0.04;//0.04;//0.0005
         public static final double STAGE_1_Kg = 1.1;//1.3 causes tiny pulse width modulation; 0.5
-        public static final double STAGE_1_MAX_SPEED = 600;
-        public static final double STAGE_1_MAX_ACCEL = 140;//180;//200//170;//160;//140;//130
+        public static final double STAGE_1_MAX_SPEED = 800;
+        public static final double STAGE_1_MAX_ACCEL = 220;//180;//200//170;//160;//140;//130
         
-        public static final double STAGE_2_Kp = 0.014;//0.035//0.04//0.0325//0.008
+        public static final double STAGE_2_Kp = 0.0057;//0.035//0.04//0.0325//0.008
         public static final double STAGE_2_Ki = 0.00;//0.0025 //0.0065
-        public static final double STAGE_2_Kd = 0.0056;//0.0051;//0.0042//0.00420//0.035 0.0043
+        public static final double STAGE_2_Kd = 0.004;//0.0051;//0.0042//0.00420//0.035 0.0043
         public static final double STAGE_2_Ks = 0.025;///0.03;//0.05
         public static final double STAGE_2_Kg = 0.75;//0.92//1.4, 1.0
-        public static final double STAGE_2_MAX_SPEED = 600;//250;
-        public static final double STAGE_2_MAX_ACCEL = 160;//210;//200//190;//180;//160;//170//150
+        public static final double STAGE_2_MAX_SPEED = 1000;//250;
+        public static final double STAGE_2_MAX_ACCEL = 340;//210;//200//190;//180;//160;//170//150
 
-        public static final double STAGE_3_Kp = 0.02;//0.0255//0.0155;//0.005
+        public static final double STAGE_3_Kp = 0.0255;//0.0255//0.0155;//0.005
         public static final double STAGE_3_Ki = 0;
-        public static final double STAGE_3_Kd = 0.0001;//0.000
-        public static final double STAGE_3_Ks = 0.02;
-        public static final double STAGE_3_Kg = 0.52;
-        public static final double STAGE_3_MAX_SPEED = 500; //500
-        public static final double STAGE_3_MAX_ACCEL = 300;//280;//250;//230;//300
+        public static final double STAGE_3_Kd = 0.0005;//0.000
+        public static final double STAGE_3_Ks = 0.022;
+        public static final double STAGE_3_Kg = 0.54;
+        public static final double STAGE_3_MAX_SPEED = 800; //500
+        public static final double STAGE_3_MAX_ACCEL = 560;//280;//250;//230;//300
     }
 
      public class POP {
          public static final double F = 0;
          public static final double R = 0;
-         public static final double SPEEDOUT = 0.2;
+         public static final double SPEEDOUT = 0.8;
          public static final double SPEEDIN = 0.5;
 
          public static final int FORWARD_PNEUMATIC_CHANNEL = 14;

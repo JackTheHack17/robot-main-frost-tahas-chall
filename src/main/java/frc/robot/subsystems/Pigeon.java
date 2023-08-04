@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.Pigeon2;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.CAN.PIGEON_ID;
 import frc.lib.Telemetry;
@@ -32,6 +34,10 @@ public class Pigeon extends SubsystemBase {
 
   public double getPitch () {
     return pitch;
+  }
+
+  public Rotation2d geRotation2d(){
+    return new Rotation2d();
   }
 
   public double getRoll () {

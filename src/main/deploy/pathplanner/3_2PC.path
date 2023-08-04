@@ -7,8 +7,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.9594869189738384,
-        "y": 4.280108131644835
+        "x": 2.9881164048042383,
+        "y": 4.666606190355238
       },
       "holonomicAngle": 180.0,
       "isReversal": false,
@@ -18,7 +18,7 @@
       "stopEvent": {
         "names": [
           "coneMode",
-          "placeHighCone",
+          "placeMidCone",
           "release",
           "tuck"
         ],
@@ -29,22 +29,22 @@
     },
     {
       "anchorPoint": {
-        "x": 6.237563046554665,
-        "y": 4.566402989948838
+        "x": 3.804056750970645,
+        "y": 4.752494647846439
       },
       "prevControl": {
-        "x": 5.4164447186037235,
-        "y": 4.9958452774048405
+        "x": 2.859283718567437,
+        "y": 4.666606190355238
       },
       "nextControl": {
-        "x": 5.4164447186037235,
-        "y": 4.9958452774048405
+        "x": 4.745057789058042,
+        "y": 4.838040196763476
       },
       "holonomicAngle": 0.0,
-      "isReversal": true,
+      "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": true,
+      "isStopPoint": false,
       "stopEvent": {
         "names": [
           "cubeMode",
@@ -59,12 +59,87 @@
     },
     {
       "anchorPoint": {
-        "x": 1.7570485140970284,
-        "y": 4.423255560796836
+        "x": 6.266192532385065,
+        "y": 4.595032475779237
       },
       "prevControl": {
-        "x": 2.6445625748394357,
-        "y": 4.938586305744041
+        "x": 5.607714358285859,
+        "y": 4.666606190355238
+      },
+      "nextControl": {
+        "x": 6.8219278180647605,
+        "y": 4.534626466466227
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 5.435937443303458,
+        "y": 4.609347218694437
+      },
+      "prevControl": {
+        "x": 6.160778130050066,
+        "y": 4.609347218694437
+      },
+      "nextControl": {
+        "x": 5.407307957473058,
+        "y": 4.609347218694437
+      },
+      "holonomicAngle": -1.591140271194494,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 4.705885554628252,
+        "y": 4.795438876592039
+      },
+      "prevControl": {
+        "x": 5.2498457854058564,
+        "y": 4.766809390761639
+      },
+      "nextControl": {
+        "x": 4.4026437131320595,
+        "y": 4.81139897351289
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 1.7856779999274288,
+        "y": 4.437570303712036
+      },
+      "prevControl": {
+        "x": 3.16705069124424,
+        "y": 4.5592456184912376
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -74,7 +149,8 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "placeHighCube",
+          "cubeMode",
+          "placeMidCube",
           "release",
           "tuck"
         ],
@@ -84,8 +160,21 @@
       }
     }
   ],
-  "maxVelocity": 4.0,
-  "maxAcceleration": 2.0,
+  "maxVelocity": 3.0,
+  "maxAcceleration": 1.5,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 1.2272727272727277,
+      "names": [
+        "pickupLowAlt"
+      ]
+    },
+    {
+      "position": 2.9545454545454533,
+      "names": [
+        "tuck"
+      ]
+    }
+  ]
 }

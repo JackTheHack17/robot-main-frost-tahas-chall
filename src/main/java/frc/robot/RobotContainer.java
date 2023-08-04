@@ -94,8 +94,8 @@ public class RobotContainer {
 //    copilotController.button(2).onFalse(new SequentialCommandGroup((m_arm.moveToPositionCommand(positions.Idle)).withTimeout(10), new WaitCommand(3.5), m_claw.intakeCommand())); //Close claw after the arm moves away from the node
     copilotController.button(2).onFalse(m_arm.defaultCommand());
     copilotController.button(2).onFalse(m_claw.intakeCommand());
-    copilotController.button(3).whileTrue(m_arm.moveToPositionCommand(positions.FloorAlt));
-    copilotController.button(3).onFalse(m_claw.intakeCommand());
+    copilotController.button(3).whileTrue(new InstantCommand( () -> m_arm.goToFloor().schedule()));
+    copilotController.button(3).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));
     copilotController.button(4).whileTrue(new InstantCommand( () -> m_arm.goToScoreMid().schedule()));
     copilotController.button(4).onFalse(m_claw.intakeCommand());
     copilotController.button(4).onFalse(m_arm.defaultCommand());

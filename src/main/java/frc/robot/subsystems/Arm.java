@@ -32,6 +32,7 @@ import static frc.robot.Constants.ARM.THETA_SPEED;
 import static frc.robot.Constants.ARM.X_SPEED;
 import static frc.robot.Constants.ARM.Y_SPEED;
 import static frc.robot.Constants.ARM.floorAltPosition;
+import static frc.robot.Constants.ARM.floorAltCubePosition;
 import static frc.robot.Constants.ARM.floorPosition;
 import static frc.robot.Constants.ARM.idlePosition;
 import static frc.robot.Constants.ARM.scoreHighCubePosition;
@@ -113,6 +114,7 @@ public class Arm extends SubsystemBase {
         positionMap.put(positions.ScoreLow, scoreLowPosition);
         positionMap.put(positions.Floor, floorPosition);
         positionMap.put(positions.FloorAlt, floorAltPosition);
+        positionMap.put(positions.FloorAltCube, floorAltCubePosition);
         positionMap.put(positions.Substation, substationPosition);
         positionMap.put(positions.Idle, idlePosition);
         positionMap.put(positions.DipHighCone, dipHighConePosition);
@@ -306,9 +308,18 @@ public class Arm extends SubsystemBase {
         m_stage3Target = angle;
     }
     //Added an if condition for different positions based on game piece
+
+    public Command goToFloor(){
+        if(m_clawSubsystem.wantCone()){
+            return moveToPositionCommand(positions.FloorAlt);
+        }
+        else{
+            return moveToPositionCommand(positions.FloorAltCube);
+        }
+    }
     public Command goToScoreHigh(){
         if(m_clawSubsystem.wantCone()){
-            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(1.0), goToDipHigh());
+            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(0.6), goToDipHigh());
         }
         else{
             return moveToPositionCommand(positions.ScoreHighCube);
@@ -321,7 +332,7 @@ public class Arm extends SubsystemBase {
 
     public Command goToScoreMid(){
         if(m_clawSubsystem.wantCone()){
-            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreMidCone).withTimeout(1.25), goToDipMid());//0.85 sec
+            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreMidCone).withTimeout(0.6), goToDipMid());//0.85 sec
         }
         else{
             return moveToPositionCommand(positions.ScoreMidCube);
@@ -389,6 +400,9 @@ public class Arm extends SubsystemBase {
                         m_clawSubsystem.openGrip();
                         //m_copilotController.setLED(3, true);
                         break;
+                    case FloorAltCube:
+                        m_clawSubsystem.spinIn();
+                        m_clawSubsystem.openGrip();
                     case Substation:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();

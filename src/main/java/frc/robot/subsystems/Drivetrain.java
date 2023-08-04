@@ -174,10 +174,10 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d _robotPose = new Pose2d();
 
   // private double _translationKp = 0.0019;
-  private double _translationKp = 5.5;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
+  private double _translationKp = 0.2;//15;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 3.75;//6.25;//12.5;//15;//0.00005
+  private double _rotationKp = 0.008;//6.25;//12.5;//15;
   private double _rotationKi = 0;
   private double _rotationKd = 0;
 
@@ -238,15 +238,15 @@ public class Drivetrain extends SubsystemBase {
       // red alliance waypoints
       _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.83, 5.15, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.83, 3.94, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.83, 3.38, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.83, 2.28, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.83, 1.70, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.83, 0.57, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.83, 1.13, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.83, 2.95, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.83, 4.52, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.71, 5.15, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.71, 3.94, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.71, 3.38, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.71, 2.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.71, 1.70, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.71, 0.57, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.71, 1.13, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.71, 2.95, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.71, 4.52, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
       // _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
@@ -266,15 +266,15 @@ public class Drivetrain extends SubsystemBase {
       // blue alliance waypoints
       _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(Math.PI)));
       _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.84, 5.05, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.84, 3.84, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.84, 3.28, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.84, 2.18, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.84, 1.60, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.84, 0.47, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.84, 1.03, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.84, 2.75, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.84, 4.42, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 5.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 3.84, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 3.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 2.18, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 1.60, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 0.47, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.86, 1.03, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.86, 2.75, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.86, 4.42, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
     }
@@ -685,12 +685,13 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("marker1", new PrintCommand("Passed marker 1"));
       // eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
       eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(1.75));
-      eventMap.put("placeMidCone", m_arm.goToScoreMid().withTimeout(1.5));
+      eventMap.put("placeMidCone", m_arm.goToScoreMid().withTimeout(1));
       eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(1.5));
+      eventMap.put("placeMidCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreMidCube).withTimeout(1.0));
       eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle).withTimeout(0.5));
       eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
       eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor));
-      eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(0.7));
+      eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAltCube).withTimeout(1.2));
       eventMap.put("intake", new WaitCommand(0.5).andThen(m_claw.intakeCommand().andThen(new WaitCommand(.25))));
       eventMap.put("autobalance", new AutoBalance(this));
       eventMap.put("realign", PPmoveToPositionCommand());
@@ -702,7 +703,7 @@ public class Drivetrain extends SubsystemBase {
       // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
       SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
         () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
-        pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose), // Pose2d consumer, used to reset odometry at the beginning of auto
+        pose -> resetOdometry(pose), // Pose2d consumer, used to reset odometry at the beginning of auto
         this.m_kinematics, // SwerveDriveKinematics
         new PIDConstants(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
         new PIDConstants(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
