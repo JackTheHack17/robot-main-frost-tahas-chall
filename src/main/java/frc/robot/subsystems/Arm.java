@@ -308,7 +308,7 @@ public class Arm extends SubsystemBase {
     //Added an if condition for different positions based on game piece
     public Command goToScoreHigh(){
         if(m_clawSubsystem.wantCone()){
-            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(1.0), goToDipHigh());
+            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(0.6), goToDipHigh());
         }
         else{
             return moveToPositionCommand(positions.ScoreHighCube);
@@ -321,7 +321,7 @@ public class Arm extends SubsystemBase {
 
     public Command goToScoreMid(){
         if(m_clawSubsystem.wantCone()){
-            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreMidCone).withTimeout(1.25), goToDipMid());//0.85 sec
+            return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreMidCone).withTimeout(0.6), goToDipMid());//0.85 sec
         }
         else{
             return moveToPositionCommand(positions.ScoreMidCube);
