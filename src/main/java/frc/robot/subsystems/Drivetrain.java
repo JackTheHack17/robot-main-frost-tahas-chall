@@ -69,7 +69,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+// import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
@@ -416,8 +416,9 @@ public class Drivetrain extends SubsystemBase {
     if (closest == null) return new InstantCommand();
     if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
       m_LEDs.flashRed();
-      m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
-      return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
+      // m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
+      return new WaitCommand(0.5);
+      // .andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
     }
     return pathToCommand( closest );
   }
