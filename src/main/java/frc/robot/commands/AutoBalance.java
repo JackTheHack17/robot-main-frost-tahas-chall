@@ -16,11 +16,11 @@ public class AutoBalance extends ProfiledPIDCommand {
         // The ProfiledPIDController used by the command
         new ProfiledPIDController(
             // The PID gains
-            0.006,
+            0.0075,
             0,
-            0.0016,
+            0.00161,
             // The motion profile constraints
-            new TrapezoidProfile.Constraints(1, 1)),
+            new TrapezoidProfile.Constraints(1.7, 1)),
         // This should return the measurement
         drivetrain::getGyroAngle, //gyro X angle
         // This should return the goal (can also be a constant)
@@ -34,7 +34,7 @@ public class AutoBalance extends ProfiledPIDCommand {
     // Configure additional PID options by calling `getController` here.
     addRequirements(drivetrain);
     this.drivetrain = drivetrain;
-    getController().setTolerance(45); //degrees
+    getController().setTolerance(10); //degrees
 
   }
   
