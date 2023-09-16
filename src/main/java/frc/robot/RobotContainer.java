@@ -3,6 +3,7 @@ import java.io.File;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -69,6 +70,12 @@ public class RobotContainer {
     //rawCamera.setFPS(30);
     //rawCamera.setResolution(640, 480);
   }
+
+  // public void pieceDetected(){
+  //   if(m_claw.getPiece()){
+  //     m_LEDs.flashRed();
+  //   }
+  // }
 
   public Arm getArm() {
     return m_arm;

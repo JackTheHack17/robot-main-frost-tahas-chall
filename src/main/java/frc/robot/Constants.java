@@ -136,8 +136,8 @@ public final class Constants {
         public static final double STAGE_1_OFFSET = 203;
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
-        public static ArmPosition scoreHighConePosition = new ArmPosition(235, 130, 177);
-        public static ArmPosition dipHighConePosition = new ArmPosition(207, 108, 129);
+        public static ArmPosition scoreHighConePosition = new ArmPosition(207, 130, 145);
+        public static ArmPosition dipHighConePosition = new ArmPosition(197, 113, 129);
         public static ArmPosition scoreHighCubePosition = new ArmPosition(185, 122, 127);
         public static ArmPosition scoreMidConePosition = new ArmPosition(133.5, 150, 160);
         public static ArmPosition dipMidConePosition = new ArmPosition(133.5, 130, 120);
@@ -167,7 +167,7 @@ public final class Constants {
 
         public static final double STAGE_2_Kp = 0.0135;// 0.035//0.04//0.0325//0.008
         public static final double STAGE_2_Ki = 0.00;// 0.0025 //0.0065
-        public static final double STAGE_2_Kd = 0.0051;// 0.0051;//0.0042//0.00420//0.035 0.0043
+        public static final double STAGE_2_Kd = 0.0041;// 0.0051;//0.0042//0.00420//0.035 0.0043
         public static final double STAGE_2_Ks = 0.025;/// 0.03;//0.05
         public static final double STAGE_2_Kg = 0.75;// 0.92//1.4, 1.0
         public static final double STAGE_2_MAX_SPEED = 800;// 250;
@@ -175,7 +175,7 @@ public final class Constants {
 
         public static final double STAGE_3_Kp = 0.0175;// 0.0255//0.0155;//0.005
         public static final double STAGE_3_Ki = 0;
-        public static final double STAGE_3_Kd = 0.00005;// 0.000
+        public static final double STAGE_3_Kd = 0.000001;// 0.000
         public static final double STAGE_3_Ks = 0.02;
         public static final double STAGE_3_Kg = 0.42;
         public static final double STAGE_3_MAX_SPEED = 800; // 500

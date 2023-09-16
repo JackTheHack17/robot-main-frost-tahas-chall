@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.LED;
 import frc.robot.Constants.POP;
 import frc.robot.Constants.ARM.positions;
 
@@ -32,6 +33,7 @@ public class PinchersofPower extends SubsystemBase  {
   private boolean m_cone;
   private double intakeSpeed = 0;
   private DigitalInput limitSwitch = new DigitalInput(Constants.DIO.GRIP_LIMIT_SWITCH);
+
 
   public PinchersofPower(RobotContainer m_container) {
     this.m_container = m_container;
@@ -65,6 +67,13 @@ public class PinchersofPower extends SubsystemBase  {
     spinner.burnFlash();
     spinner2.burnFlash();
 
+  }
+
+  public boolean getPiece(){
+    if(limitSwitch.get()){
+      return true;
+    }
+    return false;
   }
 
   /** Close */
