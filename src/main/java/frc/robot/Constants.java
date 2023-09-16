@@ -137,7 +137,7 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
         public static ArmPosition scoreHighConePosition = new ArmPosition(235, 130, 177);
-        public static ArmPosition dipHighConePosition = new ArmPosition(215, 80, 145);
+        public static ArmPosition dipHighConePosition = new ArmPosition(207, 108, 129);
         public static ArmPosition scoreHighCubePosition = new ArmPosition(185, 122, 127);
         public static ArmPosition scoreMidConePosition = new ArmPosition(133.5, 150, 160);
         public static ArmPosition dipMidConePosition = new ArmPosition(133.5, 130, 120);
