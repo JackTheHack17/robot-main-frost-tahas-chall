@@ -140,7 +140,7 @@ public final class Constants {
         public static ArmPosition dipHighConePosition = new ArmPosition(197, 113, 129);
         public static ArmPosition scoreHighCubePosition = new ArmPosition(185, 122, 127);
         public static ArmPosition scoreMidConePosition = new ArmPosition(133.5, 150, 160);
-        public static ArmPosition dipMidConePosition = new ArmPosition(133.5, 130, 120);
+        public static ArmPosition dipMidConePosition = new ArmPosition(133.5, 152, 140);
         public static ArmPosition scoreMidCubePosition = new ArmPosition(133.5, 165, 97);
         public static ArmPosition idlePosition = new ArmPosition(133.5, 192, 36);// 131 217 50
         public static ArmPosition scoreLowPosition = new ArmPosition(133.5, 150, 52);

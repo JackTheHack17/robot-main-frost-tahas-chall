@@ -549,129 +549,7 @@ public class Drivetrain extends SubsystemBase {
     if (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove").equals("special")) {
       return new InstantCommand(()->setRobotOriented(true)).andThen(new RepeatCommand(new InstantCommand(()->joystickDrive(0, 0.5, 0))).withTimeout(1).andThen(new InstantCommand(()->stopModules())));
     }
-   // switch (Telemetry.getValue("general/autonomous/selectedRoutine", "dontMove")) {
-      // case "dontMove":
-      //   return new InstantCommand();
-      // case "backupBackup":
-      //   return new SequentialCommandGroup(
-      //     new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //     new InstantCommand(() -> setRobotOriented(false)),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0.1, 0);
-      //     }).repeatedly().withTimeout(10),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //       setRobotOriented(false);
-      //     })
-      //   );
-      // case "backupScoreOneBackupCone":
-      //     return new SequentialCommandGroup(
-      //       new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //       new InstantCommand(() -> setRobotOriented(false)),
-      //       new InstantCommand(() -> m_claw.setMode(GamePieces.Cone)),
-      //       m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
-      //       m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, -0.1, 0);
-      //       }).repeatedly().withTimeout(1),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0, 0);
-      //       }),
-      //       new WaitCommand(0.1),
-      //       m_claw.outTakeCommand(),
-      //       new WaitCommand(0.5),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0.1, 0);
-      //       }).repeatedly().withTimeout(1),
-      //       new ParallelCommandGroup(
-      //         m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0.1, 0);
-      //         }).repeatedly().withTimeout(0)
-      //       ),
-      //       //new InstantCommand(() -> {
-      //       //  joystickDrive(0.1, 0, 0);
-      //       //}).repeatedly().withTimeout(0.2),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0, 0);
-      //       })
-      //     );
-      //   case "middleCharge":
-      //       return new SequentialCommandGroup(
-      //         new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //         new InstantCommand(() -> setRobotOriented(false)),
-      //         new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
-      //         m_claw.intakeCommand(),
-      //         new WaitCommand(0.2),
-      //         m_claw.spinOffCommand(),
-      //         m_arm.moveToPositionCommand(positions.Idle).withTimeout(1),
-      //         m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, -0.1, 0);
-      //         }).repeatedly().withTimeout(1),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         }),
-      //         new WaitCommand(0.1),
-      //         m_claw.outTakeCommand(),
-      //         new WaitCommand(0.5),
-      //         m_claw.spinOffCommand(),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0.1, 0);
-      //         }).repeatedly().withTimeout(1),
-      //         new ParallelCommandGroup(
-      //           m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //           new InstantCommand(() -> {
-      //             joystickDrive(0, 0.1, 0);
-      //           }).repeatedly().withTimeout(5)
-      //         ),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         }),
-      //         new WaitCommand(0.5),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, -0.1, 0);
-      //         }).repeatedly().withTimeout(1.5),
-      //         new InstantCommand(() -> {
-      //           joystickDrive(0, 0, 0);
-      //         })
-      //       );
-      //   case "backupScoreOneBackupCube":
-      //   return new SequentialCommandGroup(
-      //     new InstantCommand(() -> m_gyro.zeroYaw(180)),
-      //     new InstantCommand(() -> setRobotOriented(false)),
-      //     new InstantCommand(() -> m_claw.setMode(GamePieces.Cube)),
-      //     m_claw.intakeCommand(),
-      //     new WaitCommand(0.2),
-      //     m_claw.spinOffCommand(),
-      //     m_arm.moveToPositionCommand(positions.Idle).withTimeout(1
-      //     ),
-      //     m_arm.moveToPositionCommand(positions.ScoreHigh).withTimeout(3),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, -0.1, 0);
-      //     }).repeatedly().withTimeout(1),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //     }),
-      //     new WaitCommand(0.1),
-      //     m_claw.outTakeCommand(),
-      //     new WaitCommand(0.5),
-      //     m_claw.spinOffCommand(),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0.1, 0);
-      //     }).repeatedly().withTimeout(1),
-      //     new ParallelCommandGroup(
-      //       m_arm.moveToPositionCommand(positions.Idle).withTimeout(3),
-      //       new InstantCommand(() -> {
-      //         joystickDrive(0, 0.1, 0);
-      //       }).repeatedly().withTimeout(3)
-      //     ),
-      //     new InstantCommand(() -> {
-      //       joystickDrive(0, 0, 0);
-      //     })
-      //   );
-    //}
-
+    
     // This will load the file "FullAuto.path" and generate it with a max velocity of 4 m/s and a max acceleration of 3 m/s^2
     // for every path in the group
     try {
@@ -684,7 +562,7 @@ public class Drivetrain extends SubsystemBase {
       HashMap<String, Command> eventMap = new HashMap<>();
       eventMap.put("marker1", new PrintCommand("Passed marker 1"));
       // eventMap.put("placeHighCone", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCone).withTimeout(2.75).andThen(m_arm.moveToPositionCommand(positions.DipHighCone).withTimeout(0.75)));
-      eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(1.75));
+      eventMap.put("placeHighCone", m_arm.goToScoreHigh().withTimeout(1.5));
       eventMap.put("placeMidCone", m_arm.goToScoreMid().withTimeout(1.5));
       eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(1.5));
       eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle).withTimeout(0.5));
