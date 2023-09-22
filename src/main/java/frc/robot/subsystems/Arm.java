@@ -152,7 +152,7 @@ public class Arm extends SubsystemBase {
         m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360);
 
         m_stage1PID.setTolerance(3.0);//0
-        m_stage2PID.setTolerance(10.0);//3//2//1//0
+        m_stage2PID.setTolerance(3.0);//3//2//1//0
         m_stage3PID.setTolerance(3.0);
 
         m_stage1PID.setIntegratorRange(-0.25, 0.25);

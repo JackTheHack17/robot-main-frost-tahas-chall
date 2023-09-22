@@ -28,9 +28,6 @@
           }
         },
         "drivetrain": {
-          "gyro": {
-            "open": true
-          },
           "kinematics": {
             "open": true,
             "robot": {
@@ -316,7 +313,7 @@
     "Plot <4>": {
       "plots": [
         {
-          "height": 207,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -343,7 +340,7 @@
     "Plot <5>": {
       "plots": [
         {
-          "height": 275,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -370,7 +367,7 @@
     "Plot <6>": {
       "plots": [
         {
-          "height": 232,
+          "height": 0,
           "series": [
             {
               "color": [
@@ -397,7 +394,7 @@
     "Plot <7>": {
       "plots": [
         {
-          "height": 313,
+          "height": 0,
           "series": [
             {
               "color": [

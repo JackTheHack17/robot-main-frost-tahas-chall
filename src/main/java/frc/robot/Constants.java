@@ -137,14 +137,14 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
         public static ArmPosition scoreHighConePosition = new ArmPosition(207, 130, 145);
-        public static ArmPosition dipHighConePosition = new ArmPosition(197, 113, 129);
+        public static ArmPosition dipHighConePosition = new ArmPosition(205, 103, 136);
         public static ArmPosition scoreHighCubePosition = new ArmPosition(185, 122, 127);
         public static ArmPosition scoreMidConePosition = new ArmPosition(133.5, 150, 160);
         public static ArmPosition dipMidConePosition = new ArmPosition(133.5, 152, 140);
         public static ArmPosition scoreMidCubePosition = new ArmPosition(133.5, 165, 97);
         public static ArmPosition idlePosition = new ArmPosition(133.5, 192, 36);// 131 217 50
         public static ArmPosition scoreLowPosition = new ArmPosition(133.5, 150, 52);
-        public static ArmPosition floorPosition = new ArmPosition(133.5, 86, 142);
+        public static ArmPosition floorPosition = new ArmPosition(133.5, 83, 147);
         public static ArmPosition floorAltPosition = new ArmPosition(133.5, 114, 43);
         // public static ArmPosition floorAltCubePosition = new ArmPosition(133.5, 91, 43);
         public static ArmPosition substationPosition = new ArmPosition(133.5, 170, 111);
