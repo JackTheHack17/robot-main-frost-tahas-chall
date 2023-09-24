@@ -260,22 +260,6 @@ public class Arm extends SubsystemBase {
         } else {
             moveToAngles(internalTarget.getStage1Angle(), internalTarget.getStage2Angle(), m_stage3Encoder.getAbsolutePosition()*360);   
         }
-       // if ( lastPosition == positions.Idle && position != positions.Idle && Math.abs(m_stage2Encoder.getAbsolutePosition()*360 - target.getStage2Angle()) > JOINT_ANGLE_DEADZONE) {
-         //   moveToAngles(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle());
-            //m_manualTargetX = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[0];
-            //m_manualTargetY = forwardKinematics(m_stage1Encoder.getAbsolutePosition()*360, target.getStage2Angle(), target.getStage3Angle())[1];
-            //m_manualTargetTheta = target.getStage3Angle();
-        //} else if ( position == positions.Idle && !movingToIdle && Math.abs(m_stage1Encoder.getAbsolutePosition()*360 - target.getStage1Angle()) > JOINT_ANGLE_DEADZONE ) {
-          //  moveToAngles(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360);
-            //movingToIdle = true;
-            //m_manualTargetX = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[0];
-            //m_manualTargetY = forwardKinematics(target.getStage1Angle(), m_stage2Encoder.getAbsolutePosition()*360, target.getStage3Angle())[1];
-            //m_manualTargetTheta = target.getStage3Angle();
-        //} else if ( !movingToIdle && m_stage1Encoder.getAbsolutePosition()*360 - m_stage1Target < JOINT_ANGLE_DEADZONE ) {
-            //m_manualTargetX = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[0];
-            //m_manualTargetY = forwardKinematics(target.getStage1Angle(), target.getStage2Angle(), target.getStage3Angle())[1];
-            //m_manualTargetTheta = target.getStage3Angle();
-        //}
     }
 
     public Boolean isAtTarget () {
@@ -305,7 +289,7 @@ public class Arm extends SubsystemBase {
     public void setStage3Target(double angle) {
         m_stage3Target = angle;
     }
-    //Added an if condition for different positions based on game piece
+
     public Command goToScoreHigh(){
         if(m_clawSubsystem.wantCone()){
             return new SequentialCommandGroup(moveToPositionCommand(positions.ScoreHighCone).withTimeout(0.6), goToDipHigh());
@@ -334,7 +318,7 @@ public class Arm extends SubsystemBase {
 
     public Command moveToPositionCommand (positions position) {
         return new FunctionalCommand(
-            () -> { // init
+            () -> {
                 if (!m_copilotController.getRawButton(9)) {
                     m_copilotController.setLED(10, false);
                     m_copilotController.setLED(11, false);
@@ -365,65 +349,53 @@ public class Arm extends SubsystemBase {
         
                 switch (position) {
                     case ScoreHighCone:
-                        //m_copilotController.setLED(2, true);
                         break;
                     case ScoreHighCube:
-                        //m_copilotController.setLED(2, true);
                         break;
                     case ScoreMidCone:
-                        //m_copilotController.setLED(4, true);
                         break;
                     case ScoreMidCube:
-                        //m_copilotController.setLED(4, true);
                         break;
                     case ScoreLow:
-                        //m_copilotController.setLED(5, true);
                         break;
                     case Floor:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        //m_copilotController.setLED(1, true);
                         break;
                     case FloorAlt:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        //m_copilotController.setLED(3, true);
                         break;
                     case Substation:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        //m_copilotController.setLED(0, true);
                         break;
                     case Idle:
                         movingToIdle = true;
                         m_clawSubsystem.spinSlow();
                         break;
                     default:
-                        //m_clawSubsystem.spinOff();
                         m_clawSubsystem.spinSlow();
                         break;
                 }
             }, 
-            () -> { // execution
+            () -> {
                 moveToPosition(position);
             
             }, 
-            interrupted -> { // when should the command do when it ends?
+            interrupted -> {
                 movingToIdle = false;
             },
-            () -> { // should the command end?
-                //return this.isAtTarget();
+            () -> {
                 return false;
             },
             this
         );
     }
 
-    // if(((position == positions.Substation) || (position == positions.Floor)) || (position == positions.FloorAlt)) {
-    //     m_clawSubsystem.subclose();
     public Command moveToPositionTerminatingCommand( positions position ) {
         return new FunctionalCommand(
-            () -> { // init
+            () -> {
                 if (!m_copilotController.getRawButton(9)) {
                     m_copilotController.setLED(10, false);
                     m_copilotController.setLED(11, false);
@@ -440,46 +412,37 @@ public class Arm extends SubsystemBase {
         
                 switch (position) {
                     case ScoreHighCone:
-                        //m_copilotController.setLED(2, true);
                         break;
                     case ScoreHighCube:
-                        //m_copilotController.setLED(2, true);
                         break;
                     case ScoreMidCone:
-                        //m_copilotController.setLED(4, true);
                         break;
                     case ScoreMidCube:
-                        //m_copilotController.setLED(4, true);
                         break;
                     case ScoreLow:
-                        //m_copilotController.setLED(5, true);
                         break;
                     case Floor:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        //m_copilotController.setLED(1, true);
                         break;
                     case FloorAlt:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        //m_copilotController.setLED(3, true);
                         break;
                     case Substation:
                         m_clawSubsystem.spinIn();
                         m_clawSubsystem.openGrip();
-                        //m_copilotController.setLED(0, true);
                         break;
                     case Idle:
                         movingToIdle = true;
                         m_clawSubsystem.spinSlow();
                         break;
                     default:
-                        //m_clawSubsystem.spinOff();
                         m_clawSubsystem.spinSlow();
                         break;
                 }
             }, 
-            () -> { // execution
+            () -> {
                 moveToPosition(position);
             
             }, 
@@ -493,21 +456,9 @@ public class Arm extends SubsystemBase {
         );
     }
 
-    // public Command placeCommand () {
-    //     if (!m_clawSubsystem.wantCone() || m_clawSubsystem.getColorSensorGamePiece() != GamePieces.Cone) return new InstantCommand();
-    //     switch ( target ) {
-    //         case ScoreHigh:
-    //             return moveToPositionTerminatingCommand(positions.ScoreHighPlace);
-    //         case ScoreMid:
-    //             return moveToPositionTerminatingCommand(positions.ScoreMidPlace);
-    //         default:
-    //             return new InstantCommand();
-    //     }
-    // }
-
     public Command moveToPointCommand () {
         return new FunctionalCommand(
-            () -> { // init
+            () -> {
                 m_copilotController.setLED(0, false);
                 m_copilotController.setLED(1, false);
                 m_copilotController.setLED(2, false);
@@ -524,20 +475,19 @@ public class Arm extends SubsystemBase {
                 m_copilotController.setLED(13, true);
                 m_copilotController.setLED(14, true);
             }, 
-            () -> { // execution
+            () -> {
                 m_manualTargetX += m_copilotController.getJoystick().getX() * X_SPEED;
                 m_manualTargetY += m_copilotController.getJoystick().getY() * Y_SPEED;
                 moveToPoint(m_manualTargetX, m_manualTargetY, m_manualTargetTheta);
-                //moveToPoint(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage2Encoder.getAbsolutePosition()*360, m_stage3Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_copilotController.getJoystick().getX() * xSpeed, m_copilotController.getJoystick().getY() * ySpeed);
             }, 
 
-            interrupted -> { // when should the command do when it ends?
+            interrupted -> {
                 if (!interrupted) {
                     // arm is in position
                 }
             },
-            () -> { // should the command end?
-                return true; //this.isAtTarget();
+            () -> {
+                return true;
             },
             this
         );
@@ -614,10 +564,6 @@ public class Arm extends SubsystemBase {
             if (movingToIdle) {
                 moveToPositionCommand(positions.Idle);
             }
-            
-            //Telemetry.setValue( "Arm/stage1/theoreticalOutput", m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), (m_stage1.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
-            //Telemetry.setValue( "Arm/stage2/theoreticalOutput", m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), (m_stage2.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
-            //Telemetry.setValue( "Arm/stage3/theoreticalOutput", m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), (m_stage3.getEncoder().getVelocity()*2*Math.PI)/6000) + 12.0*MathUtil.clamp(m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
 
             if ( m_stage1Target == 0.0 && m_stage2Target == 0.0 && m_stage3Target == 0.0 ) {
                 m_stage1.setVoltage(0);
@@ -634,10 +580,7 @@ public class Arm extends SubsystemBase {
             m_stage1.set(0);
             m_stage2.set(0);
             m_stage3.set(0);
-            // calculate but ignore
-            //m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET);
-            //m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET);
-            //m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET);
+            
             m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET);
             m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET);
             m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET);

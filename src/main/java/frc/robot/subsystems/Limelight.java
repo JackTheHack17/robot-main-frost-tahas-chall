@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-// Test code to change between pipelines on limelight
 public class Limelight extends SubsystemBase {
   private NetworkTable limelight;
   private boolean pipelineIndex;
@@ -47,14 +46,20 @@ public class Limelight extends SubsystemBase {
 
   public Pose2d getPose() {
     posevalues = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
+
     Translation2d translate = new Translation2d(posevalues[0] -0.31, posevalues[1]);
     Rotation2d rotation = new Rotation2d(Math.toRadians(posevalues[3]));
+    
     return new Pose2d(translate, rotation);
   }
 
-  /** returns latency in seconds (tl + cl) */
   public double getLatency () {
-    return (limelight.getEntry("tl").getDouble(0) + limelight.getEntry("cl").getDouble(0))/1000.0;
+    return 
+      (limelight.getEntry("tl").getDouble(0) 
+      + 
+      limelight.getEntry("cl").getDouble(0))
+      / 
+      1000.0;
   }
 
   @Override
@@ -68,7 +73,5 @@ public class Limelight extends SubsystemBase {
     frc.lib.Telemetry.setValue("Limelight/Odometry/Y", getPose().getY());
     frc.lib.Telemetry.setValue("Limelight/Odometry/Rotation", getPose().getRotation().getDegrees());
   }
-
-
 }
 
