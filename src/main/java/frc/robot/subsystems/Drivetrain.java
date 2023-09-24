@@ -443,11 +443,8 @@ public class Drivetrain extends SubsystemBase {
       this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
       (Subsystem) this
     
-    );//.andThen(() -> {
-      //m_LEDs.flashGreen();
-      //m_driverController.getHID().setRumble(RumbleType.kRightRumble, 1);
-   // }//).alongWith(new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0)));
-  }
+    );
+    }
 
   public Command autoBalanceCommand () {
     PIDController pitchPID = new PIDController(AUTO_BALANCE_Kp, 0, AUTO_BALANCE_Kd);
@@ -467,73 +464,21 @@ public class Drivetrain extends SubsystemBase {
     ).repeatedly();
   }
 
-  /** Sets the gyroscope's current heading to 0 */
   public void zeroGyro() {
     m_gyro.zeroYaw();
   }
 
-  /** toggles field/robot orientation
-   * @return new isRobotOriented value
-   */
   public boolean toggleRobotOrient() {
     isRobotOriented = !isRobotOriented;
     return isRobotOriented;
   }
 
-  /** @return true if robot oriented, false if field oriented */
   public boolean getIsRobotOriented() {
     return isRobotOriented;
   }
 
-  /** Sets the robot's orientation to robot (true) or field (false) 
-   * @param _isRobotOriented - false if the robot should move with the gyro
-  */
   public void setRobotOriented(boolean _isRobotOriented) {
     isRobotOriented = _isRobotOriented;
-  }
-
-  /** runs the configuration methods to apply the config variables 
-   * @param motor - the device to configure
-  */
-  private void configDrive (TalonFX motor) {
-    motor.configFactoryDefault();
-    motor.setInverted(TalonFXInvertType.CounterClockwise);
-    motor.setNeutralMode(NeutralMode.Brake);
-    motor.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
-    motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    motor.setSelectedSensorPosition(0);
-    motor.config_kP(0, DRIVE_kP);
-    motor.config_kF(0, DRIVE_kF);
-    motor.configVoltageCompSaturation(12);
-    motor.enableVoltageCompensation(true);
-  }
-
-  /** runs the configuration methods to apply the config variables 
-   * @param motor - the device to configure
-   * @param position - the CANCoder associated with the module
-  */
-  private void configAzimuth (TalonFX motor, CANCoder position) {
-    motor.configFactoryDefault();
-    motor.setInverted(TalonFXInvertType.CounterClockwise);
-    motor.setNeutralMode(NeutralMode.Brake);
-    motor.configRemoteFeedbackFilter(position, 0);
-    motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
-    motor.configStatorCurrentLimit(AZIMUTH_CURRENT_LIMIT);
-    motor.setSelectedSensorPosition(position.getAbsolutePosition());
-    motor.config_kP(0, AZIMUTH_kP);
-    motor.config_kD(0, AZIMUTH_kD);
-    motor.configNeutralDeadband(AZIMUTH_DEADBAND);
-  }
-  
-  /** runs the configuration methods to apply the config variables 
-   * @param encoder - the device to configure
-   * @param offset - the measured constant offset in degrees
-  */
-  private void configPosition (CANCoder encoder, double offset) {
-    encoder.configFactoryDefault();
-    encoder.configMagnetOffset(offset);
-    encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-    encoder.setPositionToAbsolute();
   }
 
   private SwerveModulePosition[] getSwerveModulePositions() {
@@ -577,17 +522,17 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("wait", new WaitCommand(0.75));
 
 
-      // Create the AutoBuilder. This only needs to be created once when robot code starts, not every time you want to create an auto command. A good place to put this is in RobotContainer along with your subsystems.
+      
       SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
-        () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
-        pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose), // Pose2d consumer, used to reset odometry at the beginning of auto
-        this.m_kinematics, // SwerveDriveKinematics
-        new PIDConstants(_translationKp, _translationKi, _translationKd), // PID constants to correct for translation error (used to create the X and Y PID controllers)
-        new PIDConstants(_rotationKp, _rotationKi, _rotationKd), // PID constants to correct for rotation error (used to create the rotation controller)
-        this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+        () -> m_odometry.getEstimatedPosition(),
+        pose -> m_odometry.resetPosition(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions(), pose),
+        this.m_kinematics,
+        new PIDConstants(_translationKp, _translationKi, _translationKd),
+        new PIDConstants(_rotationKp, _rotationKi, _rotationKd),
+        this::driveFromModuleStates,
         eventMap,
-        true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
-        (Subsystem) this // The drive subsystem. Used to properly set the requirements of path following commands
+        true,
+        (Subsystem) this
       );
 
       return autoBuilder.fullAuto(pathGroup);
@@ -618,5 +563,47 @@ public class Drivetrain extends SubsystemBase {
 
   public void noShwerve () {
     shwerveDrive.set(0);
+  }
+
+
+  private void configDrive (TalonFX motor) {
+    configDrive(motor, DRIVE_kP, DRIVE_kF);
+  }
+
+  private void configAzimuth (TalonFX motor, CANCoder position) {
+    configAzimuth(motor, position, AZIMUTH_kP, AZIMUTH_kD);
+  }
+
+  private void configDrive (TalonFX motor, double kP, double kF) {
+    motor.configFactoryDefault();
+    motor.setInverted(TalonFXInvertType.CounterClockwise);
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    motor.setSelectedSensorPosition(0);
+    motor.config_kP(0, kP);
+    motor.config_kF(0, kF);
+    motor.configVoltageCompSaturation(12);
+    motor.enableVoltageCompensation(true);
+  }
+
+  private void configAzimuth (TalonFX motor, CANCoder position, double kP, double kD) {
+    motor.configFactoryDefault();
+    motor.setInverted(TalonFXInvertType.CounterClockwise);
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configRemoteFeedbackFilter(position, 0);
+    motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
+    motor.configStatorCurrentLimit(AZIMUTH_CURRENT_LIMIT);
+    motor.setSelectedSensorPosition(position.getAbsolutePosition());
+    motor.config_kP(0, AZIMUTH_kP);
+    motor.config_kD(0, AZIMUTH_kD);
+    motor.configNeutralDeadband(AZIMUTH_DEADBAND);
+  }
+
+  private void configPosition (CANCoder encoder, double offset) {
+    encoder.configFactoryDefault();
+    encoder.configMagnetOffset(offset);
+    encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    encoder.setPositionToAbsolute();
   }
 }

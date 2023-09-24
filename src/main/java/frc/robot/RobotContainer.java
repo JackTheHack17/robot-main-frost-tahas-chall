@@ -26,12 +26,6 @@ import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PinchersofPower;
 import frc.robot.subsystems.PinchersofPower.GamePieces;
 
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
- */
 public class RobotContainer {
   // Im leaving these ports as magic constants because there's no case where they are not these values
   public static final CommandXboxController driverController = new CommandXboxController(0);
@@ -66,27 +60,12 @@ public class RobotContainer {
     m_arm.setDefaultCommand(m_arm.defaultCommand());
     m_swerve.setDefaultCommand(new DriveCommand(m_swerve, driverController, copilotController));
 
-    //rawCamera = CameraServer.startAutomaticCapture("Aim Camera", 0);
-    //rawCamera.setFPS(30);
-    //rawCamera.setResolution(640, 480);
   }
-
-  // public void pieceDetected(){
-  //   if(m_claw.getPiece()){
-  //     m_LEDs.flashRed();
-  //   }
-  // }
 
   public Arm getArm() {
     return m_arm;
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
   private void configureButtonBindings() {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
@@ -141,11 +120,6 @@ public class RobotContainer {
     driverController.getHID().setRumble(RumbleType.kBothRumble, 0);
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
   public Command getAutonomousCommand() {
     // InstantCommand to set speeds to 0
     return m_swerve.getAutonomousCommand().andThen(new InstantCommand( () -> m_swerve.stopModules()));
