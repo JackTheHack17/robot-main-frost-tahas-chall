@@ -155,7 +155,7 @@ public class Drivetrain extends SubsystemBase {
   private PIDController FL_PID = new PIDController(0.0100, 0, 0.000270); // 0.105
   private PIDController FR_PID = new PIDController(0.0105, 0, 0.000265);
   private PIDController BL_PID = new PIDController(0.0105, 0, 0.000265);
-  private PIDController BR_PID = new PIDController(0.0105, 0, 0.000265);
+  private PIDController BR_PID = new PIDController(0.0100, 0, 0.000263);
 
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = false; // default to field oriented
