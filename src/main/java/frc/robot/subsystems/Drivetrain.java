@@ -138,10 +138,10 @@ public class Drivetrain extends SubsystemBase {
   private double BL_Actual_Speed = 0.0;
   private double BR_Actual_Speed = 0.0;
 
-  private PIDController FL_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
-  private PIDController FR_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
-  private PIDController BL_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
-  private PIDController BR_PID = new PIDController(AZIMUTH_kP, 0, AZIMUTH_kD);
+  private PIDController FL_PID = new PIDController(0.0100, 0, 0.000270); // 0.105
+  private PIDController FR_PID = new PIDController(0.0105, 0, 0.000265);
+  private PIDController BL_PID = new PIDController(0.0105, 0, 0.000265);
+  private PIDController BR_PID = new PIDController(0.0100, 0, 0.000263);
 
   private boolean isRobotOriented = false;
   
@@ -336,19 +336,29 @@ public class Drivetrain extends SubsystemBase {
     modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
     modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
 
-    FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
-    FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
-    BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
-    BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
+    // FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
+    // FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
+    // BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
+    // BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
     FL_Speed = modules[0].speedMetersPerSecond;
     FR_Speed = modules[1].speedMetersPerSecond;
     BL_Speed = modules[2].speedMetersPerSecond;
     BR_Speed = modules[3].speedMetersPerSecond;
 
-    FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target % 360) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
-    FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target % 360) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
-    BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target % 360) + AZIMUTH_kF * Math.signum(BL_PID.getPositionError()));
-    BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target % 360) + AZIMUTH_kF * Math.signum(BR_PID.getPositionError()));
+    FL_Target = modules[0].angle.getDegrees();
+    FR_Target = modules[1].angle.getDegrees();
+    BL_Target = modules[2].angle.getDegrees();
+    BR_Target = modules[3].angle.getDegrees();
+
+    FL_Target = Math.abs(FL_Speed) <= (MAX_LINEAR_SPEED * 0.01) ? FL_Actual_Position : FL_Target;
+    BL_Target = Math.abs(BL_Speed) <= (MAX_LINEAR_SPEED * 0.01) ? BL_Actual_Position : BL_Target;
+    FR_Target = Math.abs(FR_Speed) <= (MAX_LINEAR_SPEED * 0.01) ? FR_Actual_Position : FR_Target;
+    BR_Target = Math.abs(BR_Speed) <= (MAX_LINEAR_SPEED * 0.01) ? BR_Actual_Position : BR_Target; 
+
+    FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
+    FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
+    BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target) + 0.06 * Math.signum(BL_PID.getPositionError()));
+    BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target) + 0.05 * Math.signum(BR_PID.getPositionError()));
 
     FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
     FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
@@ -436,39 +446,6 @@ public class Drivetrain extends SubsystemBase {
     isRobotOriented = _isRobotOriented;
   }
 
-  private void configDrive (TalonFX motor) {
-    motor.configFactoryDefault();
-    motor.setInverted(TalonFXInvertType.CounterClockwise);
-    motor.setNeutralMode(NeutralMode.Brake);
-    motor.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
-    motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
-    motor.setSelectedSensorPosition(0);
-    motor.config_kP(0, DRIVE_kP);
-    motor.config_kF(0, DRIVE_kF);
-    motor.configVoltageCompSaturation(12);
-    motor.enableVoltageCompensation(true);
-  }
-
-  private void configAzimuth (TalonFX motor, CANCoder position) {
-    motor.configFactoryDefault();
-    motor.setInverted(TalonFXInvertType.CounterClockwise);
-    motor.setNeutralMode(NeutralMode.Brake);
-    motor.configRemoteFeedbackFilter(position, 0);
-    motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
-    motor.configStatorCurrentLimit(AZIMUTH_CURRENT_LIMIT);
-    motor.setSelectedSensorPosition(position.getAbsolutePosition());
-    motor.config_kP(0, AZIMUTH_kP);
-    motor.config_kD(0, AZIMUTH_kD);
-    motor.configNeutralDeadband(AZIMUTH_DEADBAND);
-  }
-
-  private void configPosition (CANCoder encoder, double offset) {
-    encoder.configFactoryDefault();
-    encoder.configMagnetOffset(offset);
-    encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-    encoder.setPositionToAbsolute();
-  }
-
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     positions[0] = new SwerveModulePosition(SCALER*(FL_Drive.getSelectedSensorPosition() / 2048) * Constants.DRIVETRAIN.DRIVE_GEAR_RATIO * Constants.DRIVETRAIN.WHEEL_PERIMETER, Rotation2d.fromDegrees(FL_Actual_Position));
@@ -547,5 +524,47 @@ public class Drivetrain extends SubsystemBase {
 
   public void noShwerve () {
     shwerveDrive.set(0);
+  }
+
+
+  private void configDrive (TalonFX motor) {
+    configDrive(motor, DRIVE_kP, DRIVE_kF);
+  }
+
+  private void configAzimuth (TalonFX motor, CANCoder position) {
+    configAzimuth(motor, position, AZIMUTH_kP, AZIMUTH_kD);
+  }
+
+  private void configDrive (TalonFX motor, double kP, double kF) {
+    motor.configFactoryDefault();
+    motor.setInverted(TalonFXInvertType.CounterClockwise);
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
+    motor.setSelectedSensorPosition(0);
+    motor.config_kP(0, kP);
+    motor.config_kF(0, kF);
+    motor.configVoltageCompSaturation(12);
+    motor.enableVoltageCompensation(true);
+  }
+
+  private void configAzimuth (TalonFX motor, CANCoder position, double kP, double kD) {
+    motor.configFactoryDefault();
+    motor.setInverted(TalonFXInvertType.CounterClockwise);
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configRemoteFeedbackFilter(position, 0);
+    motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
+    motor.configStatorCurrentLimit(AZIMUTH_CURRENT_LIMIT);
+    motor.setSelectedSensorPosition(position.getAbsolutePosition());
+    motor.config_kP(0, AZIMUTH_kP);
+    motor.config_kD(0, AZIMUTH_kD);
+    motor.configNeutralDeadband(AZIMUTH_DEADBAND);
+  }
+
+  private void configPosition (CANCoder encoder, double offset) {
+    encoder.configFactoryDefault();
+    encoder.configMagnetOffset(offset);
+    encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    encoder.setPositionToAbsolute();
   }
 }
