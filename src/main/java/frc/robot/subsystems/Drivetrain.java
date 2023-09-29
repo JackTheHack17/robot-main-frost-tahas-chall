@@ -156,12 +156,12 @@ public class Drivetrain extends SubsystemBase {
 
   private Pose2d _robotPose = new Pose2d();
 
-  private double _translationKp = 1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
+  private double _translationKp = 2.35;//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 2.5;//12.5;//15;//0.00005
+  private double _rotationKp = 1.83;// 2.5//12.5;//15;//0.00005
   private double _rotationKi = 0;
-  private double _rotationKd = 0;
+  private double _rotationKd = 0.087; // 0.1
 
   private Field2d field2d = new Field2d();
 
@@ -476,9 +476,9 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("placeHighCube", m_arm.moveToPositionTerminatingCommand(positions.ScoreHighCube).withTimeout(1.5));
       eventMap.put("tuck", m_arm.moveToPositionTerminatingCommand(positions.Idle).withTimeout(0.5));
       eventMap.put("release", m_claw.outTakeCommand().andThen(new WaitCommand(.25)));
-      eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(1.5));
+      eventMap.put("pickupLow", m_arm.moveToPositionCommand(positions.Floor).withTimeout(0.1));
       eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(0.85));
-      eventMap.put("intake", new WaitCommand(0.5).andThen(m_claw.intakeCommand().andThen(new WaitCommand(.25))));
+      eventMap.put("intake",(m_claw.intakeCommand().repeatedly().withTimeout(0.5)));
       eventMap.put("autobalance", new AutoBalance(this));
       eventMap.put("realign", moveToPositionCommand());
       eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); m_claw.spinSlow(); } ));

@@ -147,9 +147,10 @@ public class Arm extends SubsystemBase {
         m_stage3PID = new ProfiledPIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd, new TrapezoidProfile.Constraints(STAGE_3_MAX_SPEED, STAGE_3_MAX_ACCEL));
         m_stage3PID.enableContinuousInput(0, 360);
 
-        m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition()*360);
-        m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360);
-        m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360);
+        // m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition()*360);
+        // m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360);
+        // m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360);
+        resetProfiles();
 
         m_stage1PID.setTolerance(3.0);//0
         m_stage2PID.setTolerance(3.0);//3//2//1//0
@@ -319,6 +320,8 @@ public class Arm extends SubsystemBase {
     public Command moveToPositionCommand (positions position) {
         return new FunctionalCommand(
             () -> {
+                boolean dip = (position == positions.DipHighCone) || (position == positions.DipMidCone);
+                if(!dip) resetProfiles();
                 if (!m_copilotController.getRawButton(9)) {
                     m_copilotController.setLED(10, false);
                     m_copilotController.setLED(11, false);
@@ -396,6 +399,7 @@ public class Arm extends SubsystemBase {
     public Command moveToPositionTerminatingCommand( positions position ) {
         return new FunctionalCommand(
             () -> {
+                resetProfiles();
                 if (!m_copilotController.getRawButton(9)) {
                     m_copilotController.setLED(10, false);
                     m_copilotController.setLED(11, false);
@@ -581,11 +585,19 @@ public class Arm extends SubsystemBase {
             m_stage2.set(0);
             m_stage3.set(0);
             
-            m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET);
-            m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET);
-            m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET);
+            // m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET);
+            // m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET);
+            // m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET);
+            resetProfiles();
         }
     }
     
     @Override  public void simulationPeriodic() {}
+
+
+    public void resetProfiles() {
+        m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition() * 360 - STAGE_1_OFFSET);
+        m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition() * 360 - STAGE_2_OFFSET);
+        m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition() * 360 - STAGE_3_OFFSET);
+    }
 }
