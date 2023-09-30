@@ -1,9 +1,11 @@
 package frc.robot;
 import java.io.File;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -46,6 +48,13 @@ public class RobotContainer {
     Telemetry.setValue("general/autonomous/availableRoutines", pathsString);
     Telemetry.setValue("general/autonomous/selectedRoutine", "SET ME");
 
+    SmartDashboard.putNumber("alignTranslateP", 5);//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
+    SmartDashboard.putNumber("alignTranslateI", 0);
+    SmartDashboard.putNumber("alignTranslateD", 0);
+    SmartDashboard.putNumber("alignRotateP", 1.5);// 2.5//12.5;//15;//0.00005
+    SmartDashboard.putNumber("alignRotateI", 0);
+    SmartDashboard.putNumber("alignRotateD", 0); // 0.1
+
     configureButtonBindings();
 
     m_arm.setDefaultCommand(m_arm.defaultCommand());
@@ -60,7 +69,9 @@ public class RobotContainer {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().whileTrue(new AutoBalance(m_swerve));
+//    driverController.y().onTrue(new InstantCommand(() -> m_swerve.resetPose(new Pose2d())));
     driverController.x().onTrue(new InstantCommand(() -> m_swerve.PPmoveToPositionCommand().schedule()));
+    driverController.x().onFalse(new InstantCommand(() -> {}, m_swerve));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));

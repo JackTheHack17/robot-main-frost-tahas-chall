@@ -43,41 +43,41 @@ public class LEDs extends SubsystemBase {
         (int) Math.floor(Color.kPurple.blue*255)));
   }
 
-  public Command turnRed () { 
-    return new InstantCommand( () ->
-      setColor( 
-        (int) Math.floor(Color.kPurple.red*255), 
-        (int) Math.floor(Color.kPurple.green*255), 
-        (int) Math.floor(Color.kPurple.blue*255)));
-   }
+  // public Command turnRed () { 
+  //   return new InstantCommand( () ->
+  //     setColor( 
+  //       (int) Math.floor(Color.kPurple.red*255), 
+  //       (int) Math.floor(Color.kPurple.green*255), 
+  //       (int) Math.floor(Color.kPurple.blue*255)));
+  //  }
 
   public Command turnYellow () { 
     return new InstantCommand( () -> 
       setColor(
         (int) Math.floor(Color.kOrange.red*255), 
-        (int) Math.floor(0), 
-        (int) Math.floor(0)));
+        (int) Math.floor(Color.kOrange.green*255), 
+        (int) Math.floor(Color.kOrange.blue*255)));
   }
 
-  public Command flashRed () { 
-    return new InstantCommand( () -> {
-      m_r2 = m_r;
-      m_g2 = m_g;
-      m_b2 = m_b;
-      setColor(255, 0, 0);})
-        .andThen( new WaitCommand(0.5) )
-        .andThen( new InstantCommand( () -> setColor(m_r2, m_g2, m_b2)) ); 
-    }
+  // public Command flashRed () { 
+  //   return new InstantCommand( () -> {
+  //     m_r2 = m_r;
+  //     m_g2 = m_g;
+  //     m_b2 = m_b;
+  //     setColor(255, 0, 0);})
+  //       .andThen( new WaitCommand(0.5) )
+  //       .andThen( new InstantCommand( () -> setColor(m_r2, m_g2, m_b2)) ); 
+  //   }
 
-  public Command flashGreen () { 
-    return new InstantCommand( () -> {
-      m_r2 = m_r;
-      m_g2 = m_g;
-      m_b2 = m_b;
-      setColor(0, 255, 0);})
-        .andThen( new WaitCommand(0.5) )
-        .andThen( new InstantCommand(() -> setColor(m_r2, m_g2, m_b2)) );
-    }
+  // public Command flashGreen () { 
+  //   return new InstantCommand( () -> {
+  //     m_r2 = m_r;
+  //     m_g2 = m_g;
+  //     m_b2 = m_b;
+  //     setColor(0, 255, 0);})
+  //       .andThen( new WaitCommand(0.5) )
+  //       .andThen( new InstantCommand(() -> setColor(m_r2, m_g2, m_b2)) );
+  //   }
   
   @Override
   public void periodic() {

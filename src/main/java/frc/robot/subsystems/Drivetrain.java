@@ -54,6 +54,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -148,7 +149,11 @@ public class Drivetrain extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
   private static final double SCALER = 0.02;
 
-  private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(m_kinematics, new Rotation2d(0), getSwerveModulePositions(), new Pose2d());
+  private SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
+    m_kinematics, 
+    new Rotation2d(0), 
+    getSwerveModulePositions(), 
+    new Pose2d());
 
   private List<Pose2d> _coneWaypoints = new ArrayList<Pose2d>();
   private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
@@ -162,12 +167,12 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKi = 0;
   private double _rotationKd = 0.087; // 0.1
 
-  private double _alignTranslationKp = 2.35;//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
-  private double _alignTranslationKi = 0;
-  private double _alignTranslationKd = 0;
-  private double _alignRotationKp = 1.83;// 2.5//12.5;//15;//0.00005
-  private double _alignRotationKi = 0;
-  private double _alignRotationKd = 0.087; // 0.1
+  private double _alignTranslationKp = SmartDashboard.getNumber("alignTranslateP", 2.35);//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
+  private double _alignTranslationKi = SmartDashboard.getNumber("alignTranslateI", 0);
+  private double _alignTranslationKd = SmartDashboard.getNumber("alignTranslateD", 0);
+  private double _alignRotationKp = SmartDashboard.getNumber("alignRotateP", 1.83);// 2.5//12.5;//15;//0.00005
+  private double _alignRotationKi = SmartDashboard.getNumber("alignRotateI", 0);
+  private double _alignRotationKd = SmartDashboard.getNumber("alignRotateD", 0.087); // 0.1
 
   private Field2d field2d = new Field2d();
 
@@ -220,15 +225,15 @@ public class Drivetrain extends SubsystemBase {
       // red alliance waypoints
       _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.71, 5.15, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.71, 3.94, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.71, 3.38, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.71, 2.28, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.71, 1.70, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.71, 0.57, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.71, 1.13, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.71, 2.95, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.71, 4.52, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.71, 5.15, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(14.71, 3.94, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(14.71, 3.38, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(14.71, 2.28, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(14.71, 1.70, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(14.71, 0.57, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(14.71, 1.13, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(14.71, 2.95, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(14.71, 4.52, new Rotation2d(Math.PI)));
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
       // _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
@@ -246,17 +251,17 @@ public class Drivetrain extends SubsystemBase {
       // _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
-      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.86, 5.05, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.86, 3.84, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.86, 3.28, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.86, 2.18, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.86, 1.60, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.86, 0.47, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.86, 1.03, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.86, 2.75, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.86, 4.42, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 5.05, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.86, 3.84, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.86, 3.28, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.86, 2.18, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.86, 1.60, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.86, 0.47, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.86, 1.03, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.86, 2.75, new Rotation2d(180)));
+      _cubeWaypoints.add(new Pose2d(1.86, 4.42, new Rotation2d(180)));
       _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
     }
@@ -330,10 +335,13 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
-    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(m_limelight.getPose(), Timer.getFPGATimestamp() - m_limelight.getLatency());
+    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(
+      m_limelight.getPose(), 
+      Timer.getFPGATimestamp() - m_limelight.getLatency(),
+      VecBuilder.fill(0.9, 0.9, 5000));
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
-    Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", -_robotPose.getX());
+    Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", _robotPose.getX());
     Telemetry.setValue("drivetrain/odometry/field/DSrightPosition", _robotPose.getY());
 
     field2d.setRobotPose(_robotPose);
@@ -357,10 +365,6 @@ public class Drivetrain extends SubsystemBase {
     modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
     modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
 
-    // FL_Target = inputModulus(modules[0].angle.getDegrees(), 0, 360);
-    // FR_Target = inputModulus(modules[1].angle.getDegrees(), 0, 360);
-    // BL_Target = inputModulus(modules[2].angle.getDegrees(), 0, 360);
-    // BR_Target = inputModulus(modules[3].angle.getDegrees(), 0, 360);
     FL_Speed = modules[0].speedMetersPerSecond;
     FR_Speed = modules[1].speedMetersPerSecond;
     BL_Speed = modules[2].speedMetersPerSecond;
@@ -417,14 +421,15 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command PPpathToCommand (Pose2d target) {
+    PathConstraints pathConstraints = new PathConstraints(2, 1);
+
     PathPlannerTrajectory _alignToTarget = PathPlanner.generatePath(
-      new PathConstraints(1, 0.5),
+     pathConstraints,
       new PathPoint(new Translation2d(
         m_odometry.getEstimatedPosition().getX(), 
         m_odometry.getEstimatedPosition().getY()), 
-        new Rotation2d(Math.toRadians(m_gyro.getYaw())),
-        // You can get rid of this if you want
-        2),
+        new Rotation2d(Math.toRadians(m_gyro.getYaw()))
+        ),
 
       new PathPoint(
         new Translation2d(
@@ -435,13 +440,12 @@ public class Drivetrain extends SubsystemBase {
     );
 
     PathPlannerTrajectory _toTarget = PathPlanner.generatePath(
-      new PathConstraints(1, 0.5),
+      pathConstraints,
       new PathPoint(
         new Translation2d(
           m_odometry.getEstimatedPosition().getX(), 
           target.getY()), 
-          target.getRotation(), 
-          2),
+          target.getRotation()),
 // In Order to fuse everything into one path just take this path point add it to the align to target path point
 // and then only use the align command not a sequential command, using 2 paths for testing purposes
       new PathPoint(
@@ -482,7 +486,17 @@ public class Drivetrain extends SubsystemBase {
       (Subsystem) this
     );
 
-    return new SequentialCommandGroup(align, toGoal);
+    SwerveModuleState[] startState = new SwerveModuleState[] {
+      new SwerveModuleState(0, Rotation2d.fromDegrees(90)),
+      new SwerveModuleState(0, Rotation2d.fromDegrees(90)),
+      new SwerveModuleState(0, Rotation2d.fromDegrees(90)),
+      new SwerveModuleState(0, Rotation2d.fromDegrees(90))};
+
+    Command initWheelPositions = 
+      new InstantCommand(() -> driveFromModuleStates(startState), this)
+      .repeatedly().withTimeout(0.75);
+
+    return new SequentialCommandGroup(initWheelPositions, align, toGoal);
   }
 
   public double getGyroAngle(){
@@ -589,6 +603,13 @@ public class Drivetrain extends SubsystemBase {
         m_arm.moveToPositionTerminatingCommand(positions.Idle)
       );
     }
+  }
+
+  public void resetPose(Pose2d pose) {
+    m_odometry.resetPosition(
+      new Rotation2d( Math.toRadians( m_gyro.getYaw() ) ), 
+      getSwerveModulePositions(), 
+      pose);
   }
 
   public void shwerve ( double LX, double LY) {

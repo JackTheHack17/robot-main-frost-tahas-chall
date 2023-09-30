@@ -1,6 +1,9 @@
 {
   "NetworkTables": {
     "transitory": {
+      "limelight": {
+        "open": true
+      },
       "telemetry": {
         "Arm": {
           "open": true
