@@ -46,20 +46,21 @@ public class Limelight extends SubsystemBase {
 
   public Pose2d getPose() {
     posevalues = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
-
-    Translation2d translate = new Translation2d(posevalues[0] -0.31, posevalues[1]);
+    Translation2d translate = new Translation2d(posevalues[0], posevalues[1]);
     Rotation2d rotation = new Rotation2d(Math.toRadians(posevalues[3]));
-    
     return new Pose2d(translate, rotation);
   }
 
+  public Pose2d getTarget() {
+    posevalues = limelight.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
+    Translation2d translate = new Translation2d(posevalues[0], posevalues[1]);
+    Rotation2d rotation = new Rotation2d(Math.toRadians(posevalues[3]));
+    return new Pose2d(translate, rotation);
+  }
+
+  /** returns latency in seconds (tl + cl) */
   public double getLatency () {
-    return 
-      (limelight.getEntry("tl").getDouble(0) 
-      + 
-      limelight.getEntry("cl").getDouble(0))
-      / 
-      1000.0;
+    return (limelight.getEntry("tl").getDouble(0) + limelight.getEntry("cl").getDouble(0))/1000.0;
   }
 
   @Override
@@ -74,4 +75,3 @@ public class Limelight extends SubsystemBase {
     frc.lib.Telemetry.setValue("Limelight/Odometry/Rotation", getPose().getRotation().getDegrees());
   }
 }
-

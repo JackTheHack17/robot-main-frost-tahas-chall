@@ -1,6 +1,7 @@
 package frc.robot;
 import java.io.File;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,7 +34,7 @@ public class RobotContainer {
   public LEDs m_LEDs = new LEDs();
   public PinchersofPower m_claw = new PinchersofPower(this);
   public Arm m_arm = new Arm(m_claw, copilotController);
-  public Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw, m_limelight, m_LEDs);
+  public Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw, m_limelight);
 
   public RobotContainer() {
     File[] paths = new File(Filesystem.getDeployDirectory(), "pathplanner").listFiles();
@@ -118,5 +119,13 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return m_swerve.getAutonomousCommand().andThen(new InstantCommand( () -> m_swerve.stopModules()));
+  }
+
+  public static DriverStation.Alliance getDriverAlliance() {
+    // What to do for competition
+    //return DriverStation.getAlliance();
+
+    // What to do for testing
+    return DriverStation.Alliance.Red;
   }
 }

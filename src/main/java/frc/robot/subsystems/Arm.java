@@ -33,6 +33,7 @@ import static frc.robot.Constants.ARM.X_SPEED;
 import static frc.robot.Constants.ARM.Y_SPEED;
 import static frc.robot.Constants.ARM.floorAltPosition;
 import static frc.robot.Constants.ARM.floorPosition;
+import static frc.robot.Constants.ARM.autonFloorPosition;
 import static frc.robot.Constants.ARM.idlePosition;
 import static frc.robot.Constants.ARM.scoreHighCubePosition;
 import static frc.robot.Constants.ARM.scoreHighConePosition;
@@ -105,13 +106,13 @@ public class Arm extends SubsystemBase {
     private double stage3 = 0;
 
     public Arm(PinchersofPower m_claw, ButtonBoard copilotController) {
-        // populate position map
         positionMap.put(positions.ScoreHighCone, scoreHighConePosition);
         positionMap.put(positions.ScoreMidCone, scoreMidConePosition);
         positionMap.put(positions.ScoreHighCube, scoreHighCubePosition);
         positionMap.put(positions.ScoreMidCube, scoreMidCubePosition);
         positionMap.put(positions.ScoreLow, scoreLowPosition);
         positionMap.put(positions.Floor, floorPosition);
+        positionMap.put(positions.AutonFloor, autonFloorPosition);
         positionMap.put(positions.FloorAlt, floorAltPosition);
         positionMap.put(positions.Substation, substationPosition);
         positionMap.put(positions.Idle, idlePosition);
@@ -147,9 +148,6 @@ public class Arm extends SubsystemBase {
         m_stage3PID = new ProfiledPIDController(STAGE_3_Kp, STAGE_3_Ki, STAGE_3_Kd, new TrapezoidProfile.Constraints(STAGE_3_MAX_SPEED, STAGE_3_MAX_ACCEL));
         m_stage3PID.enableContinuousInput(0, 360);
 
-        // m_stage1PID.reset(m_stage1Encoder.getAbsolutePosition()*360);
-        // m_stage2PID.reset(m_stage2Encoder.getAbsolutePosition()*360);
-        // m_stage3PID.reset(m_stage3Encoder.getAbsolutePosition()*360);
         resetProfiles();
 
         m_stage1PID.setTolerance(3.0);//0
