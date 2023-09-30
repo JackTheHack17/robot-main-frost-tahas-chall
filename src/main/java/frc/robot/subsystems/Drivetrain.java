@@ -403,6 +403,35 @@ public class Drivetrain extends SubsystemBase {
     BR_Azimuth.set(ControlMode.PercentOutput, 0);
   }
 
+  public void lockModule(SwerveModuleState[] states) {
+    SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
+
+    modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
+    modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
+    modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
+    modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
+
+    FL_Speed = modules[0].speedMetersPerSecond;
+    FR_Speed = modules[1].speedMetersPerSecond;
+    BL_Speed = modules[2].speedMetersPerSecond;
+    BR_Speed = modules[3].speedMetersPerSecond;
+
+    FL_Target = modules[0].angle.getDegrees();
+    FR_Target = modules[1].angle.getDegrees();
+    BL_Target = modules[2].angle.getDegrees();
+    BR_Target = modules[3].angle.getDegrees();
+
+    FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
+    FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
+    BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target) + 0.06 * Math.signum(BL_PID.getPositionError()));
+    BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target) + 0.05 * Math.signum(BR_PID.getPositionError()));
+
+    FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+  }
+
   public Command PPmoveToPositionCommand () {
     Pose2d actualPose = _robotPose;
 
