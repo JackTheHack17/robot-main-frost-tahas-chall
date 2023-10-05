@@ -19,7 +19,6 @@ public class Pigeon extends SubsystemBase {
   private double roll = 0;
   private double[] ypr = new double[3];
 
-    /** Creates a new ExampleSubsystem. */
   public Pigeon () {
     pigeon = new Pigeon2(PIGEON_ID, "drivetrain");
   }
@@ -70,7 +69,5 @@ public class Pigeon extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
+  public void simulationPeriodic() {}
 }

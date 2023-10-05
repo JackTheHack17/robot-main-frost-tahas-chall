@@ -26,9 +26,9 @@ public class DriveCommand extends CommandBase {
   private CommandGenericHID driverController;
   private ButtonBoard copilotController;
 
-  private SlewRateLimiter LXSlewRateLimiter = new SlewRateLimiter(2, -2, 0);
-  private SlewRateLimiter LYSlewRateLimiter = new SlewRateLimiter(2, -2, 0);
-  private SlewRateLimiter RXSlewRateLimiter = new SlewRateLimiter(2, -2, 0);
+  private SlewRateLimiter LXSlewRateLimiter = new SlewRateLimiter(1.5, -1.5, 0);
+  private SlewRateLimiter LYSlewRateLimiter = new SlewRateLimiter(1.5, -1.5, 0);
+  private SlewRateLimiter RXSlewRateLimiter = new SlewRateLimiter(1.5, -1.5, 0);
 
   /**
    * Creates a new ExampleCommand.

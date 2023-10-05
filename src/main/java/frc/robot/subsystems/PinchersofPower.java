@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -33,17 +34,17 @@ public class PinchersofPower extends SubsystemBase  {
   private double intakeSpeed = 0;
   private DigitalInput limitSwitch = new DigitalInput(Constants.DIO.GRIP_LIMIT_SWITCH);
 
+
   public PinchersofPower(RobotContainer m_container) {
     this.m_container = m_container;
     comp = new Compressor(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH);
     pusher = new DoubleSolenoid(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH, Constants.POP.FORWARD_PNEUMATIC_CHANNEL, Constants.POP.BACKWARD_PNEUMATIC_CHANNEL);
+
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
-    //spinner2.follow(spinner, true);
+
     colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = true;
-
-    //comp.disable();
 
     spinner.restoreFactoryDefaults();
     spinner2.restoreFactoryDefaults();
@@ -67,22 +68,22 @@ public class PinchersofPower extends SubsystemBase  {
 
   }
 
-  /** Close */
+  public boolean getPiece(){
+    if(limitSwitch.get()) return true;
+    return false;
+  }
+
   public void closeGrip() {
     pusher.set(Value.kForward);
   }
 
-  /** Open */
   public void openGrip() {
     pusher.set(Value.kReverse);
   }
 
   public void toggle () {
-    if (pusher.get() == Value.kReverse) {
-      pusher.set(Value.kForward);
-    } else {
-      pusher.set(Value.kReverse);
-    }
+    if (pusher.get() == Value.kReverse) pusher.set(Value.kForward);
+    else pusher.set(Value.kReverse);
   }
 
   public void spinSlow() {
@@ -110,31 +111,22 @@ public class PinchersofPower extends SubsystemBase  {
   public GamePieces getColorSensorGamePiece () {
     Color actualColor = colorSensor.getColor();
     if ( colorSensor.getProximity() > 100 ) {
-      if (actualColor.green < actualColor.blue) { // cube
-        return GamePieces.Cube;
-      } else if (actualColor.green < actualColor.blue) { // cone
-        return GamePieces.Cone;
-      } else {
-        return GamePieces.None;
-      }
-    } else {
-      return GamePieces.None;
-    }
+      if (actualColor.green < actualColor.blue) return GamePieces.Cube;
+
+      else if (actualColor.green < actualColor.blue) return GamePieces.Cone;
+
+      else return GamePieces.None;
+
+    } else return GamePieces.None;
   }
 
   public void intake() {
-    if(!m_cone) {
-      openGrip();
-    } else {
-      closeGrip();
-    }
+    if(!m_cone) openGrip();
+    else closeGrip();
   }
-  public void setCone(boolean check){
-    m_cone = check;
-  }
-  public boolean wantCone () {
-    return m_cone;
-  }
+  public void setCone(boolean check) { m_cone = check; }
+
+  public boolean wantCone () { return m_cone; }
 
   public void setMode(GamePieces mode) {
     m_cone = (mode == GamePieces.Cone);
@@ -153,23 +145,17 @@ public class PinchersofPower extends SubsystemBase  {
 
   public Command outTakeCommand() {
     return new InstantCommand( () -> {
-      if (m_container.getArm().target == positions.Substation && m_cone) {
-        closeGrip();
-      } else if ( m_cone ) {
-        if ( m_container.getArm().target == positions.ScoreLow) {
-          spinOut();  
-        }
+      if (m_container.getArm().target == positions.Substation && m_cone) { closeGrip();} 
+      else if ( m_cone ) {
+        if ( m_container.getArm().target == positions.ScoreLow) spinOut();  
         spinOff();
         openGrip();
-      } else {
-        spinOut();
-      }
+      } 
+      else spinOut();
     });
   }
 
-  public Command spinOffCommand() {
-    return new InstantCommand(() -> spinOff(), this);
-  }
+  public Command spinOffCommand() { return new InstantCommand(() -> spinOff(), this); }
 
   @Override
   public void periodic() {
@@ -186,16 +172,18 @@ public class PinchersofPower extends SubsystemBase  {
       spinner2.set(0);
     }
 
+    intakeMotorTelemetry("leftMotor", spinner);
+    intakeMotorTelemetry("rightMotor", spinner2);
+    
     Telemetry.setValue("Pincher/limitSwitch", !limitSwitch.get());
-    Telemetry.setValue("Pincher/leftMotor/setpoint", spinner.get());
-    Telemetry.setValue("Pincher/leftMotor/temperature", spinner.getMotorTemperature());
-    Telemetry.setValue("Pincher/leftMotor/outputVoltage", spinner.getAppliedOutput());
-    Telemetry.setValue("Pincher/leftMotor/statorcurrent", spinner.getOutputCurrent());
-    Telemetry.setValue("Pincher/rightMotor/setpoint", spinner2.get());
-    Telemetry.setValue("Pincher/rightMotor/temperature", spinner2.getMotorTemperature());
-    Telemetry.setValue("Pincher/rightMotor/outputVoltage", spinner2.getAppliedOutput());
-    Telemetry.setValue("Pincher/rightMotor/statorCurrent", spinner2.getOutputCurrent());
     Telemetry.setValue("Pincher/piston", pusher.get() == DoubleSolenoid.Value.kForward ? "Forward" : "Reverse");
     Telemetry.setValue("Pincher/compressor/pressure", comp.getPressure());
+  }
+
+  public void intakeMotorTelemetry(String key, CANSparkMax motor) {
+    Telemetry.setValue("Pincher/"+key+"/setpoint", motor.get());
+    Telemetry.setValue("Pincher/"+key+"/temperature", motor.getMotorTemperature());
+    Telemetry.setValue("Pincher/"+key+"/outputVoltage", motor.getAppliedOutput());
+    Telemetry.setValue("Pincher/"+key+"/statorcurrent", motor.getOutputCurrent());
   }
 }
