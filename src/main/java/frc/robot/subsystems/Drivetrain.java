@@ -236,32 +236,19 @@ public class Drivetrain extends SubsystemBase {
       _cubeWaypoints.add(new Pose2d(14.71, 4.52, new Rotation2d(Math.PI)));
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _coneWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(12.8, 1.1, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
-      // _cubeWaypoints.add(new Pose2d(0.76, 1.1, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
       _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.86, 5.05, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.86, 3.84, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.86, 3.28, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.86, 2.18, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.86, 1.60, new Rotation2d(180)));
-      _coneWaypoints.add(new Pose2d(1.86, 0.47, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.86, 1.03, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.86, 2.75, new Rotation2d(180)));
-      _cubeWaypoints.add(new Pose2d(1.86, 4.42, new Rotation2d(180)));
+      _coneWaypoints.add(new Pose2d(1.86, 5.05, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 3.84, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 3.28, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 2.18, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 1.60, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 0.47, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(1.86, 1.03, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(1.86, 2.75, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(1.86, 4.42, new Rotation2d(Math.PI)));
       _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
     }
@@ -352,6 +339,7 @@ public class Drivetrain extends SubsystemBase {
     m_chassisSpeeds = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED);
     if ( !isRobotOriented ) m_chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED, m_odometry.getEstimatedPosition().getRotation());
     
+    m_chassisSpeeds = discretize(m_chassisSpeeds);
     modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
 
     driveFromModuleStates(modules);
@@ -359,6 +347,9 @@ public class Drivetrain extends SubsystemBase {
 
   public void driveFromModuleStates ( SwerveModuleState[] modules ) {
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
+    m_chassisSpeeds = discretize(m_kinematics.toChassisSpeeds(modules));
+    
+    modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
 
     modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
     modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
@@ -694,5 +685,17 @@ public class Drivetrain extends SubsystemBase {
     encoder.configMagnetOffset(offset);
     encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     encoder.setPositionToAbsolute();
+  }
+
+  public ChassisSpeeds discretize(ChassisSpeeds speeds) {
+    double dt = 0.02;
+    var desiredDeltaPose = new Pose2d(
+      speeds.vxMetersPerSecond * dt, 
+      speeds.vyMetersPerSecond * dt, 
+      new Rotation2d(speeds.omegaRadiansPerSecond * dt * 4)
+    );
+    var twist = new Pose2d().log(desiredDeltaPose);
+
+    return new ChassisSpeeds((twist.dx / dt), (twist.dy / dt), (speeds.omegaRadiansPerSecond));
   }
 }
