@@ -462,14 +462,9 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/PathPlanner/Y", actualPose.getY());
     Telemetry.setValue("drivetrain/PathPlanner/Angle", actualPose.getRotation().getDegrees());    
 
-     Pose2d closest = actualPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
-    //Pose2d closest = new Pose2d(new Translation2d(12.8, 1.07), new Rotation2d());
+    Pose2d closest = actualPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+
     if (closest == null) return new InstantCommand();
-    // if (closest.relativeTo(m_odometry.getEstimatedPosition()).getTranslation().getNorm() > MAX_WAYPOINT_DISTANCE) {
-    //   m_LEDs.flashRed();
-    //   m_driverController.getHID().setRumble(RumbleType.kLeftRumble, 1);
-    //   return new WaitCommand(0.5).andThen(() -> m_driverController.getHID().setRumble(RumbleType.kBothRumble, 0));
-    // }
 
     Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointX", closest.getX());
     Telemetry.setValue("drivetrain/PathPlanner/ChoosenWaypointY", closest.getY());
@@ -535,23 +530,23 @@ public class Drivetrain extends SubsystemBase {
 
     Command align = new PPSwerveControllerCommand(
       _alignToTarget,
-      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
-      this.m_kinematics, // SwerveDriveKinematics
-      tPID, // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      tPID, // PID constants to correct for rotation error (used to create the rotation controller)
-      rPID, // PID constants to correct for rotation error (used to create the rotation controller)
-      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+      () -> m_odometry.getEstimatedPosition(),
+      this.m_kinematics,
+      tPID,
+      tPID,
+      rPID,
+      this::driveFromModuleStates,
       (Subsystem) this
     );
 
     Command toGoal = new PPSwerveControllerCommand(
       _toTarget,
-      () -> m_odometry.getEstimatedPosition(), // Pose2d supplier
-      this.m_kinematics, // SwerveDriveKinematics
-      tPID, // PID constants to correct for translation error (used to create the X and Y PID controllers)
-      tPID, // PID constants to correct for rotation error (used to create the rotation controller)
-      rPID, // PID constants to correct for rotation error (used to create the rotation controller)
-      this::driveFromModuleStates, // Module states consumer used to output to the drive subsystem
+      () -> m_odometry.getEstimatedPosition(),
+      this.m_kinematics,
+      tPID, 
+      tPID, 
+      rPID, 
+      this::driveFromModuleStates,
       (Subsystem) this
     );
 
