@@ -160,10 +160,10 @@ public class Drivetrain extends SubsystemBase {
 
   private Pose2d _robotPose = new Pose2d();
 
-  private double _translationKp = 2.35;//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
+  private double _translationKp = 2.40;// 2.35//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 1.83;// 2.5//12.5;//15;//0.00005
+  private double _rotationKp = 1.78;//1.83;// 2.5//12.5;//15;//0.00005
   private double _rotationKi = 0;
   private double _rotationKd = 0.087; // 0.1
 
@@ -322,10 +322,10 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
-    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(
-      m_limelight.getPose(), 
-      Timer.getFPGATimestamp() - m_limelight.getLatency(),
-      VecBuilder.fill(0.9, 0.9, 5000));
+    // if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(
+    //   m_limelight.getPose(), 
+    //   Timer.getFPGATimestamp() - m_limelight.getLatency(),
+    //   VecBuilder.fill(0.9, 0.9, 5000));
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", _robotPose.getX());
@@ -692,7 +692,7 @@ public class Drivetrain extends SubsystemBase {
     var desiredDeltaPose = new Pose2d(
       speeds.vxMetersPerSecond * dt, 
       speeds.vyMetersPerSecond * dt, 
-      new Rotation2d(speeds.omegaRadiansPerSecond * dt * 4)
+      new Rotation2d(speeds.omegaRadiansPerSecond * dt * 3)
     );
     var twist = new Pose2d().log(desiredDeltaPose);
 

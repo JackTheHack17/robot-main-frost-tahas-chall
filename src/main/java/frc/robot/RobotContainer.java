@@ -70,8 +70,8 @@ public class RobotContainer {
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().whileTrue(new AutoBalance(m_swerve));
 //    driverController.y().onTrue(new InstantCommand(() -> m_swerve.resetPose(new Pose2d())));
-    driverController.x().onTrue(new InstantCommand(() -> m_swerve.PPmoveToPositionCommand().schedule()));
-    driverController.x().onFalse(new InstantCommand(() -> {}, m_swerve));
+    // driverController.x().onTrue(new InstantCommand(() -> m_swerve.PPmoveToPositionCommand().schedule()));
+    // driverController.x().onFalse(new InstantCommand(() -> {}, m_swerve));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));
