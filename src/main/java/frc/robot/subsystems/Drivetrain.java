@@ -163,9 +163,9 @@ public class Drivetrain extends SubsystemBase {
   private double _translationKp = 2.40;// 2.35//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 1.78;//1.83;// 2.5//12.5;//15;//0.00005
+  private double _rotationKp = 1.73;//1.83;// 2.5//12.5;//15;//0.00005
   private double _rotationKi = 0;
-  private double _rotationKd = 0.087; // 0.1
+  private double _rotationKd = 0.085; // 0.1
 
   private double _alignTranslationKp = SmartDashboard.getNumber("alignTranslateP", 2.35);//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _alignTranslationKi = SmartDashboard.getNumber("alignTranslateI", 0);
