@@ -138,7 +138,7 @@ public final class Constants {
         public static final double STAGE_2_OFFSET = 270;
         public static final double STAGE_3_OFFSET = 210;
         public static ArmPosition scoreHighConePosition = new ArmPosition(207, changeScope(130), 145);
-        public static ArmPosition dipHighConePosition = new ArmPosition(198, changeScope(103), 136);
+        public static ArmPosition dipHighConePosition = new ArmPosition(198, changeScope(108), 136);
         public static ArmPosition scoreHighCubePosition = new ArmPosition(185, changeScope(122), 127);
         public static ArmPosition scoreMidConePosition = new ArmPosition(133.5, changeScope(160), 160);
         public static ArmPosition dipMidConePosition = new ArmPosition(133.5, changeScope(158), 140);
@@ -194,7 +194,7 @@ public final class Constants {
         public static final double F = 0;
         public static final double R = 0;
         public static final double SPEEDOUT = 0.8;
-        public static final double SPEEDIN = 0.5;
+        public static final double SPEEDIN = 0.50;
 
         public static final int FORWARD_PNEUMATIC_CHANNEL = 14;
         public static final int BACKWARD_PNEUMATIC_CHANNEL = 15;

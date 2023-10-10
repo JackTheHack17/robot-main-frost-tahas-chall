@@ -87,7 +87,7 @@ public class PinchersofPower extends SubsystemBase  {
   }
 
   public void spinSlow() {
-    intakeSpeed = POP.SPEEDIN/4;
+    intakeSpeed = 0.15;//0.2; 
   }
 
   public void spinIn() {

@@ -80,15 +80,15 @@
     {
       "anchorPoint": {
         "x": 6.46,
-        "y": 4.58
+        "y": 4.42
       },
       "prevControl": {
         "x": 6.264648611494086,
-        "y": 4.576344737543764
+        "y": 4.416344737543763
       },
       "nextControl": {
         "x": 6.655351388505914,
-        "y": 4.583655262456237
+        "y": 4.423655262456236
       },
       "holonomicAngle": 0.0,
       "isReversal": false,
@@ -170,7 +170,7 @@
       ]
     },
     {
-      "position": 1.37,
+      "position": 1.32,
       "names": [
         "cubeMode",
         "pickupLow"
