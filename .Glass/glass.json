@@ -5,13 +5,16 @@
         "open": true
       },
       "telemetry": {
-        "Arm": {
-          "open": true
-        },
         "LEDS": {
           "Blinkin": {
             "open": true
           }
+        },
+        "Limelight": {
+          "Odometry": {
+            "open": true
+          },
+          "open": true
         },
         "POP": {
           "open": true,
@@ -72,8 +75,7 @@
               "open": true
             },
             "open": true
-          },
-          "open": true
+          }
         },
         "general": {
           "autonomous": {
@@ -86,6 +88,13 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Field": {
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
   "NetworkTables Settings": {
@@ -397,7 +406,7 @@
     "Plot <7>": {
       "plots": [
         {
-          "height": 0,
+          "height": 225,
           "series": [
             {
               "color": [

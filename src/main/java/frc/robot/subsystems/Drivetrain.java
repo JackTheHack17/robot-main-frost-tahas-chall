@@ -238,19 +238,19 @@ public class Drivetrain extends SubsystemBase {
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
       // blue alliance waypoints
-      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.86, 5.05, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.86, 3.84, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.86, 3.28, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.86, 2.18, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.86, 1.60, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.86, 0.47, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(1.86, 1.03, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(1.86, 2.75, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(1.86, 4.42, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 5.05 + 0.02, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 3.84 + 0.02, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 3.28 + 0.02, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 2.18 + 0.02, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 1.60 + 0.02, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(1.86, 0.47 + 0.02, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(1.86, 1.03 + 0.02, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(1.86, 2.75 + 0.02, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(1.86, 4.42 + 0.02, new Rotation2d(Math.PI)));
+      _cubeWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
     }
 
     PathPlannerServer.startServer(6969);
@@ -322,10 +322,10 @@ public class Drivetrain extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
 
-    // if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(
-    //   m_limelight.getPose(), 
-    //   Timer.getFPGATimestamp() - m_limelight.getLatency(),
-    //   VecBuilder.fill(0.9, 0.9, 5000));
+    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(
+      m_limelight.getPose(), 
+      Timer.getFPGATimestamp() - m_limelight.getLatency(),
+      VecBuilder.fill(0.9, 0.9, 10000000));
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
     Telemetry.setValue("drivetrain/odometry/field/DSawayPosition", _robotPose.getX());
@@ -382,6 +382,38 @@ public class Drivetrain extends SubsystemBase {
     BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
   }
 
+  public void lockModules ( SwerveModuleState[] modules ) {
+    SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
+    m_chassisSpeeds = discretize(m_kinematics.toChassisSpeeds(modules));
+    
+    modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+
+    modules[0] = SwerveModuleState.optimize(modules[0], new Rotation2d(Math.toRadians(FL_Position.getAbsolutePosition())));
+    modules[1] = SwerveModuleState.optimize(modules[1], new Rotation2d(Math.toRadians(FR_Position.getAbsolutePosition())));
+    modules[2] = SwerveModuleState.optimize(modules[2], new Rotation2d(Math.toRadians(BL_Position.getAbsolutePosition())));
+    modules[3] = SwerveModuleState.optimize(modules[3], new Rotation2d(Math.toRadians(BR_Position.getAbsolutePosition())));
+
+    FL_Speed = modules[0].speedMetersPerSecond;
+    FR_Speed = modules[1].speedMetersPerSecond;
+    BL_Speed = modules[2].speedMetersPerSecond;
+    BR_Speed = modules[3].speedMetersPerSecond;
+
+    FL_Target = modules[0].angle.getDegrees();
+    FR_Target = modules[1].angle.getDegrees();
+    BL_Target = modules[2].angle.getDegrees();
+    BR_Target = modules[3].angle.getDegrees();
+
+    FL_Azimuth.set(ControlMode.PercentOutput, FL_PID.calculate(FL_Position.getAbsolutePosition(), FL_Target) + AZIMUTH_kF * Math.signum(FL_PID.getPositionError()));
+    FR_Azimuth.set(ControlMode.PercentOutput, FR_PID.calculate(FR_Position.getAbsolutePosition(), FR_Target) + AZIMUTH_kF * Math.signum(FR_PID.getPositionError()));
+    BL_Azimuth.set(ControlMode.PercentOutput, BL_PID.calculate(BL_Position.getAbsolutePosition(), BL_Target) + 0.06 * Math.signum(BL_PID.getPositionError()));
+    BR_Azimuth.set(ControlMode.PercentOutput, BR_PID.calculate(BR_Position.getAbsolutePosition(), BR_Target) + 0.05 * Math.signum(BR_PID.getPositionError()));
+
+    FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+    BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER)*2048)/10);
+  }
+
   public void stopModules () {  
     FL_Drive.set(ControlMode.PercentOutput, 0);
     FR_Drive.set(ControlMode.PercentOutput, 0);
@@ -424,6 +456,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command PPmoveToPositionCommand () {
+    resetPose(m_limelight.getPose());
     Pose2d actualPose = _robotPose;
 
     Telemetry.setValue("drivetrain/PathPlanner/X", actualPose.getX());
@@ -441,7 +474,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command PPpathToCommand (Pose2d target) {
-    PathConstraints pathConstraints = new PathConstraints(2, 1);
+    PathConstraints pathConstraints = new PathConstraints(3, 1);
 
     PathPlannerTrajectory _alignToTarget = PathPlanner.generatePath(
      pathConstraints,
@@ -482,7 +515,7 @@ public class Drivetrain extends SubsystemBase {
 
     PIDController rPID = new PIDController(_alignRotationKp, _alignRotationKi, _alignRotationKd);
     rPID.setTolerance(0);
-    rPID.setIntegratorRange(-0, 0);
+    rPID.setIntegratorRange(-0.1, 0.1);
 
     Command align = new PPSwerveControllerCommand(
       _alignToTarget,
@@ -513,7 +546,7 @@ public class Drivetrain extends SubsystemBase {
       new SwerveModuleState(0, Rotation2d.fromDegrees(90))};
 
     Command initWheelPositions = 
-      new InstantCommand(() -> driveFromModuleStates(startState), this)
+      new InstantCommand(() -> lockModules(startState), this)
       .repeatedly().withTimeout(0.75);
 
     return new SequentialCommandGroup(initWheelPositions, align, toGoal);

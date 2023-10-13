@@ -2,9 +2,11 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 
 public class Limelight extends SubsystemBase {
   private NetworkTable limelight;
@@ -47,7 +49,9 @@ public class Limelight extends SubsystemBase {
   public Pose2d getPose() {
     posevalues = limelight.getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
     Translation2d translate = new Translation2d(posevalues[0], posevalues[1]);
-    Rotation2d rotation = new Rotation2d(Math.toRadians(posevalues[3]));
+    Rotation2d rotation;
+    rotation = Rotation2d.fromDegrees(posevalues[3] - 5);
+    // else rotation = Rotation2d.fromDegrees(posevalues[3] + 180);
     return new Pose2d(translate, rotation);
   }
 
