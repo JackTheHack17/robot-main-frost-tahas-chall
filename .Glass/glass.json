@@ -1,10 +1,27 @@
 {
   "NetworkTables": {
     "transitory": {
+      "SmartDashboard": {
+        "PPSwerveControllerCommand": {
+          "open": true
+        },
+        "open": true
+      },
       "limelight": {
         "open": true
       },
       "telemetry": {
+        "Arm": {
+          "stage1": {
+            "open": true
+          },
+          "stage2": {
+            "open": true
+          },
+          "stage3": {
+            "open": true
+          }
+        },
         "LEDS": {
           "Blinkin": {
             "open": true
@@ -13,8 +30,7 @@
         "Limelight": {
           "Odometry": {
             "open": true
-          },
-          "open": true
+          }
         },
         "POP": {
           "open": true,
@@ -34,6 +50,12 @@
           }
         },
         "drivetrain": {
+          "Align": {
+            "choosenWaypoint": {
+              "open": true
+            },
+            "open": true
+          },
           "kinematics": {
             "open": true,
             "robot": {
@@ -43,9 +65,6 @@
           "modules": {
             "BL": {
               "azimuth": {
-                "open": true
-              },
-              "drive": {
                 "open": true
               },
               "open": true
@@ -75,7 +94,8 @@
               "open": true
             },
             "open": true
-          }
+          },
+          "open": true
         },
         "general": {
           "autonomous": {
@@ -406,7 +426,7 @@
     "Plot <7>": {
       "plots": [
         {
-          "height": 225,
+          "height": 0,
           "series": [
             {
               "color": [

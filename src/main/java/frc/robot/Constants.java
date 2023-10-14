@@ -64,12 +64,13 @@ public final class Constants {
 
     public class DRIVETRAIN {
         // robot width (meters)
-        public static final double ROBOT_WIDTH = 0.6858;
+        public static final double ROBOT_WIDTH_METERS = 0.6858;
         // wheel diameter (meters)
-        public static final double WHEEL_DIAMETER = 0.1016;
-        public static final double WHEEL_PERIMETER = WHEEL_DIAMETER * Math.PI;
-        // drive gear ratio
+        public static final double WHEEL_DIAMETER_METERS = 0.1016;
+        public static final double WHEEL_PERIMETER_METERS = WHEEL_DIAMETER_METERS * Math.PI;
+        
         public static final double DRIVE_GEAR_RATIO = 6.75;
+        public static final double AZIMUTH_GEAR_RATIO = 12.8;
 
         // encoder offsets (degrees)
         public static final double FL_ECODER_OFFSET = -313.506;// + 0.5;

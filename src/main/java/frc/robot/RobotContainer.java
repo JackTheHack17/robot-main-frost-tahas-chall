@@ -16,7 +16,6 @@ import frc.lib.ButtonBoard;
 import frc.lib.Telemetry;
 
 import frc.robot.Constants.ARM.positions;
-import frc.robot.commands.AutoBalance;
 import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
