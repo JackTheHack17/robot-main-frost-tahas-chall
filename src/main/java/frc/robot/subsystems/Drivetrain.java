@@ -13,13 +13,10 @@ import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -49,12 +46,12 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.Telemetry;
-import frc.lib.moveToPosition;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.AutoBalance;
+import frc.robot.commands.HolonomicController;
+import frc.robot.commands.moveToPosition;
 import frc.robot.RobotContainer;
 import frc.robot.SwerveModule;
-import frc.lib.APSwerveControllerCommand;
 
 public class Drivetrain extends SubsystemBase {
   private Pigeon m_gyro;
@@ -179,36 +176,6 @@ public class Drivetrain extends SubsystemBase {
     getSwerveModulePositions(), 
     new Pose2d());
 
-    ProfiledPIDController xController = new ProfiledPIDController(
-      _alignTranslationKp, 
-      _alignTranslationKi, 
-      _alignTranslationKd, _tranConstraints);
-
-    xController.setTolerance(0);
-    xController.setIntegratorRange(-0.2, 0.2);
-
-    ProfiledPIDController yController = new ProfiledPIDController(
-      _alignTranslationKp, 
-      _alignTranslationKi, 
-      _alignTranslationKd, _tranConstraints);
-
-    xController.setTolerance(0);
-    xController.setIntegratorRange(-0.2, 0.2);
-
-    ProfiledPIDController rotController = new ProfiledPIDController(
-      _alignRotationKp, 
-      _alignRotationKi, 
-      _alignRotationKd, _rotConstraints);
-
-    rotController.setTolerance(0);
-    rotController.setIntegratorRange(-5.2, 5.2);
-
-    _moveToPosition = new moveToPosition(
-      xController, 
-      yController, 
-      rotController, 
-      this);
-
     Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
     Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
     Telemetry.setValue("drivetrain/PathPlanner/translationKd", _translationKd);
@@ -222,7 +189,7 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.setSecondaryCurrentLimit(60);
     shwerveDrive.burnFlash();
 
- //   if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {
+   if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {
       _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.75, 5.15, new Rotation2d(0)));
@@ -236,21 +203,23 @@ public class Drivetrain extends SubsystemBase {
       _cubeWaypoints.add(new Pose2d(14.75, 4.52, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-    // } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
-    //   _coneWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
-    //   _coneWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
-    //   _coneWaypoints.add(new Pose2d(1.82, 5.05 + 0.02, new Rotation2d(0)));
-    //   _coneWaypoints.add(new Pose2d(1.82, 3.84 + 0.02, new Rotation2d(0)));
-    //   _coneWaypoints.add(new Pose2d(1.82, 3.28 + 0.02, new Rotation2d(0)));
-    //   _coneWaypoints.add(new Pose2d(1.82, 2.18 + 0.02, new Rotation2d(0)));
-    //   _coneWaypoints.add(new Pose2d(1.82, 1.60 + 0.02, new Rotation2d(0)));
-    //   _coneWaypoints.add(new Pose2d(1.86, 0.47 + 0.02, new Rotation2d(0)));
-    //   _cubeWaypoints.add(new Pose2d(1.86, 1.03 + 0.02, new Rotation2d(0)));
-    //   _cubeWaypoints.add(new Pose2d(1.86, 2.75 + 0.02, new Rotation2d(0)));
-    //   _cubeWaypoints.add(new Pose2d(1.86, 4.42 + 0.02, new Rotation2d(0)));
-    //   _cubeWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
-    //   _cubeWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
-    // }
+    } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
+      _coneWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 5.05 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 3.84 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 3.28 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 2.18 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 1.60 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.86, 0.47 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.86, 1.03 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.86, 2.75 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.86, 4.42 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
+    }
+
+    _moveToPosition = new moveToPosition(this);
 
     PathPlannerServer.startServer(6969);
   }
@@ -311,6 +280,13 @@ public class Drivetrain extends SubsystemBase {
     for(int i = 0; i <= 3; i++) swerveModules[i].setDesiredState(modules[i]); 
   }
 
+  public void driveFromChassisSpeeds (ChassisSpeeds speeds) {
+    modules = m_kinematics.toSwerveModuleStates( speeds );
+    SwerveDriveKinematics.desaturateWheelSpeeds( modules, MAX_LINEAR_SPEED );
+
+    for(int i = 0; i <= 3; i++) swerveModules[i].setDesiredState( modules[i] );
+  }
+
   public void lockModules ( SwerveModuleState[] modules ) {
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
     m_chassisSpeeds = discretize(m_kinematics.toChassisSpeeds(modules));
@@ -351,15 +327,17 @@ public class Drivetrain extends SubsystemBase {
     Pose2d edgePose = new Pose2d(
       m_odometry.getEstimatedPosition().getX(), 
       target.getY(), 
-      target.getRotation());
+      target.getRotation() );
 
+    Command toAlign = _moveToPosition.generateMoveToPositionCommand(
+      edgePose,
+      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(1)),
+      generateAlignmentController() );
 
-    Command toAlign = _moveToPosition.generateMoveToPositionCommand( 
-      _robotPose, 
-      edgePose,  
-      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(1)));
-
-    Command toGoal = _moveToPosition.generateMoveToPositionCommand( _robotPose, target, new Pose2d() );
+    Command toGoal = _moveToPosition.generateMoveToPositionCommand( 
+      target, 
+      new Pose2d(), 
+      generateAlignmentController() );
 
     SwerveModuleState[] startState = new SwerveModuleState[] {
       new SwerveModuleState(0, Rotation2d.fromDegrees(90)),
@@ -374,32 +352,23 @@ public class Drivetrain extends SubsystemBase {
     return new SequentialCommandGroup(initWheelPositions, toAlign, toGoal);
   }
 
-  public PathPlannerTrajectory generateLinearTrajectory(PathConstraints constraints, Pose2d startPose, Pose2d endPose) {
-    return PathPlanner.generatePath(
-     constraints,
-      new PathPoint(
-        new Translation2d(
-          startPose.getX(), 
-          startPose.getY()), 
-          startPose.getRotation() ),
-      new PathPoint(
-        new Translation2d(
-          endPose.getX(),
-          endPose.getY()), 
-          endPose.getRotation() ) );
-  }
-
-  public Command generatePathFollowerCommand(PIDController tPID, PIDController rPID, PathPlannerTrajectory traj) {
-    return new APSwerveControllerCommand(
-      traj,
-      () -> m_odometry.getEstimatedPosition(),
-      m_kinematics, 
-      tPID, 
-      tPID, 
-      rPID, 
-      this::driveFromModuleStates,
-      this
-    );
+  public HolonomicController generateAlignmentController() {
+    return new HolonomicController(
+      new ProfiledPIDController(
+        _alignTranslationKp, 
+        _alignTranslationKi,
+        _alignTranslationKd,
+        _tranConstraints), 
+      new ProfiledPIDController(
+        _alignTranslationKp, 
+        _alignTranslationKi,
+        _alignTranslationKd,
+        _tranConstraints), 
+      new ProfiledPIDController(
+        _alignRotationKp, 
+        _alignRotationKi,
+        _alignRotationKd,
+        _rotConstraints));
   }
 
   public double getGyroAngle() { return m_gyro.getPitch(); }
@@ -490,7 +459,8 @@ public class Drivetrain extends SubsystemBase {
     configDrive(motor, DRIVE_kP, DRIVE_kF);
   }
 
-  private void configAzimuth (TalonFX motor, CANCoder position) {
+  // public to avoid warnings
+  public void configAzimuth (TalonFX motor, CANCoder position) {
     configAzimuth(motor, position, AZIMUTH_kP, AZIMUTH_kD, AZIMUTH_kF);
   }
 
