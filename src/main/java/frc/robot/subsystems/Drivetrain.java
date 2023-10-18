@@ -27,6 +27,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,6 +36,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -47,6 +49,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.Telemetry;
+import frc.lib.moveToPosition;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.AutoBalance;
 import frc.robot.RobotContainer;
@@ -125,14 +128,19 @@ public class Drivetrain extends SubsystemBase {
   // private double _alignRotationKi = SmartDashboard.getNumber("alignRotateI", 0);
   // private double _alignRotationKd = SmartDashboard.getNumber("alignRotateD", 0.087); // 0.1
 
-  private double _alignTranslationKp = 5.5;
-  private double _alignTranslationKi = 0.1;
+  private double _alignTranslationKp = 0.5; //5.5;
+  private double _alignTranslationKi = 0;//0.;
   private double _alignTranslationKd = 0;
-  private double _alignRotationKp = 2.5;
-  private double _alignRotationKi = 0.42;
-  private double _alignRotationKd = 0.0;
+  private double _alignRotationKp = 0.2;//2.5;
+  private double _alignRotationKi = 0;//.42;
+  private double _alignRotationKd = 0;//.0;
 
-  private Field2d field2d = new Field2d();
+  public Field2d field2d = new Field2d();
+
+  private moveToPosition _moveToPosition;
+  
+  private Constraints _tranConstraints = new Constraints(2, 1);
+  private Constraints _rotConstraints = new Constraints(180, 90);
 
   public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight) {
     this.m_gyro = m_gyro;
@@ -171,6 +179,36 @@ public class Drivetrain extends SubsystemBase {
     getSwerveModulePositions(), 
     new Pose2d());
 
+    ProfiledPIDController xController = new ProfiledPIDController(
+      _alignTranslationKp, 
+      _alignTranslationKi, 
+      _alignTranslationKd, _tranConstraints);
+
+    xController.setTolerance(0);
+    xController.setIntegratorRange(-0.2, 0.2);
+
+    ProfiledPIDController yController = new ProfiledPIDController(
+      _alignTranslationKp, 
+      _alignTranslationKi, 
+      _alignTranslationKd, _tranConstraints);
+
+    xController.setTolerance(0);
+    xController.setIntegratorRange(-0.2, 0.2);
+
+    ProfiledPIDController rotController = new ProfiledPIDController(
+      _alignRotationKp, 
+      _alignRotationKi, 
+      _alignRotationKd, _rotConstraints);
+
+    rotController.setTolerance(0);
+    rotController.setIntegratorRange(-5.2, 5.2);
+
+    _moveToPosition = new moveToPosition(
+      xController, 
+      yController, 
+      rotController, 
+      this);
+
     Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
     Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
     Telemetry.setValue("drivetrain/PathPlanner/translationKd", _translationKd);
@@ -184,35 +222,35 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.setSecondaryCurrentLimit(60);
     shwerveDrive.burnFlash();
 
-    if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {
+ //   if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {
       _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 5.15, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(14.75, 3.94, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(14.75, 3.38, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(14.75, 2.28, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(14.75, 1.67, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(14.75, 0.47, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(14.75, 1.13, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(14.75, 2.95, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(14.75, 4.52, new Rotation2d(Math.PI)));
+      _coneWaypoints.add(new Pose2d(14.75, 5.15, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 3.94, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 3.38, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 2.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 1.67, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 0.47, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.75, 1.13, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.75, 2.95, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.75, 4.52, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-    } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
-      _coneWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.82, 5.05 + 0.02, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.82, 3.84 + 0.02, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.82, 3.28 + 0.02, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.82, 2.18 + 0.02, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.82, 1.60 + 0.02, new Rotation2d(Math.PI)));
-      _coneWaypoints.add(new Pose2d(1.86, 0.47 + 0.02, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(1.86, 1.03 + 0.02, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(1.86, 2.75 + 0.02, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(1.86, 4.42 + 0.02, new Rotation2d(Math.PI)));
-      _cubeWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
-    }
+    // } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
+    //   _coneWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
+    //   _coneWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
+    //   _coneWaypoints.add(new Pose2d(1.82, 5.05 + 0.02, new Rotation2d(0)));
+    //   _coneWaypoints.add(new Pose2d(1.82, 3.84 + 0.02, new Rotation2d(0)));
+    //   _coneWaypoints.add(new Pose2d(1.82, 3.28 + 0.02, new Rotation2d(0)));
+    //   _coneWaypoints.add(new Pose2d(1.82, 2.18 + 0.02, new Rotation2d(0)));
+    //   _coneWaypoints.add(new Pose2d(1.82, 1.60 + 0.02, new Rotation2d(0)));
+    //   _coneWaypoints.add(new Pose2d(1.86, 0.47 + 0.02, new Rotation2d(0)));
+    //   _cubeWaypoints.add(new Pose2d(1.86, 1.03 + 0.02, new Rotation2d(0)));
+    //   _cubeWaypoints.add(new Pose2d(1.86, 2.75 + 0.02, new Rotation2d(0)));
+    //   _cubeWaypoints.add(new Pose2d(1.86, 4.42 + 0.02, new Rotation2d(0)));
+    //   _cubeWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
+    //   _cubeWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
+    // }
 
     PathPlannerServer.startServer(6969);
   }
@@ -294,8 +332,8 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.set(0);
   }
 
-  public Command PPmoveToPositionCommand () {
-    resetPose(m_limelight.getPose());
+  public Command moveToPositionCommand () {
+    // resetPose(m_limelight.getPose());
     Pose2d actualPose = _robotPose; 
 
     Pose2d closest = actualPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
@@ -304,46 +342,24 @@ public class Drivetrain extends SubsystemBase {
     poseToTelemetry(actualPose, "Align/startPose");
     poseToTelemetry(closest, "Align/choosenWaypoint");
 
-    return PPpathToCommand( closest );
+    return pathToCommand( closest );
   }
 
-  public Command PPpathToCommand (Pose2d target) {
-    PathConstraints pathConstraints = new PathConstraints(3, 2);
+  public Command pathToCommand (Pose2d target) {
+    field2d.getObject("Goal").setPose(target);
 
     Pose2d edgePose = new Pose2d(
       m_odometry.getEstimatedPosition().getX(), 
       target.getY(), 
-      target.getRotation().plus(Rotation2d.fromDegrees(15)));
+      target.getRotation());
 
-    PathPlannerTrajectory align = PathPlanner.generatePath(
-        pathConstraints,
-          new PathPoint(
-            new Translation2d(
-              _robotPose.getX(), 
-              _robotPose.getY()), 
-              _robotPose.getRotation() ),
-          new PathPoint(
-            new Translation2d(
-              edgePose.getX(),
-              edgePose.getY()), 
-              edgePose.getRotation() ),
-          new PathPoint(
-              new Translation2d(
-                target.getX(),
-                target.getY()),
-              target.getRotation().plus(Rotation2d.fromDegrees(15))) );
-    
-    field2d.getObject("Aligntraj").setPose(target);
 
-    PIDController tPID = new PIDController(_alignTranslationKp, _alignTranslationKi, _alignTranslationKd);
-    tPID.setTolerance(0);
-    tPID.setIntegratorRange(-0.2, 0.2);
+    Command toAlign = _moveToPosition.generateMoveToPositionCommand( 
+      _robotPose, 
+      edgePose,  
+      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(1)));
 
-    PIDController rPID = new PIDController(_alignRotationKp, _alignRotationKi, _alignRotationKd);
-    rPID.setTolerance(0);
-    rPID.setIntegratorRange(-5.2, 5.2);
-
-    Command alignTo = generatePathFollowerCommand(tPID, rPID, align);
+    Command toGoal = _moveToPosition.generateMoveToPositionCommand( _robotPose, target, new Pose2d() );
 
     SwerveModuleState[] startState = new SwerveModuleState[] {
       new SwerveModuleState(0, Rotation2d.fromDegrees(90)),
@@ -352,10 +368,10 @@ public class Drivetrain extends SubsystemBase {
       new SwerveModuleState(0, Rotation2d.fromDegrees(90)) };
 
     Command initWheelPositions = 
-      new InstantCommand(() -> lockModules(startState), this)
+      new InstantCommand(() -> lockModules( startState ), this)
       .repeatedly().withTimeout(0.75);
 
-    return new SequentialCommandGroup(initWheelPositions, alignTo);
+    return new SequentialCommandGroup(initWheelPositions, toAlign, toGoal);
   }
 
   public PathPlannerTrajectory generateLinearTrajectory(PathConstraints constraints, Pose2d startPose, Pose2d endPose) {
@@ -396,6 +412,12 @@ public class Drivetrain extends SubsystemBase {
 
   public void setRobotOriented(boolean _isRobotOriented) { isRobotOriented = _isRobotOriented; }
 
+  public Pose2d getPose() { return _robotPose; }
+
+  public ChassisSpeeds getChassisSpeeds() { return forwardKinematics; }
+
+  public SwerveDriveKinematics getKinematics() { return m_kinematics; }
+
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     for(int i = 0; i <= 3; i++) positions[i] = swerveModules[i].getPosition();
@@ -426,7 +448,6 @@ public class Drivetrain extends SubsystemBase {
       eventMap.put("pickupLowAlt", m_arm.moveToPositionCommand(positions.FloorAlt).withTimeout(0.85));
       eventMap.put("intake",(m_claw.intakeCommand().repeatedly().withTimeout(0.5)));
       eventMap.put("autobalance", new AutoBalance(this));
-      eventMap.put("realign", PPmoveToPositionCommand());
       eventMap.put("coneMode", new InstantCommand( () -> { m_claw.setCone(true); m_claw.closeGrip(); m_claw.spinSlow(); } ));
       eventMap.put("cubeMode", new InstantCommand( () -> { m_claw.setCone(false); m_claw.openGrip(); } ));
       eventMap.put("wait", new WaitCommand(0.75));

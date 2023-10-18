@@ -1,6 +1,9 @@
 {
   "NetworkTables": {
     "transitory": {
+      "FMSInfo": {
+        "open": true
+      },
       "SmartDashboard": {
         "PPSwerveControllerCommand": {
           "open": true
@@ -12,6 +15,7 @@
       },
       "telemetry": {
         "Arm": {
+          "open": true,
           "stage1": {
             "open": true
           },
@@ -86,16 +90,14 @@
                 "open": true
               },
               "open": true
-            },
-            "open": true
+            }
           },
           "odometry": {
             "field": {
               "open": true
             },
             "open": true
-          },
-          "open": true
+          }
         },
         "general": {
           "autonomous": {
