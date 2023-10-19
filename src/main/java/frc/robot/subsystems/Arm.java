@@ -83,9 +83,9 @@ public class Arm extends SubsystemBase {
     private ProfiledPIDController m_stage3PID;
     private PinchersofPower m_clawSubsystem;
     private ButtonBoard m_copilotController;
-    private double m_stage1Target = 0;
-    private double m_stage2Target = 0;
-    private double m_stage3Target = 0;
+    private double m_stage1Target = idlePosition.getStage1Angle();
+    private double m_stage2Target = idlePosition.getStage2Angle();
+    private double m_stage3Target = idlePosition.getStage3Angle();
     // manual targets actually unused
     private double m_manualTargetX = 0;
     private double m_manualTargetY = 0;
@@ -563,16 +563,12 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("Arm/stage2/internalVelocity", m_stage2.getEncoder().getVelocity());
 
         if ( DriverStation.isEnabled() || DriverStation.isAutonomousEnabled() ) {
-            if (movingToIdle) {
-                moveToPositionCommand(positions.Idle);
-            }
-
-            if ( m_stage1Target == 0.0 && m_stage2Target == 0.0 && m_stage3Target == 0.0 ) {
-                m_stage1.setVoltage(0);
-                m_stage2.setVoltage(0);
-                m_stage3.setVoltage(0);
-                return;
-            }
+            // if ( m_stage1Target == 0.0 && m_stage2Target == 0.0 && m_stage3Target == 0.0 ) {
+            //     m_stage1.setVoltage(0);
+            //     m_stage2.setVoltage(0);
+            //     m_stage3.setVoltage(0);
+            //     return;
+            // }
 
             m_stage1.setVoltage( m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), 0) + 12.0*MathUtil.clamp(m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
             m_stage2.setVoltage( m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), 0) + 12.0*MathUtil.clamp(m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));

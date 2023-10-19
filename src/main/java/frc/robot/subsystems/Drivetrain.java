@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.DRIVETRAIN.*;
 import static frc.robot.Constants.CAN.*;
 
+import java.security.DrbgParameters.Reseed;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,13 +46,13 @@ import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.lib.SwerveModule;
 import frc.lib.Telemetry;
 import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.AutoBalance;
 import frc.robot.commands.HolonomicController;
 import frc.robot.commands.moveToPosition;
 import frc.robot.RobotContainer;
-import frc.robot.SwerveModule;
 
 public class Drivetrain extends SubsystemBase {
   private Pigeon m_gyro;
@@ -125,10 +126,10 @@ public class Drivetrain extends SubsystemBase {
   // private double _alignRotationKi = SmartDashboard.getNumber("alignRotateI", 0);
   // private double _alignRotationKd = SmartDashboard.getNumber("alignRotateD", 0.087); // 0.1
 
-  private double _alignTranslationKp = 0.5; //5.5;
+  private double _alignTranslationKp = 3.1; //5.5;
   private double _alignTranslationKi = 0;//0.;
   private double _alignTranslationKd = 0;
-  private double _alignRotationKp = 0.2;//2.5;
+  private double _alignRotationKp = 5.8;//2.5;
   private double _alignRotationKi = 0;//.42;
   private double _alignRotationKd = 0;//.0;
 
@@ -136,8 +137,8 @@ public class Drivetrain extends SubsystemBase {
 
   private moveToPosition _moveToPosition;
   
-  private Constraints _tranConstraints = new Constraints(2, 1);
-  private Constraints _rotConstraints = new Constraints(180, 90);
+  private Constraints _tranConstraints = new Constraints(4, 3);
+  private Constraints _rotConstraints = new Constraints(120, 60);
 
   public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight) {
     this.m_gyro = m_gyro;
@@ -171,10 +172,10 @@ public class Drivetrain extends SubsystemBase {
     swerveModules[3] = new SwerveModule(BR_Drive, BR_Azimuth, BR_Position, BR_PID, BR_kF, "BR");
 
     m_odometry = new SwerveDrivePoseEstimator(
-    m_kinematics, 
-    new Rotation2d(0), 
-    getSwerveModulePositions(), 
-    new Pose2d());
+      m_kinematics, 
+      new Rotation2d(0), 
+      getSwerveModulePositions(), 
+      new Pose2d());
 
     Telemetry.setValue("drivetrain/PathPlanner/translationKp", _translationKp);
     Telemetry.setValue("drivetrain/PathPlanner/translationKi", _translationKi);
@@ -192,15 +193,15 @@ public class Drivetrain extends SubsystemBase {
    if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {
       _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 5.15, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 3.94, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 3.38, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 2.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 5.15 - 0.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 3.94 - 0.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 3.38 - 0.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 2.28 - 0.05, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.75, 1.67, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 0.47, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.75, 1.13, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.75, 2.95, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.75, 4.52, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 0.47 + 0.05, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.75, 1.13 - 0.05, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.75, 2.95 - 0.05, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(14.75, 4.52 - 0.05, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
     } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
@@ -222,6 +223,8 @@ public class Drivetrain extends SubsystemBase {
     _moveToPosition = new moveToPosition(this);
 
     PathPlannerServer.startServer(6969);
+
+    resetPose(m_limelight.getPose());
   }
 
   @Override
@@ -331,7 +334,7 @@ public class Drivetrain extends SubsystemBase {
 
     Command toAlign = _moveToPosition.generateMoveToPositionCommand(
       edgePose,
-      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(1)),
+      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(5)),
       generateAlignmentController() );
 
     Command toGoal = _moveToPosition.generateMoveToPositionCommand( 
@@ -386,6 +389,8 @@ public class Drivetrain extends SubsystemBase {
   public ChassisSpeeds getChassisSpeeds() { return forwardKinematics; }
 
   public SwerveDriveKinematics getKinematics() { return m_kinematics; }
+
+  public Pose2d getTargetPose() { return _moveToPosition.getTarget(); }
 
   private SwerveModulePosition[] getSwerveModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];

@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.lib;
 
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
@@ -8,7 +8,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import static frc.robot.Constants.DRIVETRAIN.*;
-import frc.lib.Telemetry;
 
 public class SwerveModule {
     public TalonFX driveMotor;

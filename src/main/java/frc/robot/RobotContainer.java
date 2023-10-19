@@ -2,6 +2,9 @@ package frc.robot;
 import java.io.File;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -50,7 +53,7 @@ public class RobotContainer {
     SmartDashboard.putNumber("alignTranslateP", 5);//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
     SmartDashboard.putNumber("alignTranslateI", 0.1);
     SmartDashboard.putNumber("alignTranslateD", 0);
-    SmartDashboard.putNumber("alignRotateP", 2);// 2.5//12.5;//15;//0.00005
+    SmartDashboard.putNumber("alignRotateP", 2);// 2v.5//12.5;//15;//0.00005
     SmartDashboard.putNumber("alignRotateI", 0);
     SmartDashboard.putNumber("alignRotateD", 0); // 0.1
 
@@ -71,6 +74,13 @@ public class RobotContainer {
     driverController.y().onTrue(new InstantCommand(() -> m_swerve.resetPose(new Pose2d())));
     driverController.x().onTrue(new InstantCommand(() -> m_swerve.moveToPositionCommand().schedule()));
     driverController.x().onFalse(new InstantCommand(() -> {}, m_swerve));
+
+    // driverController.y().onTrue(new InstantCommand(
+    //   () -> m_swerve.resetPose(
+    //     m_swerve.getTargetPose().plus(
+    //       new Transform2d(
+    //         new Translation2d(0.09, -0.09), 
+    //         Rotation2d.fromDegrees(0.8))))));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));

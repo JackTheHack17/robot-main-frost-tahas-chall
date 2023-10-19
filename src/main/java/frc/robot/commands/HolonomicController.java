@@ -81,15 +81,17 @@ public class HolonomicController {
                 new TrapezoidProfile.State(
                     goalPose.getX(),
                     goalSpeed.vxMetersPerSecond) ),
+
             yController.calculate( 
                 currentPose.getY(), 
                 new TrapezoidProfile.State(
                     goalPose.getY(),
                     goalSpeed.vyMetersPerSecond) ),
-            xController.calculate( 
-                currentPose.getX(), 
+
+            thetaController.calculate( 
+                currentPose.getRotation().getDegrees(), 
                 new TrapezoidProfile.State(
-                    goalPose.getX(),
+                    goalPose.getRotation().getDegrees(),
                     goalSpeed.vxMetersPerSecond) ) );
     }
 
@@ -99,6 +101,45 @@ public class HolonomicController {
             yController.calculate( robotPose.getY() ),
             thetaController.calculate( robotPose.getRotation().getRadians() )
         );
+    }
+
+    public ChassisSpeeds calculateWithFF(Pose2d goalPose, Pose2d currentPose) {
+        return calculateWithFF(goalPose, new ChassisSpeeds(), currentPose);
+    }
+
+    public ChassisSpeeds calculateWithFF(Pose2d goalPose, ChassisSpeeds goalSpeed, Pose2d currentPose) {
+        return new ChassisSpeeds(
+            xController.calculate( 
+                currentPose.getX(), 
+                new TrapezoidProfile.State(
+                    goalPose.getX(),
+                    goalSpeed.vxMetersPerSecond) )
+            + xController.getSetpoint().velocity,
+
+            yController.calculate( 
+                currentPose.getY(), 
+                new TrapezoidProfile.State(
+                    goalPose.getY(),
+                    goalSpeed.vyMetersPerSecond) )
+            + yController.getSetpoint().velocity,
+
+            thetaController.calculate( 
+                currentPose.getRotation().getDegrees(), 
+                new TrapezoidProfile.State(
+                    goalPose.getRotation().getDegrees(),
+                    goalSpeed.omegaRadiansPerSecond) )
+            + thetaController.getSetpoint().velocity
+            );
+    }
+
+    public ChassisSpeeds calculateWithFF(Pose2d robotPose) {
+        return new ChassisSpeeds(
+            xController.calculate( robotPose.getX() )
+            + xController.getSetpoint().velocity,
+            yController.calculate( robotPose.getY() )
+            + yController.getSetpoint().velocity,
+            thetaController.calculate( robotPose.getRotation().getRadians()
+            + thetaController.getSetpoint().velocity ) );
     }
 
     public void setGoal(Pose2d goalPose) {

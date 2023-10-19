@@ -15,7 +15,6 @@
       },
       "telemetry": {
         "Arm": {
-          "open": true,
           "stage1": {
             "open": true
           },
@@ -60,6 +59,12 @@
             },
             "open": true
           },
+          "PathPlanner": {
+            "open": true
+          },
+          "chassis": {
+            "open": true
+          },
           "kinematics": {
             "open": true,
             "robot": {
@@ -97,7 +102,8 @@
               "open": true
             },
             "open": true
-          }
+          },
+          "open": true
         },
         "general": {
           "autonomous": {
