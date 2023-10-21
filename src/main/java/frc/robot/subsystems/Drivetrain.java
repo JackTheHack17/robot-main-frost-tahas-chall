@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.DRIVETRAIN.*;
 import static frc.robot.Constants.CAN.*;
 
-import java.security.DrbgParameters.Reseed;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,10 +60,10 @@ public class Drivetrain extends SubsystemBase {
   private Limelight m_limelight;
 
   private SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-    new Translation2d(ROBOT_WIDTH_METERS/2, ROBOT_WIDTH_METERS/2),
-    new Translation2d(ROBOT_WIDTH_METERS/2, -ROBOT_WIDTH_METERS/2),
-    new Translation2d(-ROBOT_WIDTH_METERS/2, ROBOT_WIDTH_METERS/2),
-    new Translation2d(-ROBOT_WIDTH_METERS/2, -ROBOT_WIDTH_METERS/2) );
+    new Translation2d(  ROBOT_WIDTH_METERS / 2,  ROBOT_WIDTH_METERS / 2 ),
+    new Translation2d(  ROBOT_WIDTH_METERS / 2, -ROBOT_WIDTH_METERS / 2 ),
+    new Translation2d( -ROBOT_WIDTH_METERS / 2,  ROBOT_WIDTH_METERS / 2 ),
+    new Translation2d( -ROBOT_WIDTH_METERS / 2, -ROBOT_WIDTH_METERS / 2 ) );
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds();
   private ChassisSpeeds forwardKinematics = new ChassisSpeeds();
@@ -93,10 +92,10 @@ public class Drivetrain extends SubsystemBase {
   private final PIDController BL_PID = new PIDController(0.0105, 0, 0.000);
   private final PIDController BR_PID = new PIDController(0.0100, 0, 0.000);
 
-  private final double FL_kF = 0;
-  private final double FR_kF = 0;
-  private final double BL_kF = 0;
-  private final double BR_kF = 0;
+  private final double FL_kF = AZIMUTH_kF;
+  private final double FR_kF = AZIMUTH_kF;
+  private final double BL_kF = AZIMUTH_kF;
+  private final double BR_kF = 0.6;
 
   private SwerveModule[] swerveModules = new SwerveModule[4];
 
