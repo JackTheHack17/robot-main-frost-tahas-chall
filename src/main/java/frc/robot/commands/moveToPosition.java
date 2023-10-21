@@ -39,6 +39,8 @@ public class moveToPosition {
                 controller.setTolerance( tolerance );
                 controller.reset( currentPose.get(), currentChassisSpeeds.get() );
                 controller.setGoal(targetPose, targetChassisSpeeds);
+                
+                driveSub.field2d.getObject( "Goal" ).setPose( controller.getPositionGoal() );
             },
             () -> {
                 driveSub.driveFromChassisSpeeds(
@@ -46,7 +48,6 @@ public class moveToPosition {
                         controller.calculate( currentPose.get() ) ) );
 
                 driveSub.field2d.getObject( "Setpoint" ).setPose( controller.getPositionSetpoint() );
-                driveSub.field2d.getObject( "Goal" ).setPose( controller.getPositionGoal() );
                 Telemetry.getValue("PathPlanner/AtGoal", controller.atGoal() );
             }, 
             (interrupted) -> { driveSub.joystickDrive(0, 0, 0); }, 

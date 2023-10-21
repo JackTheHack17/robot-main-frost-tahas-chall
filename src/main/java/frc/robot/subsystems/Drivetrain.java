@@ -271,22 +271,20 @@ public class Drivetrain extends SubsystemBase {
     modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
 
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
-    for(int i = 0; i <= 3; i++) swerveModules[i].setDesiredState(modules[i]); 
+    setDesiredStates();
   }
 
   // For autonomous
   public void driveFromModuleStates ( SwerveModuleState[] modules ) {
     modules = m_kinematics.toSwerveModuleStates( discretize( m_kinematics.toChassisSpeeds(modules) ) );
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
-
-    for(int i = 0; i <= 3; i++) swerveModules[i].setDesiredState(modules[i]); 
+    setDesiredStates();
   }
 
   public void driveFromChassisSpeeds (ChassisSpeeds speeds) {
     modules = m_kinematics.toSwerveModuleStates( speeds );
-    SwerveDriveKinematics.desaturateWheelSpeeds( modules, MAX_LINEAR_SPEED );
-
-    for(int i = 0; i <= 3; i++) swerveModules[i].setDesiredState( modules[i] );
+    SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
+    setDesiredStates();
   }
 
   public void lockModules ( SwerveModuleState[] modules ) {
@@ -300,6 +298,8 @@ public class Drivetrain extends SubsystemBase {
 
   public void stopModules () { for(int i = 0; i <= 3; i++) swerveModules[i].stopMotors(); }
 
+  public void setDesiredStates() { for(int i = 0; i <= 3; i++) swerveModules[i].setDesiredState( modules[i] ); }
+
   public void shwerve ( double LX, double LY) {
     // 6in diameter wheels, 10:1 gearbox
     if (isRobotOriented) shwerveDrive.set(MathUtil.clamp(-LX*9, -1, 1));
@@ -311,7 +311,6 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command moveToPositionCommand () {
-    // resetPose(m_limelight.getPose());
     Pose2d actualPose = _robotPose; 
 
     Pose2d closest = actualPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
@@ -333,7 +332,7 @@ public class Drivetrain extends SubsystemBase {
 
     Command toAlign = _moveToPosition.generateMoveToPositionCommand(
       edgePose,
-      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(5)),
+      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(5) ),
       generateAlignmentController() );
 
     Command toGoal = _moveToPosition.generateMoveToPositionCommand( 
@@ -355,7 +354,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public HolonomicController generateAlignmentController() {
-    return new HolonomicController(
+    HolonomicController controller = new HolonomicController(
       new ProfiledPIDController(
         _alignTranslationKp, 
         _alignTranslationKi,
@@ -371,6 +370,12 @@ public class Drivetrain extends SubsystemBase {
         _alignRotationKi,
         _alignRotationKd,
         _rotConstraints));
+    
+    controller.xControllerIRange(-0.5, 0.5);
+    controller.yControllerIRange(-0.5, 0.5);
+    controller.thetaControllerIRange(-5, 5);
+
+    return controller;
   }
 
   public double getGyroAngle() { return m_gyro.getPitch(); }
