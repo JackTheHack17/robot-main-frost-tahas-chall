@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.lib;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -6,22 +6,19 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 // import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.RobotContainer;
 
-public class Limelight extends SubsystemBase {
+public class Limelight {
   private NetworkTable limelight;
   private boolean pipelineIndex;
   private double[] posevalues;
+  private String key;
 
-  public Limelight() {
-    limelight = NetworkTableInstance.getDefault().getTable("limelight-limeone");
+  public Limelight(String key) {
+    this.key = key;
+    limelight = NetworkTableInstance.getDefault().getTable(key);
     limelight.getEntry("pipeline").setNumber(0);
   }
-
-  // public void switchPipeline() {
-  //   limelight.getEntry("pipeline").setNumber(!pipelineIndex ? 1 : 0);
-  // }
 
   public void setPipelineIndex(int index) {
     limelight.getEntry("pipeline").setNumber(index);
@@ -68,15 +65,14 @@ public class Limelight extends SubsystemBase {
     return (limelight.getEntry("tl").getDouble(0) + limelight.getEntry("cl").getDouble(0))/1000.0;
   }
 
-  @Override
   public void periodic() {
-    frc.lib.Telemetry.setValue("Limelight/2d/yaw", getyaw());
-    frc.lib.Telemetry.setValue("Limelight/2d/pitch", getPitch());
-    frc.lib.Telemetry.setValue("Limelight/2d/area", getArea());
-    frc.lib.Telemetry.setValue("Limelight/pip/pipeline", getPipeLineIndex());
-    frc.lib.Telemetry.setValue("Limelight/hastarget", hastarget());
-    frc.lib.Telemetry.setValue("Limelight/Odometry/X", getPose().getX());
-    frc.lib.Telemetry.setValue("Limelight/Odometry/Y", getPose().getY());
-    frc.lib.Telemetry.setValue("Limelight/Odometry/Rotation", getPose().getRotation().getDegrees());
+    frc.lib.Telemetry.setValue(key+"/2d/yaw", getyaw());
+    frc.lib.Telemetry.setValue(key+"/2d/pitch", getPitch());
+    frc.lib.Telemetry.setValue(key+"/2d/area", getArea());
+    frc.lib.Telemetry.setValue(key+"/pip/pipeline", getPipeLineIndex());
+    frc.lib.Telemetry.setValue(key+"/hastarget", hastarget());
+    frc.lib.Telemetry.setValue(key+"/Odometry/X", getPose().getX());
+    frc.lib.Telemetry.setValue(key+"/Odometry/Y", getPose().getY());
+    frc.lib.Telemetry.setValue(key+"/Odometry/Rotation", getPose().getRotation().getDegrees());
   }
 }

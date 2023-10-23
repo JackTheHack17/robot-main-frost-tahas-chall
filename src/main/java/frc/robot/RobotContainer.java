@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.lib.ButtonBoard;
+import frc.lib.Limelight;
 import frc.lib.Telemetry;
 
 import frc.robot.Constants.ARM.positions;
@@ -20,9 +21,9 @@ import frc.robot.commands.DriveCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.LEDs;
-import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PinchersofPower;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.PinchersofPower.GamePieces;
 
 public class RobotContainer {
@@ -31,11 +32,11 @@ public class RobotContainer {
   public static final ButtonBoard copilotController = new ButtonBoard(1, 2);
 
   public Pigeon m_gyro = new Pigeon();
-  public Limelight m_limelight = new Limelight();
+  public VisionSubsystem vision = new VisionSubsystem();
   public LEDs m_LEDs = new LEDs();
   public PinchersofPower m_claw = new PinchersofPower(this);
   public Arm m_arm = new Arm(m_claw, copilotController);
-  public Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw, m_limelight);
+  public Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw, vision);
 
   public RobotContainer() {
     File[] paths = new File(Filesystem.getDeployDirectory(), "pathplanner").listFiles();

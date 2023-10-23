@@ -13,6 +13,7 @@ import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.auto.PIDConstants;
@@ -34,6 +35,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -45,8 +47,10 @@ import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
 import frc.lib.SwerveModule;
 import frc.lib.Telemetry;
+
 import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.AutoBalance;
 import frc.robot.commands.HolonomicController;
@@ -57,7 +61,7 @@ public class Drivetrain extends SubsystemBase {
   private Pigeon m_gyro;
   private Arm m_arm;
   private PinchersofPower m_claw;
-  private Limelight m_limelight;
+  private VisionSubsystem vision;
 
   private SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     new Translation2d(  ROBOT_WIDTH_METERS / 2,  ROBOT_WIDTH_METERS / 2 ),
@@ -139,11 +143,11 @@ public class Drivetrain extends SubsystemBase {
   private Constraints _tranConstraints = new Constraints(4, 3);
   private Constraints _rotConstraints = new Constraints(120, 60);
 
-  public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, Limelight m_limelight) {
+  public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, VisionSubsystem vision) {
     this.m_gyro = m_gyro;
     this.m_arm = m_arm;
     this.m_claw = m_claw;
-    this.m_limelight = m_limelight;
+    this.vision = vision;
 
     configPID(FL_PID);
     configPID(FR_PID);
@@ -223,7 +227,7 @@ public class Drivetrain extends SubsystemBase {
 
     PathPlannerServer.startServer(6969);
 
-    resetPose(m_limelight.getPose());
+    resetPose(vision.getCenterLimelight().getPose());
   }
 
   @Override
@@ -239,9 +243,9 @@ public class Drivetrain extends SubsystemBase {
       swerveModules[3].getState()
     );
 
-    if ( m_limelight.hastarget()) m_odometry.addVisionMeasurement(
-      m_limelight.getPose(), 
-      Timer.getFPGATimestamp() - m_limelight.getLatency(),
+    if ( vision.getCenterLimelight().hastarget()) m_odometry.addVisionMeasurement(
+      vision.getCenterLimelight().getPose(), 
+      Timer.getFPGATimestamp() - vision.getCenterLimelight().getLatency(),
       VecBuilder.fill(0.9, 0.9, 10000000));
 
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
@@ -267,8 +271,8 @@ public class Drivetrain extends SubsystemBase {
 
     else m_chassisSpeeds = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED);
 
-    m_chassisSpeeds = discretize(m_chassisSpeeds);
-    modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+    m_chassisSpeeds = discretize( m_chassisSpeeds );
+    modules = m_kinematics.toSwerveModuleStates( m_chassisSpeeds );
 
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
     setDesiredStates();
