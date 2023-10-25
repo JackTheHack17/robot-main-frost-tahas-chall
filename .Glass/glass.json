@@ -1,14 +1,10 @@
 {
   "NetworkTables": {
     "transitory": {
-      "FMSInfo": {
-        "open": true
-      },
       "SmartDashboard": {
         "PPSwerveControllerCommand": {
           "open": true
-        },
-        "open": true
+        }
       },
       "limelight": {
         "open": true
@@ -52,18 +48,25 @@
             "open": true
           }
         },
+        "Rlimelight-limeone": {
+          "2d": {
+            "open": true
+          },
+          "Odometry": {
+            "open": true
+          }
+        },
         "drivetrain": {
           "Align": {
             "choosenWaypoint": {
               "open": true
-            },
-            "open": true
-          },
-          "PathPlanner": {
-            "open": true
+            }
           },
           "chassis": {
-            "open": true
+            "open": true,
+            "robot": {
+              "open": true
+            }
           },
           "kinematics": {
             "open": true,
@@ -107,6 +110,17 @@
         },
         "general": {
           "autonomous": {
+            "open": true
+          }
+        },
+        "limelight-limeone": {
+          "2d": {
+            "open": true
+          },
+          "Odometry": {
+            "open": true
+          },
+          "pip": {
             "open": true
           }
         },

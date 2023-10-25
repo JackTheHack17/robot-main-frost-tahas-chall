@@ -28,8 +28,8 @@ public class Limelight {
     return pipelineIndex ? 1 : 0;
   }
 
-  public boolean hastarget() {
-    return !( limelight.getEntry("tv").getDouble(0) == 1 );
+  public boolean hasTarget() {
+    return ( limelight.getEntry("tv").getDouble(0) == 1 );
   }
 
   public double getyaw() {
@@ -66,13 +66,13 @@ public class Limelight {
   }
 
   public void periodic() {
-    frc.lib.Telemetry.setValue(key+"/2d/yaw", getyaw());
-    frc.lib.Telemetry.setValue(key+"/2d/pitch", getPitch());
-    frc.lib.Telemetry.setValue(key+"/2d/area", getArea());
-    frc.lib.Telemetry.setValue(key+"/pip/pipeline", getPipeLineIndex());
-    frc.lib.Telemetry.setValue(key+"/hastarget", hastarget());
-    frc.lib.Telemetry.setValue(key+"/Odometry/X", getPose().getX());
-    frc.lib.Telemetry.setValue(key+"/Odometry/Y", getPose().getY());
-    frc.lib.Telemetry.setValue(key+"/Odometry/Rotation", getPose().getRotation().getDegrees());
+    frc.lib.Telemetry.setValue("R"+key+"/2d/yaw", getyaw());
+    frc.lib.Telemetry.setValue("R"+key+"/2d/pitch", getPitch());
+    frc.lib.Telemetry.setValue("R"+key+"/2d/area", getArea());
+    frc.lib.Telemetry.setValue("R"+key+"/pip/pipeline", getPipeLineIndex());
+    frc.lib.Telemetry.setValue("R"+key+"/hastarget", hasTarget());
+    frc.lib.Telemetry.setValue("R"+key+"/Odometry/X", getPose().getX());
+    frc.lib.Telemetry.setValue("R"+key+"/Odometry/Y", getPose().getY());
+    frc.lib.Telemetry.setValue("R"+key+"/Odometry/Rotation", getPose().getRotation().getDegrees());
   }
 }

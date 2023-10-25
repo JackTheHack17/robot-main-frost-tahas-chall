@@ -29,6 +29,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -91,15 +92,15 @@ public class Drivetrain extends SubsystemBase {
   private final TalonFX BL_Azimuth = new TalonFX(BL_AZIMUTH_ID, "drivetrain");
   private final TalonFX BR_Azimuth = new TalonFX(BR_AZIMUTH_ID, "drivetrain");
 
-  private final PIDController FL_PID = new PIDController(0.0100, 0, 0.000); // 0.105
-  private final PIDController FR_PID = new PIDController(0.0105, 0, 0.000);
-  private final PIDController BL_PID = new PIDController(0.0105, 0, 0.000);
-  private final PIDController BR_PID = new PIDController(0.0100, 0, 0.000);
+  private final PIDController FL_PID = new PIDController(0.0100, 0, 0.000270); // 0.105
+  private final PIDController FR_PID = new PIDController(0.0105, 0, 0.000265);
+  private final PIDController BL_PID = new PIDController(0.0105, 0, 0.000265);
+  private final PIDController BR_PID = new PIDController(0.0100, 0, 0.000263);
 
   private final double FL_kF = AZIMUTH_kF;
   private final double FR_kF = AZIMUTH_kF;
   private final double BL_kF = AZIMUTH_kF;
-  private final double BR_kF = 0.6;
+  private final double BR_kF = 0.06;
 
   private SwerveModule[] swerveModules = new SwerveModule[4];
 
@@ -114,6 +115,7 @@ public class Drivetrain extends SubsystemBase {
   private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
 
   private Pose2d _robotPose = new Pose2d();
+  private Pose2d _lastPose = _robotPose;
 
   private double _translationKp = 2.40;// 2.35//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
@@ -130,10 +132,10 @@ public class Drivetrain extends SubsystemBase {
   // private double _alignRotationKd = SmartDashboard.getNumber("alignRotateD", 0.087); // 0.1
 
   private double _alignTranslationKp = 3.1; //5.5;
-  private double _alignTranslationKi = 0;//0.;
+  private double _alignTranslationKi = 0.005;//0.;
   private double _alignTranslationKd = 0;
   private double _alignRotationKp = 5.8;//2.5;
-  private double _alignRotationKi = 0;//.42;
+  private double _alignRotationKi = 0.02;//.42;
   private double _alignRotationKd = 0;//.0;
 
   public Field2d field2d = new Field2d();
@@ -236,29 +238,34 @@ public class Drivetrain extends SubsystemBase {
 
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
 
-    forwardKinematics = m_kinematics.toChassisSpeeds(
-      swerveModules[0].getState(), 
-      swerveModules[1].getState(), 
-      swerveModules[2].getState(), 
-      swerveModules[3].getState()
-    );
+    robotPositionTelemetry();
+  }
 
-    if ( vision.getCenterLimelight().hastarget()) m_odometry.addVisionMeasurement(
+  public void robotPositionTelemetry() {
+    if ( vision.getCenterLimelight().hasTarget() ) 
+    m_odometry.addVisionMeasurement(
       vision.getCenterLimelight().getPose(), 
       Timer.getFPGATimestamp() - vision.getCenterLimelight().getLatency(),
-      VecBuilder.fill(0.9, 0.9, 10000000));
+      VecBuilder.fill(0.9, 0.9, 10000000) );
 
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
-    poseToTelemetry(_robotPose, "/chassis/");
+    Transform2d transform = _robotPose.minus(_lastPose).div(0.02);
+
+    forwardKinematics = new ChassisSpeeds(
+      transform.getX(), 
+      transform.getY(), 
+      transform.getRotation().getDegrees() );
+
+    poseToTelemetry( _robotPose, "/chassis/" );
     Telemetry.setValue("drivetrain/chassis/robot/forwardSpeed", forwardKinematics.vxMetersPerSecond);
-    Telemetry.setValue("drivetrain/chassis/robot/rightwardSpeed", -forwardKinematics.vyMetersPerSecond);
+    Telemetry.setValue("drivetrain/chassis/robot/rightwardSpeed", forwardKinematics.vyMetersPerSecond);
     Telemetry.setValue("drivetrain/chassis/clockwiseSpeed", Math.toDegrees(forwardKinematics.omegaRadiansPerSecond));
-    Telemetry.setValue("drivetrain/chassis/field/DSawaySpeed", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
-    Telemetry.setValue("drivetrain/chassis/field/DSrightSpeed", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(m_gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(m_gyro.getYaw()))));
+
+    _lastPose = _robotPose;
 
     field2d.setRobotPose(_robotPose);
-    SmartDashboard.putData(field2d);
+    SmartDashboard.putData(field2d);    
   }
 
   public void joystickDrive(double LX, double LY, double RX) {
@@ -463,7 +470,7 @@ public class Drivetrain extends SubsystemBase {
 
   public void resetPose(Pose2d pose) {
     m_odometry.resetPosition(
-      new Rotation2d( Math.toRadians( m_gyro.getYaw() ) ), 
+      Rotation2d.fromDegrees( m_gyro.getYaw() ), 
       getSwerveModulePositions(), 
       pose);
   }

@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 
 public class HolonomicController {
     private ProfiledPIDController xController;
@@ -28,9 +29,20 @@ public class HolonomicController {
     }
 
     public void reset(Pose2d startPose, ChassisSpeeds targetChassisSpeeds) {
-        xController.reset( startPose.getX() );
-        yController.reset( startPose.getY() );
-        thetaController.reset( startPose.getRotation().getRadians() );
+        xController.reset( 
+            new State(
+                startPose.getX(),
+                targetChassisSpeeds.vxMetersPerSecond ) );
+
+        yController.reset( 
+            new State(
+                startPose.getY(),
+                targetChassisSpeeds.vyMetersPerSecond ) );
+
+        thetaController.reset(
+            new State(
+                startPose.getRotation().getRadians(),
+                targetChassisSpeeds.omegaRadiansPerSecond ) );
     }
 
     public boolean atGoal() {
