@@ -124,13 +124,6 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKi = 0;
   private double _rotationKd = 0.085; // 0.1
 
-  // private double _alignTranslationKp = SmartDashboard.getNumber("alignTranslateP", 2.35);//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
-  // private double _alignTranslationKi = SmartDashboard.getNumber("alignTranslateI", 0);
-  // private double _alignTranslationKd = SmartDashboard.getNumber("alignTranslateD", 0);
-  // private double _alignRotationKp = SmartDashboard.getNumber("alignRotateP", 1.83);// 2.5//12.5;//15;//0.00005
-  // private double _alignRotationKi = SmartDashboard.getNumber("alignRotateI", 0);
-  // private double _alignRotationKd = SmartDashboard.getNumber("alignRotateD", 0.087); // 0.1
-
   private double _alignTranslationKp = 3.1; //5.5;
   private double _alignTranslationKi = 0.005;//0.;
   private double _alignTranslationKd = 0;
@@ -171,10 +164,10 @@ public class Drivetrain extends SubsystemBase {
     configAzimuth(BL_Azimuth, BL_Position, BL_PID.getP(), BL_PID.getD(), BL_kF);
     configAzimuth(BR_Azimuth, BR_Position, BR_PID.getP(), BR_PID.getD(), BR_kF);
 
-    swerveModules[0] = new SwerveModule(FL_Drive, FL_Azimuth, FL_Position, FL_PID, FL_kF, "FL");
-    swerveModules[1] = new SwerveModule(FR_Drive, FR_Azimuth, FR_Position, FR_PID, FR_kF, "FR");
-    swerveModules[2] = new SwerveModule(BL_Drive, BL_Azimuth, BL_Position, BL_PID, BL_kF, "BL");
-    swerveModules[3] = new SwerveModule(BR_Drive, BR_Azimuth, BR_Position, BR_PID, BR_kF, "BR");
+    swerveModules[0] = new SwerveModule( FL_Drive, FL_Azimuth, FL_Position, FL_PID, FL_kF, "FL" );
+    swerveModules[1] = new SwerveModule( FR_Drive, FR_Azimuth, FR_Position, FR_PID, FR_kF, "FR" );
+    swerveModules[2] = new SwerveModule( BL_Drive, BL_Azimuth, BL_Position, BL_PID, BL_kF, "BL" );
+    swerveModules[3] = new SwerveModule( BR_Drive, BR_Azimuth, BR_Position, BR_PID, BR_kF, "BR" );
 
     m_odometry = new SwerveDrivePoseEstimator(
       m_kinematics, 
@@ -217,10 +210,10 @@ public class Drivetrain extends SubsystemBase {
       _coneWaypoints.add(new Pose2d(1.82, 3.28 + 0.02, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(1.82, 2.18 + 0.02, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(1.82, 1.60 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.86, 0.47 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.86, 1.03 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.86, 2.75 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.86, 4.42 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 0.47 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.82, 1.03 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.82, 2.75 + 0.02, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.82, 4.42 + 0.02, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
     }
