@@ -107,7 +107,7 @@ public class Drivetrain extends SubsystemBase {
   private boolean isRobotOriented = false;
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 60, 60, 0);
-  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 20, 20, 0);
+  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 40, 40, 0);
 
   private SwerveDrivePoseEstimator m_odometry;
 
@@ -124,9 +124,14 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKi = 0;
   private double _rotationKd = 0.085; // 0.1
 
-  private double _alignTranslationKp = 3.1; //5.5;
-  private double _alignTranslationKi = 0.005;//0.;
-  private double _alignTranslationKd = 0;
+  private double _alignXTranslationKp = 4; //5.5;
+  private double _alignXTranslationKi = 0.085;//0.;
+  private double _alignXTranslationKd = 0;
+
+  private double _alignYTranslationKp = 3.1; //5.5;
+  private double _alignYTranslationKi = 0.01;//0.;
+  private double _alignYTranslationKd = 0;
+
   private double _alignRotationKp = 5.8;//2.5;
   private double _alignRotationKi = 0.02;//.42;
   private double _alignRotationKd = 0;//.0;
@@ -135,7 +140,8 @@ public class Drivetrain extends SubsystemBase {
 
   private moveToPosition _moveToPosition;
   
-  private Constraints _tranConstraints = new Constraints(4, 3);
+  private Constraints _tranYConstraints = new Constraints(4, 8);
+  private Constraints _tranXConstraints = new Constraints(4.5, 8);
   private Constraints _rotConstraints = new Constraints(120, 60);
 
   public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, VisionSubsystem vision) {
@@ -188,10 +194,10 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.setSecondaryCurrentLimit(60);
     shwerveDrive.burnFlash();
 
-   if (RobotContainer.getDriverAlliance() == DriverStation.Alliance.Red) {
+   if (RobotContainer.getDriverAlliance().equals(DriverStation.Alliance.Red)) {
       _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 5.15 - 0.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 5.01, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.75, 3.94 - 0.05, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.75, 3.38 - 0.05, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.75, 2.28 - 0.05, new Rotation2d(0)));
@@ -202,7 +208,7 @@ public class Drivetrain extends SubsystemBase {
       _cubeWaypoints.add(new Pose2d(14.75, 4.52 - 0.05, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-    } else if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
+    } else if (DriverStation.getAlliance().equals(DriverStation.Alliance.Blue)) {
       _coneWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(1.82, 5.05 + 0.02, new Rotation2d(0)));
@@ -336,7 +342,7 @@ public class Drivetrain extends SubsystemBase {
 
     Command toAlign = _moveToPosition.generateMoveToPositionCommand(
       edgePose,
-      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(5) ),
+      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
       generateAlignmentController() );
 
     Command toGoal = _moveToPosition.generateMoveToPositionCommand( 
@@ -344,38 +350,28 @@ public class Drivetrain extends SubsystemBase {
       new Pose2d(), 
       generateAlignmentController() );
 
-    SwerveModuleState[] startState = new SwerveModuleState[] {
-      new SwerveModuleState(0, Rotation2d.fromDegrees(90)),
-      new SwerveModuleState(0, Rotation2d.fromDegrees(90)),
-      new SwerveModuleState(0, Rotation2d.fromDegrees(90)),
-      new SwerveModuleState(0, Rotation2d.fromDegrees(90)) };
-
-    Command initWheelPositions = 
-      new InstantCommand(() -> lockModules( startState ), this)
-      .repeatedly().withTimeout(0.75);
-
-    return new SequentialCommandGroup(initWheelPositions, toAlign, toGoal);
+    return new SequentialCommandGroup(toAlign, toGoal);
   }
 
   public HolonomicController generateAlignmentController() {
     HolonomicController controller = new HolonomicController(
       new ProfiledPIDController(
-        _alignTranslationKp, 
-        _alignTranslationKi,
-        _alignTranslationKd,
-        _tranConstraints), 
+        _alignXTranslationKp, 
+        _alignXTranslationKi,
+        _alignXTranslationKd,
+        _tranXConstraints), 
       new ProfiledPIDController(
-        _alignTranslationKp, 
-        _alignTranslationKi,
-        _alignTranslationKd,
-        _tranConstraints), 
+        _alignYTranslationKp, 
+        _alignYTranslationKi,
+        _alignYTranslationKd,
+        _tranYConstraints), 
       new ProfiledPIDController(
         _alignRotationKp, 
         _alignRotationKi,
         _alignRotationKd,
-        _rotConstraints));
+        _rotConstraints) );
     
-    controller.xControllerIRange(-0.5, 0.5);
+    controller.xControllerIRange(-0.75, 0.75);
     controller.yControllerIRange(-0.5, 0.5);
     controller.thetaControllerIRange(-5, 5);
 
@@ -393,6 +389,14 @@ public class Drivetrain extends SubsystemBase {
   public void setRobotOriented(boolean _isRobotOriented) { isRobotOriented = _isRobotOriented; }
 
   public Pose2d getPose() { return _robotPose; }
+
+  public void resetPoseWithLL() { 
+    resetPose(
+      new Pose2d(
+        vision.getCenterLimelight().getPose().getX(), 
+        vision.getCenterLimelight().getPose().getY(), 
+        Rotation2d.fromDegrees( m_gyro.getYaw() ) ) );
+      }
 
   public ChassisSpeeds getChassisSpeeds() { return forwardKinematics; }
 

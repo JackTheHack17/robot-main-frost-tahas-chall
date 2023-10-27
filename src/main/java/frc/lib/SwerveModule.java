@@ -102,6 +102,8 @@ public class SwerveModule {
         Telemetry.setValue("drivetrain/modules/"+key+"/drive/outputVoltage", driveMotor.getMotorOutputVoltage());
         Telemetry.setValue("drivetrain/modules/"+key+"/azimuth/statorCurrent", angleMotor.getStatorCurrent());
         Telemetry.setValue("drivetrain/modules/"+key+"/drive/statorCurrent", driveMotor.getStatorCurrent());
+        Telemetry.setValue("drivetrain/modules/"+key+"/drive/Temperature", driveMotor.getTemperature());
+        Telemetry.setValue("drivetrain/modules/"+key+"/azimuth/Temperature", driveMotor.getTemperature());
     }
 
     public static double degreesToFalcon(double degrees) {
