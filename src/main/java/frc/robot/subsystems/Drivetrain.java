@@ -115,7 +115,7 @@ public class Drivetrain extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = 
     new StatorCurrentLimitConfiguration(
       true, 
-      40, 
+      25,
       40, 
       0);
 
