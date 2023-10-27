@@ -7,18 +7,24 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.Telemetry;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class moveToPosition {
     private Supplier<Pose2d> currentPose;
     private Supplier<ChassisSpeeds> currentChassisSpeeds;
-    private Drivetrain driveSub;
+    private Consumer<ChassisSpeeds> setDesiredStates;
+    private Drivetrain requirements;
     private Pose2d target = new Pose2d();
 
-    public moveToPosition( Drivetrain driveSub ) {
-        this.driveSub = driveSub;
-        currentPose = () -> driveSub.getPose();
-        currentChassisSpeeds = () -> driveSub.getChassisSpeeds();
+    public moveToPosition( 
+        Supplier<Pose2d> curPoseSupplier, Supplier<ChassisSpeeds> curSpeedSupplier, 
+        Consumer<ChassisSpeeds> setDesiredStates, Drivetrain requirements) {
+        currentPose = curPoseSupplier;
+        currentChassisSpeeds = curSpeedSupplier;
+        this.setDesiredStates = setDesiredStates;
+        this.requirements = requirements;
     }
 
     public Command generateMoveToPositionCommand( 
@@ -30,7 +36,7 @@ public class moveToPosition {
             controller );
     }
 
-    public Command generateMoveToPositionCommand( 
+    public Command generateMoveToPositionCommand(
         Pose2d targetPose, ChassisSpeeds targetChassisSpeeds, 
         Pose2d tolerance, HolonomicController controller ) {
         return new FunctionalCommand(
@@ -40,19 +46,19 @@ public class moveToPosition {
                 controller.reset( currentPose.get(), currentChassisSpeeds.get() );
                 controller.setGoal(targetPose, targetChassisSpeeds);
                 
-                driveSub.field2d.getObject( "Goal" ).setPose( controller.getPositionGoal() );
+                requirements.field2d.getObject( "Goal" ).setPose( controller.getPositionGoal() );
             },
             () -> {
-                driveSub.driveFromChassisSpeeds(
+                setDesiredStates.accept(
                     discretize( 
                         controller.calculate( currentPose.get() ) ) );
 
-                driveSub.field2d.getObject( "Setpoint" ).setPose( controller.getPositionSetpoint() );
+                requirements.field2d.getObject( "Setpoint" ).setPose( controller.getPositionSetpoint() );
                 Telemetry.getValue("PathPlanner/AtGoal", controller.atGoal() );
             }, 
-            (interrupted) -> { driveSub.joystickDrive(0, 0, 0); }, 
+            (interrupted) -> { requirements.joystickDrive(0, 0, 0); }, 
             () -> controller.atGoal(),
-            driveSub) ;
+            requirements) ;
     }
 
     public ChassisSpeeds discretize(ChassisSpeeds speeds) {

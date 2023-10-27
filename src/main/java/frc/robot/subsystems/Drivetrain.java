@@ -106,8 +106,18 @@ public class Drivetrain extends SubsystemBase {
 
   private boolean isRobotOriented = false;
   
-  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 60, 60, 0);
-  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(true, 40, 40, 0);
+  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = 
+    new StatorCurrentLimitConfiguration(
+      true, 
+      60, 
+      60, 
+      0);
+  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = 
+    new StatorCurrentLimitConfiguration(
+      true, 
+      40, 
+      40, 
+      0);
 
   private SwerveDrivePoseEstimator m_odometry;
 
@@ -224,11 +234,15 @@ public class Drivetrain extends SubsystemBase {
       _cubeWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
     }
 
-    _moveToPosition = new moveToPosition(this);
+    _moveToPosition = new moveToPosition(
+      this::getPose,
+      this::getChassisSpeeds,
+      this::driveFromChassisSpeeds,
+      this );
 
     PathPlannerServer.startServer(6969);
 
-    resetPose(vision.getCenterLimelight().getPose());
+    if(vision.getCenterLimelight().hasTarget()) resetPose(vision.getCenterLimelight().getPose());
   }
 
   @Override
@@ -333,20 +347,16 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command pathToCommand (Pose2d target) {
-    field2d.getObject("Goal").setPose(target);
-
-    Pose2d edgePose = new Pose2d(
-      m_odometry.getEstimatedPosition().getX(), 
-      target.getY(), 
-      target.getRotation() );
-
     Command toAlign = _moveToPosition.generateMoveToPositionCommand(
-      edgePose,
+      new Pose2d(
+        m_odometry.getEstimatedPosition().getX(), 
+        target.getY(), 
+        target.getRotation() ),
       new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
       generateAlignmentController() );
 
     Command toGoal = _moveToPosition.generateMoveToPositionCommand( 
-      target, 
+      target,
       new Pose2d(), 
       generateAlignmentController() );
 
