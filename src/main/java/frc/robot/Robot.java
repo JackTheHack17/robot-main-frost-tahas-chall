@@ -29,9 +29,6 @@ public class Robot extends TimedRobot {
     Telemetry.setValue("buttonBoard/joystick", "" + RobotContainer.copilotController.getJoystick().getX() + ", " + RobotContainer.copilotController.getJoystick().getY());
 
     Telemetry.setValue("general/FMSAlliance", DriverStation.getAlliance() == Alliance.Blue ? "Blue" : (DriverStation.getAlliance() == Alliance.Red ? "Red" : "Invalid") );
-    
-    if (!DriverStation.isEnabled()) 
-      if ( RobotContainer.copilotController.getRawButton(9) ) {}
 
     CommandScheduler.getInstance().run();
   }
@@ -41,17 +38,13 @@ public class Robot extends TimedRobot {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     m_robotContainer.killRumble();
 
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    if (m_autonomousCommand != null) m_autonomousCommand.schedule();
   }
 
   @Override
   public void teleopInit() {
     m_robotContainer.killRumble();
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
+    if (m_autonomousCommand != null) m_autonomousCommand.cancel();
 
     m_robotContainer.m_swerve.setRobotOriented(false);
   }

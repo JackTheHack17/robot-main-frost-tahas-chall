@@ -1,76 +1,56 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.lib.FrostConfigs;
 import frc.lib.Telemetry;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.POP;
 import frc.robot.Constants.ARM.positions;
+import java.util.function.Supplier;
 
 public class PinchersofPower extends SubsystemBase  {
   private final Compressor comp;
   private final DoubleSolenoid pusher;
-  private RobotContainer m_container;
   private final CANSparkMax spinner;
   private final CANSparkMax spinner2;
-  private final ColorSensorV3 colorSensor;
   private boolean m_cone;
   private double intakeSpeed = 0;
   private DigitalInput limitSwitch = new DigitalInput(Constants.DIO.GRIP_LIMIT_SWITCH);
+  private Supplier<positions> armPos;
 
-
-  public PinchersofPower(RobotContainer m_container) {
-    this.m_container = m_container;
+  public PinchersofPower() {
     comp = new Compressor(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH);
     pusher = new DoubleSolenoid(Constants.CAN.PCH_ID, PneumaticsModuleType.REVPH, Constants.POP.FORWARD_PNEUMATIC_CHANNEL, Constants.POP.BACKWARD_PNEUMATIC_CHANNEL);
 
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
 
-    colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = true;
 
-    spinner.restoreFactoryDefaults();
-    spinner2.restoreFactoryDefaults();
+    FrostConfigs.configIntakeMotor(spinner, false);
+    FrostConfigs.configIntakeMotor(spinner, true);
 
-    spinner.clearFaults();
-    spinner2.clearFaults();
-
-    spinner.setIdleMode(IdleMode.kBrake);
-    spinner2.setIdleMode(IdleMode.kBrake);
-
-    spinner.setSmartCurrentLimit(20);
-    spinner2.setSmartCurrentLimit(20);
-
-    spinner2.setInverted(true);
-
-    spinner.setCANTimeout(20);
-    spinner2.setCANTimeout(20);
-
-    spinner.burnFlash();
-    spinner2.burnFlash();
-
+    armPos = () -> positions.Idle;
   }
 
-  public boolean getPiece(){
-    if(limitSwitch.get()) return true;
-    return false;
+  public void setArmPos(Supplier<positions> armPos) {
+    this.armPos = armPos;
+  }
+
+  public boolean getGPDetected(){
+    return !limitSwitch.get();
   }
 
   public void closeGrip() {
@@ -108,18 +88,6 @@ public class PinchersofPower extends SubsystemBase  {
     None
   }
 
-  public GamePieces getColorSensorGamePiece () {
-    Color actualColor = colorSensor.getColor();
-    if ( colorSensor.getProximity() > 100 ) {
-      if (actualColor.green < actualColor.blue) return GamePieces.Cube;
-
-      else if (actualColor.green < actualColor.blue) return GamePieces.Cone;
-
-      else return GamePieces.None;
-
-    } else return GamePieces.None;
-  }
-
   public void intake() {
     if(!m_cone) openGrip();
     else closeGrip();
@@ -132,12 +100,8 @@ public class PinchersofPower extends SubsystemBase  {
     m_cone = (mode == GamePieces.Cone);
     spinSlow();
 
-    if(!m_cone){
-      openGrip();
-    }
+    if(!m_cone) openGrip();
   }
-
-  
 
   public Command intakeCommand() {
     return new InstantCommand(() -> intake(), this);
@@ -145,9 +109,9 @@ public class PinchersofPower extends SubsystemBase  {
 
   public Command outTakeCommand() {
     return new InstantCommand( () -> {
-      if (m_container.getArm().target == positions.Substation && m_cone) { closeGrip();} 
+      if ( armPos.get() == positions.Substation && m_cone) { closeGrip();} 
       else if ( m_cone ) {
-        if ( m_container.getArm().target == positions.ScoreLow) spinOut();  
+        if ( armPos.get() == positions.ScoreLow) spinOut();  
         spinOff();
         openGrip();
       } 
@@ -157,15 +121,37 @@ public class PinchersofPower extends SubsystemBase  {
 
   public Command spinOffCommand() { return new InstantCommand(() -> spinOff(), this); }
 
+  public boolean setClawAndIdleState(positions position) {
+    switch (position) {
+      case ScoreHighCone:
+      case ScoreHighCube:
+      case ScoreMidCone:
+      case ScoreMidCube:
+      case ScoreLow:
+        return false;
+      case Floor:
+      case FloorAlt:
+      case Substation:
+          spinIn();
+          openGrip();
+          return false;
+      case Idle:
+          spinSlow();
+          return true;
+      default:
+          spinSlow();
+          return false;
+    }
+  }
+
   @Override
   public void periodic() {
     if ( DriverStation.isEnabled() || DriverStation.isAutonomousEnabled() ) {
       spinner.set(intakeSpeed);
       spinner2.set(intakeSpeed);
 
-      if ( !limitSwitch.get() && (m_container.m_arm.target == positions.Substation || m_container.m_arm.target == positions.Floor) && m_cone && !RobotContainer.copilotController.getRawButton(15) ) {
-        closeGrip();
-      }
+      if ( getGPDetected() && (armPos.get() == positions.Substation || armPos.get() == positions.Floor) 
+      && m_cone && !RobotContainer.copilotController.getRawButton(15) ) closeGrip();
     } else {
       // prevent CAN timeouts when disabled, actual motor stoppage is handled at a lower level
       spinner.set(0);

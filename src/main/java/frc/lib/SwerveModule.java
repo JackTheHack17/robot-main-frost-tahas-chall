@@ -28,6 +28,21 @@ public class SwerveModule {
         this.key = key;
     }
 
+    public SwerveModule(int driveID, int angleID, int angleEncoderID,
+    double offset, PIDController angleController, double kF, String key) {
+        this(
+            new TalonFX(driveID, "drivetrain"), 
+            new TalonFX(angleID, "drivetrain"), 
+            new CANCoder(angleEncoderID, "drivetrain"), 
+            angleController, 
+            kF, 
+            key);
+        FrostConfigs.configDrive(driveMotor);
+        FrostConfigs.configAzimuth(angleMotor, angleEncoder);
+        FrostConfigs.configPosition(angleEncoder, offset);
+        FrostConfigs.configAzimuthPID(angleController);
+    }
+
     public void setDesiredState(SwerveModuleState desiredState) {
         this.desiredState = desiredState;
         desiredState = SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition()));
