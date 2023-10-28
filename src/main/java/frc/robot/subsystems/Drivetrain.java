@@ -82,6 +82,22 @@ public class Drivetrain extends SubsystemBase {
   private SwerveModule[] swerveModules = new SwerveModule[4];
 
   private boolean isRobotOriented = false;
+<<<<<<< HEAD
+=======
+  
+  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = 
+    new StatorCurrentLimitConfiguration(
+      true, 
+      60, 
+      60, 
+      0);
+  private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = 
+    new StatorCurrentLimitConfiguration(
+      true, 
+      40, 
+      40, 
+      0);
+>>>>>>> parent of aba58d6 (Updated current limit)
 
   private SwerveDrivePoseEstimator m_odometry;
 
