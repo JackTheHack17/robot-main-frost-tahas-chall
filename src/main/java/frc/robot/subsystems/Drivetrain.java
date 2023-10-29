@@ -35,6 +35,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -56,6 +57,7 @@ import frc.robot.Constants.ARM.positions;
 import frc.robot.commands.AutoBalance;
 import frc.robot.commands.HolonomicController;
 import frc.robot.commands.moveToPosition;
+import frc.robot.commands.HolonomicController.HolonomicConstraints;
 import frc.robot.RobotContainer;
 
 public class Drivetrain extends SubsystemBase {
@@ -73,7 +75,7 @@ public class Drivetrain extends SubsystemBase {
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds();
   private ChassisSpeeds forwardKinematics = new ChassisSpeeds();
 
-  private SwerveModuleState[] modules;
+  private SwerveModuleState[] modules = new SwerveModuleState[4];
 
   private final CANCoder FL_Position = new CANCoder(FL_CANCODER_ID, "drivetrain");
   private final CANCoder FR_Position = new CANCoder(FR_CANCODER_ID, "drivetrain");
@@ -92,15 +94,15 @@ public class Drivetrain extends SubsystemBase {
   private final TalonFX BL_Azimuth = new TalonFX(BL_AZIMUTH_ID, "drivetrain");
   private final TalonFX BR_Azimuth = new TalonFX(BR_AZIMUTH_ID, "drivetrain");
 
-  private final PIDController FL_PID = new PIDController(0.0100, 0, 0.000270); // 0.105
-  private final PIDController FR_PID = new PIDController(0.0105, 0, 0.000265);
-  private final PIDController BL_PID = new PIDController(0.0105, 0, 0.000265);
-  private final PIDController BR_PID = new PIDController(0.0100, 0, 0.000263);
+  private final PIDController FL_PID = new PIDController(0.0095, 0, 0.000275); // 0.105
+  private final PIDController FR_PID = new PIDController(0.0100, 0, 0.000270);
+  private final PIDController BL_PID = new PIDController(0.0100, 0, 0.000270);
+  private final PIDController BR_PID = new PIDController(0.0095, 0, 0.000268);
 
   private final double FL_kF = AZIMUTH_kF;
   private final double FR_kF = AZIMUTH_kF;
   private final double BL_kF = AZIMUTH_kF;
-  private final double BR_kF = 0.06;
+  private final double BR_kF = 0.05;
 
   private SwerveModule[] swerveModules = new SwerveModule[4];
 
@@ -112,12 +114,13 @@ public class Drivetrain extends SubsystemBase {
       60, 
       60, 
       0);
+
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = 
     new StatorCurrentLimitConfiguration(
       true, 
       40, 
       40, 
-      0);
+      0.2);
 
   private SwerveDrivePoseEstimator m_odometry;
 
@@ -134,16 +137,16 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKi = 0;
   private double _rotationKd = 0.085; // 0.1
 
-  private double _alignXTranslationKp = 4; //5.5;
-  private double _alignXTranslationKi = 0.085;//0.;
-  private double _alignXTranslationKd = 0;
+  private double _alignXTranslationKp = 2.5;//5; //5.5;
+  private double _alignXTranslationKi = 0.0;//0.1;//0.;
+  private double _alignXTranslationKd = 0.1;//0.05;
 
-  private double _alignYTranslationKp = 3.1; //5.5;
-  private double _alignYTranslationKi = 0.01;//0.;
-  private double _alignYTranslationKd = 0;
+  private double _alignYTranslationKp = 2.2;//3.1; //5.5;
+  private double _alignYTranslationKi = 0; //0.01;//0.;
+  private double _alignYTranslationKd = 0; //0.03;
 
-  private double _alignRotationKp = 5.8;//2.5;
-  private double _alignRotationKi = 0.02;//.42;
+  private double _alignRotationKp = 6.2;//2.5;
+  private double _alignRotationKi = 0.0;// 0.03; //.42;
   private double _alignRotationKd = 0;//.0;
 
   public Field2d field2d = new Field2d();
@@ -152,7 +155,10 @@ public class Drivetrain extends SubsystemBase {
   
   private Constraints _tranYConstraints = new Constraints(4, 8);
   private Constraints _tranXConstraints = new Constraints(4.5, 8);
-  private Constraints _rotConstraints = new Constraints(120, 60);
+  private Constraints _rotConstraints = new Constraints(360, 240);
+
+  private HolonomicConstraints _holonomicConstraints = 
+    new HolonomicConstraints(_tranXConstraints, _tranYConstraints, _rotConstraints);
 
   public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, VisionSubsystem vision) {
     this.m_gyro = m_gyro;
@@ -207,7 +213,7 @@ public class Drivetrain extends SubsystemBase {
    if (RobotContainer.getDriverAlliance().equals(DriverStation.Alliance.Red)) {
       _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 5.01, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(14.75, 5.09, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.75, 3.94 - 0.05, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.75, 3.38 - 0.05, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(14.75, 2.28 - 0.05, new Rotation2d(0)));
@@ -250,8 +256,15 @@ public class Drivetrain extends SubsystemBase {
     for(int i = 0; i <= 3; i++) swerveModules[i].telemetry();
 
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
-
+    // Telemetry.setValue("e", modules);
     robotPositionTelemetry();
+
+    // double[] e = new double[8];
+    // e[0] = modules[0].angle.getRadians();
+    // e[1] = modules[0].speedMetersPerSecond;
+    // e[2] = modules[1].angle.getRadians();
+    // e[3] = modules[2].speedMetersPerSecond;
+    // SmartDashboard.putNumberArray("e", e);
   }
 
   public void robotPositionTelemetry() {
@@ -287,7 +300,8 @@ public class Drivetrain extends SubsystemBase {
         LY * MAX_LINEAR_SPEED, 
         -LX * MAX_LINEAR_SPEED, 
         -RX * MAX_ROTATION_SPEED, 
-        m_odometry.getEstimatedPosition().getRotation().plus(Rotation2d.fromDegrees(180)));
+        m_odometry.getEstimatedPosition().getRotation().plus(Rotation2d.fromDegrees(
+          (DriverStation.getAlliance().equals(DriverStation.Alliance.Red))?  180 : 0 ) ) );
 
     else m_chassisSpeeds = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED);
 
@@ -306,6 +320,9 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void driveFromChassisSpeeds (ChassisSpeeds speeds) {
+    speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      speeds, m_odometry.getEstimatedPosition().getRotation() );
+
     modules = m_kinematics.toSwerveModuleStates( speeds );
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
     setDesiredStates();
@@ -347,13 +364,26 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command pathToCommand (Pose2d target) {
-    Command toAlign = _moveToPosition.generateMoveToPositionCommand(
-      new Pose2d(
-        m_odometry.getEstimatedPosition().getX(), 
-        target.getY(), 
-        target.getRotation() ),
-      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
-      generateAlignmentController() );
+    Command toAlign = 
+      (_robotPose.getX() < 14.05) ?
+        _moveToPosition.generateMoveToPositionCommandTimed(
+          new Pose2d(
+          14.05, 
+            target.getY(), 
+            target.getRotation() ),
+          new ChassisSpeeds(0.75, 0.0, 0),
+          new Pose2d( 0.05, 0.05, Rotation2d.fromDegrees(1.5) ),
+          _holonomicConstraints,
+          generateAlignmentController() ) 
+        :
+        _moveToPosition.generateMoveToPositionCommandTimed(
+          new Pose2d(
+            m_odometry.getEstimatedPosition().getX(), 
+            target.getY(), 
+            target.getRotation() ),
+          new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
+          _holonomicConstraints,
+          generateAlignmentController() );
 
     Command toGoal = _moveToPosition.generateMoveToPositionCommand( 
       target,
@@ -383,7 +413,7 @@ public class Drivetrain extends SubsystemBase {
     
     controller.xControllerIRange(-0.75, 0.75);
     controller.yControllerIRange(-0.5, 0.5);
-    controller.thetaControllerIRange(-5, 5);
+    controller.thetaControllerIRange(-8.5, 8.5);
 
     return controller;
   }

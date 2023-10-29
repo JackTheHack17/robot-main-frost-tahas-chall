@@ -9,6 +9,9 @@
       "limelight": {
         "open": true
       },
+      "limelight-limetwo": {
+        "open": true
+      },
       "telemetry": {
         "Arm": {
           "open": true,
@@ -56,6 +59,12 @@
           "Odometry": {
             "open": true
           }
+        },
+        "Rlimelight-limetwo": {
+          "Odometry": {
+            "open": true
+          },
+          "open": true
         },
         "drivetrain": {
           "Align": {
@@ -121,8 +130,7 @@
           "pip": {
             "open": true
           }
-        },
-        "open": true
+        }
       }
     },
     "types": {

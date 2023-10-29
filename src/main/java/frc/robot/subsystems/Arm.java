@@ -563,16 +563,17 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("Arm/stage2/internalVelocity", m_stage2.getEncoder().getVelocity());
 
         if ( DriverStation.isEnabled() || DriverStation.isAutonomousEnabled() ) {
-            // if ( m_stage1Target == 0.0 && m_stage2Target == 0.0 && m_stage3Target == 0.0 ) {
-            //     m_stage1.setVoltage(0);
-            //     m_stage2.setVoltage(0);
-            //     m_stage3.setVoltage(0);
-            //     return;
-            // }
+            double stage1Calc = MathUtil.clamp(m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), 0) + 12.0*m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -12, 12);
+            double stage2Calc = MathUtil.clamp(m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), 0) + 12.0*m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -12, 12);
+            double stage3Calc = MathUtil.clamp(m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), 0) + 12.0*m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -12, 12);
 
-            m_stage1.setVoltage( MathUtil.clamp(m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), 0) + 12.0*m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -1, 1));
-            m_stage2.setVoltage( MathUtil.clamp(m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), 0) + 12.0*m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -1, 1));
-            m_stage3.setVoltage( MathUtil.clamp(m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), 0) + 12.0*m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -1, 1));
+            Telemetry.setValue("Arm/stage1/PIDVOLT", stage1Calc);
+            Telemetry.setValue("Arm/stage2/PIDVOLT", stage2Calc);
+            Telemetry.setValue("Arm/stage3/PIDVOLT", stage3Calc);
+
+            m_stage1.setVoltage(stage1Calc);
+            m_stage2.setVoltage(stage2Calc);
+            m_stage3.setVoltage(stage3Calc);
         } else {
             // prevent CAN timeouts when disabled, actual motor stoppage is handled at a lower level
             m_stage1.set(0);

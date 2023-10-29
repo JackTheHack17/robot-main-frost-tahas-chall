@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.Telemetry;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.commands.HolonomicController.HolonomicConstraints;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -51,7 +52,7 @@ public class moveToPosition {
             () -> {
                 setDesiredStates.accept(
                     discretize( 
-                        controller.calculate( currentPose.get() ) ) );
+                        controller.calculateWithFF( currentPose.get() ) ) );
 
                 requirements.field2d.getObject( "Setpoint" ).setPose( controller.getPositionSetpoint() );
                 Telemetry.getValue("PathPlanner/AtGoal", controller.atGoal() );
@@ -59,6 +60,19 @@ public class moveToPosition {
             (interrupted) -> { requirements.joystickDrive(0, 0, 0); }, 
             () -> controller.atGoal(),
             requirements) ;
+    }
+
+    public Command generateMoveToPositionCommandTimed(
+        Pose2d targetPose, Pose2d tolerance, 
+        HolonomicConstraints profiles, HolonomicController controller ) {
+        return generateMoveToPositionCommandTimed(targetPose, new ChassisSpeeds(), tolerance, profiles, controller);
+    }
+
+    public Command generateMoveToPositionCommandTimed(
+        Pose2d targetPose, ChassisSpeeds targetChassisSpeeds, 
+        Pose2d tolerance,  HolonomicConstraints profiles, HolonomicController controller) {
+        return generateMoveToPositionCommand(targetPose, targetChassisSpeeds, tolerance, controller)
+            .withTimeout(profiles.getLongestTime(tolerance, targetChassisSpeeds));
     }
 
     public ChassisSpeeds discretize(ChassisSpeeds speeds) {
