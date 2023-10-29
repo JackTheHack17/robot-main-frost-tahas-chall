@@ -374,8 +374,7 @@ public class Drivetrain extends SubsystemBase {
           new ChassisSpeeds(0.75, 0.0, 0),
           new Pose2d( 0.05, 0.05, Rotation2d.fromDegrees(1.5) ),
           _holonomicConstraints,
-          generateAlignmentController() ) 
-        :
+          generateAlignmentController() ) :
         _moveToPosition.generateMoveToPositionCommandTimed(
           new Pose2d(
             m_odometry.getEstimatedPosition().getX(), 

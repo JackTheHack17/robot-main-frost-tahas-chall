@@ -130,7 +130,8 @@
           "pip": {
             "open": true
           }
-        }
+        },
+        "open": true
       }
     },
     "types": {
