@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import frc.lib.Telemetry;
 
 public class HolonomicController {
     private ProfiledPIDController xController;
@@ -145,13 +147,24 @@ public class HolonomicController {
     }
 
     public ChassisSpeeds calculateWithFF(Pose2d robotPose) {
-        return new ChassisSpeeds(
+
+        ChassisSpeeds speeds = new ChassisSpeeds(
             xController.calculate( robotPose.getX() )
             + xController.getSetpoint().velocity,
             yController.calculate( robotPose.getY() )
             + yController.getSetpoint().velocity,
             thetaController.calculate( robotPose.getRotation().getRadians()
             + thetaController.getSetpoint().velocity ) );
+        
+        Telemetry.setValue("ALIGNMENT/XOUTPUT", speeds.vxMetersPerSecond);
+        Telemetry.setValue("ALIGNMENT/YOUTPUT", speeds.vyMetersPerSecond);
+        Telemetry.setValue("ALIGNMENT/OMEGAOUTPUT", speeds.omegaRadiansPerSecond);
+
+        Telemetry.setValue("ALIGNMENT/XPIDOUTPUT", speeds.vxMetersPerSecond - xController.getSetpoint().velocity);
+        Telemetry.setValue("ALIGNMENT/YPIDOUTPUT", speeds.vyMetersPerSecond - yController.getSetpoint().velocity);
+        Telemetry.setValue("ALIGNMENT/OMEGAPIDOUTPUT", speeds.omegaRadiansPerSecond - thetaController.getSetpoint().velocity);
+
+        return speeds;
     }
 
     public void setGoal(Pose2d goalPose) {
@@ -201,5 +214,43 @@ public class HolonomicController {
 
     public void thetaControllerIRange(double lowerBound, double higherBound) {
         thetaController.setIntegratorRange( lowerBound, higherBound );
+    }
+
+    public static class HolonomicConstraints {
+        Constraints xConstraints;
+        Constraints yConstraints;
+        Constraints thetaConstraints;
+
+        public HolonomicConstraints(Constraints xConstraints, Constraints yConstraints, Constraints thetaConstraints) {
+                this.xConstraints = xConstraints;
+                this.yConstraints = yConstraints;
+                this.thetaConstraints = thetaConstraints;
+        }
+
+        public double getLongestTime(State xGoal, State yGoal, State thetaGoal) {
+            TrapezoidProfile xProfile = new TrapezoidProfile(xConstraints, xGoal);
+            TrapezoidProfile yProfile = new TrapezoidProfile(yConstraints, yGoal);
+            TrapezoidProfile thetaProfile = new TrapezoidProfile(thetaConstraints, thetaGoal);
+
+            return Math.max(
+                Math.max(xProfile.totalTime(), yProfile.totalTime()), thetaProfile.totalTime());
+        }
+
+        public double getLongestTime(Pose2d posGoal, ChassisSpeeds velGoal) {
+            return getLongestTime(
+                new State(
+                    posGoal.getX(), 
+                    velGoal.vxMetersPerSecond ),
+                new State(
+                    posGoal.getY(),
+                    velGoal.vyMetersPerSecond ), 
+                new State(
+                    posGoal.getRotation().getDegrees(),
+                    velGoal.omegaRadiansPerSecond ) );
+        }
+
+        public double getLongestTime(Pose2d posGoal) {
+            return getLongestTime(posGoal, new ChassisSpeeds());
+        }
     }
 }
