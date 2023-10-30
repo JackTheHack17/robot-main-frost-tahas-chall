@@ -35,7 +35,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -159,6 +158,8 @@ public class Drivetrain extends SubsystemBase {
 
   private HolonomicConstraints _holonomicConstraints = 
     new HolonomicConstraints(_tranXConstraints, _tranYConstraints, _rotConstraints);
+
+  Pose2d _targetPose = new Pose2d();
 
   public Drivetrain(Pigeon m_gyro, Arm m_arm, PinchersofPower m_claw, VisionSubsystem vision) {
     this.m_gyro = m_gyro;
@@ -365,7 +366,7 @@ public class Drivetrain extends SubsystemBase {
 
   public Command pathToCommand (Pose2d target) {
     Command toAlign = 
-      (_robotPose.getX() < 14.05) ?
+      (_robotPose.getX() < 14.05 && !(_robotPose.getX() < 8)) ?
         _moveToPosition.generateMoveToPositionCommandTimed(
           new Pose2d(
           14.05, 
@@ -381,6 +382,7 @@ public class Drivetrain extends SubsystemBase {
             m_odometry.getEstimatedPosition().getX(), 
             target.getY(), 
             target.getRotation() ),
+            new ChassisSpeeds(0.75, 0.0, 0),
           new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
           _holonomicConstraints,
           generateAlignmentController() );

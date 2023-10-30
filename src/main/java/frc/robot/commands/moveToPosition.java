@@ -71,8 +71,9 @@ public class moveToPosition {
     public Command generateMoveToPositionCommandTimed(
         Pose2d targetPose, ChassisSpeeds targetChassisSpeeds, 
         Pose2d tolerance,  HolonomicConstraints profiles, HolonomicController controller) {
+        Telemetry.setValue("Alignment/MOM", profiles.getLongestTime(targetPose, targetChassisSpeeds));
         return generateMoveToPositionCommand(targetPose, targetChassisSpeeds, tolerance, controller)
-            .withTimeout(profiles.getLongestTime(tolerance, targetChassisSpeeds));
+            .withTimeout(profiles.getLongestTime(targetPose, targetChassisSpeeds));
     }
 
     public ChassisSpeeds discretize(ChassisSpeeds speeds) {
