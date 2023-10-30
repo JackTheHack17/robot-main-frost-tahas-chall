@@ -372,7 +372,7 @@ public class Drivetrain extends SubsystemBase {
           14.05, 
             target.getY(), 
             target.getRotation() ),
-          new ChassisSpeeds(0.75, 0.0, 0),
+          new ChassisSpeeds(0.75, 0.0, 0.0),
           new Pose2d( 0.05, 0.05, Rotation2d.fromDegrees(1.5) ),
           _holonomicConstraints,
           generateAlignmentController() ) 
@@ -382,7 +382,7 @@ public class Drivetrain extends SubsystemBase {
             m_odometry.getEstimatedPosition().getX(), 
             target.getY(), 
             target.getRotation() ),
-            new ChassisSpeeds(0.75, 0.0, 0),
+            new ChassisSpeeds(0.75, 0.0, 0.0),
           new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
           _holonomicConstraints,
           generateAlignmentController() );

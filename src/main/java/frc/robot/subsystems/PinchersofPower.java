@@ -3,16 +3,13 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,7 +26,6 @@ public class PinchersofPower extends SubsystemBase  {
   private RobotContainer m_container;
   private final CANSparkMax spinner;
   private final CANSparkMax spinner2;
-  private final ColorSensorV3 colorSensor;
   private boolean m_cone;
   private double intakeSpeed = 0;
   private DigitalInput limitSwitch = new DigitalInput(Constants.DIO.GRIP_LIMIT_SWITCH);
@@ -43,7 +39,6 @@ public class PinchersofPower extends SubsystemBase  {
     spinner = new CANSparkMax(Constants.CAN.GRIP_LEFT_ID, MotorType.kBrushless);
     spinner2 = new CANSparkMax(Constants.CAN.GRIP_RIGHT_ID, MotorType.kBrushless);
 
-    colorSensor = new ColorSensorV3(I2C.Port.kMXP);
     m_cone = true;
 
     spinner.restoreFactoryDefaults();
@@ -106,18 +101,6 @@ public class PinchersofPower extends SubsystemBase  {
     Cone,
     Cube,
     None
-  }
-
-  public GamePieces getColorSensorGamePiece () {
-    Color actualColor = colorSensor.getColor();
-    if ( colorSensor.getProximity() > 100 ) {
-      if (actualColor.green < actualColor.blue) return GamePieces.Cube;
-
-      else if (actualColor.green < actualColor.blue) return GamePieces.Cone;
-
-      else return GamePieces.None;
-
-    } else return GamePieces.None;
   }
 
   public void intake() {
