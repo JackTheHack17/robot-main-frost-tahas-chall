@@ -129,6 +129,13 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d _robotPose = new Pose2d();
   private Pose2d _lastPose = _robotPose;
 
+  private Pose2d topLeftNode = new Pose2d(11.1, 4.5, new Rotation2d());
+  private Pose2d topRightNode = new Pose2d(14.05, 4.5, new Rotation2d());
+  private Pose2d bottomLeftNode = new Pose2d(11.1, 1.5, new Rotation2d());
+  private Pose2d bottomRightNode = new Pose2d(14.05, 1.5, new Rotation2d());
+
+  private List<Pose2d> rightNodes = new ArrayList<>();
+
   private double _translationKp = 2.40;// 2.35//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
   private double _translationKd = 0;
@@ -211,20 +218,24 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.setSecondaryCurrentLimit(60);
     shwerveDrive.burnFlash();
 
+    rightNodes.add(bottomRightNode);
+    rightNodes.add(topRightNode);
+
    if (RobotContainer.getDriverAlliance().equals(DriverStation.Alliance.Red)) {
-      _coneWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 5.09, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 3.94 - 0.05, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 3.38 - 0.05, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 2.28 - 0.05, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 1.67, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(14.75, 0.47 + 0.05, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.75, 1.13 - 0.05, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.75, 2.95 - 0.05, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(14.75, 4.52 - 0.05, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(0.76, 6.13, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(0.76, 7.49, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(0.76, 6.13, Rotation2d.fromDegrees(180)));
+      _coneWaypoints.add(new Pose2d(0.76, 7.49, Rotation2d.fromDegrees(180)));
+      _coneWaypoints.add(new Pose2d(14.75, 5.09, new Rotation2d()));
+      _coneWaypoints.add(new Pose2d(14.75, 3.94 - 0.05, new Rotation2d()));
+      _coneWaypoints.add(new Pose2d(14.75, 3.38 - 0.05, new Rotation2d()));
+      _coneWaypoints.add(new Pose2d(14.75, 2.28 - 0.05, new Rotation2d()));
+      _coneWaypoints.add(new Pose2d(14.75, 1.67, new Rotation2d()));
+      _coneWaypoints.add(new Pose2d(14.75, 0.47 + 0.05, new Rotation2d()));
+
+      _cubeWaypoints.add(new Pose2d(0.76, 6.13, Rotation2d.fromDegrees(180)));
+      _cubeWaypoints.add(new Pose2d(0.76, 7.49, Rotation2d.fromDegrees(180)));
+      _cubeWaypoints.add(new Pose2d(14.75, 1.13 - 0.05, new Rotation2d()));
+      _cubeWaypoints.add(new Pose2d(14.75, 2.95 - 0.05, new Rotation2d()));
+      _cubeWaypoints.add(new Pose2d(14.75, 4.52 - 0.05, new Rotation2d()));
     } else if (DriverStation.getAlliance().equals(DriverStation.Alliance.Blue)) {
       _coneWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
       _coneWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
@@ -352,6 +363,59 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.set(0);
   }
 
+  public List<Pose2d> generateWaypoints(Pose2d target) {
+    List<Pose2d> waypoints = new ArrayList<Pose2d>();
+
+    if( (_robotPose.getX() > 14.05) && (_robotPose.getX() < 8) ) {
+      waypoints.add(new Pose2d(
+        m_odometry.getEstimatedPosition().getX(), 
+        target.getY(), 
+        target.getRotation() ));
+        System.out.println("\n\n\n\n\n\nNONE\n\n\n\n\n\n");
+    } else if(target.getY() > 1.5 && target.getY() < 4) {
+      if(_robotPose.getY() < 1.5) {
+        System.out.println("\n\n\n\n\n\nTOP\n\n\n\n\n\n");
+        waypoints.add(bottomRightNode);
+      }
+
+      if(_robotPose.getY() > 1.5 && _robotPose.getY() < 4) {
+        double topDist = 
+          _robotPose.minus(topLeftNode).getTranslation().getNorm()
+          +  target.minus(topRightNode).getTranslation().getNorm();
+        double bottomDist = 
+          _robotPose.minus(bottomLeftNode).getTranslation().getNorm()
+          +  target.minus(bottomRightNode).getTranslation().getNorm();
+        System.out.println("\n\n\n\n\n\n" + topDist + " " + bottomDist + "\n\n\n\n\n\n");
+
+        if(topDist <= bottomDist) {
+          waypoints.add(topLeftNode);
+          waypoints.add(topRightNode);
+          System.out.println("\n\n\n\n\n\nTOP BOTTOM\n\n\n\n\n\n");
+        } else if (bottomDist < topDist) {
+          System.out.println("\n\n\n\n\n\nMIDDLE BOTTOM\n\n\n\n\n\n");
+          waypoints.add(bottomLeftNode);
+          waypoints.add(bottomRightNode);
+        }
+      } else if(_robotPose.getY() > 4) {
+        System.out.println("\n\n\n\n\n\nBOTTOM\n\n\n\n\n\n");
+        waypoints.add(topRightNode);
+      }
+    } else if(_robotPose.getY() > 1.5 && _robotPose.getY() < 4) waypoints.add( target.nearest(rightNodes) );
+
+    if((_robotPose.getX() > 8))
+      waypoints.add(new Pose2d(
+        14.05,
+        target.getY(),
+        target.getRotation() ) );
+
+    waypoints.add(target);
+
+    System.out.println("\n\n\n\n\n\nDONE\n\n\n\n\n\n");
+
+
+    return waypoints;
+  }
+
   public Command moveToPositionCommand () {
     Pose2d actualPose = _robotPose; 
 
@@ -361,7 +425,7 @@ public class Drivetrain extends SubsystemBase {
     poseToTelemetry(actualPose, "Align/startPose");
     poseToTelemetry(closest, "Align/choosenWaypoint");
 
-    return pathToCommand( closest );
+    return pathToCommand( generateWaypoints( closest ) );
   }
 
   public Command pathToCommand (Pose2d target) {
@@ -419,6 +483,41 @@ public class Drivetrain extends SubsystemBase {
 
     return controller;
   }
+
+  public Command pathToCommand(List<Pose2d> waypoints) {
+    field2d.getObject("Targets").setPoses(waypoints);
+    SequentialCommandGroup commands = new SequentialCommandGroup();
+
+    for(int i = 0; i < waypoints.size() - 1; i++) {
+      ChassisSpeeds speed;
+      try {
+        if(waypoints.get(i).getY() == waypoints.get(i + 1).getY()) 
+          speed = new ChassisSpeeds(0.0, 0.75, 0.0);
+        if(waypoints.get(i).getX() == waypoints.get(i + 1).getX())
+          speed = new ChassisSpeeds(0.75, 0.0, 0.0);
+        else speed = new ChassisSpeeds(0.0, 0.0, 0.0);
+      } catch (Exception e) {
+        speed = new ChassisSpeeds(0.0, 0.0, 0.0);
+      }
+
+    commands.addCommands(
+      _moveToPosition.generateMoveToPositionCommandTimed(
+        waypoints.get(i),
+        speed,
+        new Pose2d( 0.05, 0.05, Rotation2d.fromDegrees(1.5) ),
+        _holonomicConstraints,
+        generateAlignmentController() ) );
+    }
+
+    commands.addCommands(
+      _moveToPosition.generateMoveToPositionCommand(
+        waypoints.get(waypoints.size() - 1 ),
+        new Pose2d(), 
+        generateAlignmentController() ));
+
+    return commands;
+  }
+
 
   public double getGyroAngle() { return m_gyro.getPitch(); }
 
