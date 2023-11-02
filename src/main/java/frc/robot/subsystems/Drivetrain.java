@@ -372,13 +372,13 @@ public class Drivetrain extends SubsystemBase {
         target.getY(), 
         target.getRotation() ));
         System.out.println("\n\n\n\n\n\nNONE\n\n\n\n\n\n");
-    } else if(target.getY() > 1.5 && target.getY() < 4) {
-      if(_robotPose.getY() < 1.5) {
+    } else if(inBetween(target.getY(), 1.5, 4)) {
+      if(lessThan(_robotPose.getY(), 1)) {
         System.out.println("\n\n\n\n\n\nTOP\n\n\n\n\n\n");
         waypoints.add(bottomRightNode);
       }
 
-      if(_robotPose.getY() > 1.5 && _robotPose.getY() < 4) {
+      if(inBetween(_robotPose.getY(), 1.5, 4)) {
         double topDist = 
           _robotPose.minus(topLeftNode).getTranslation().getNorm()
           +  target.minus(topRightNode).getTranslation().getNorm();
@@ -396,11 +396,11 @@ public class Drivetrain extends SubsystemBase {
           waypoints.add(bottomLeftNode);
           waypoints.add(bottomRightNode);
         }
-      } else if(_robotPose.getY() > 4) {
+      } else if(greaterThan(_robotPose.getY(), 4)) {
         System.out.println("\n\n\n\n\n\nBOTTOM\n\n\n\n\n\n");
         waypoints.add(topRightNode);
       }
-    } else if(_robotPose.getY() > 1.5 && _robotPose.getY() < 4) waypoints.add( target.nearest(rightNodes) );
+    } else if(inBetween(_robotPose.getY(), 1.5, 4)) waypoints.add( target.nearest(rightNodes) );
 
     if((_robotPose.getX() > 8))
       waypoints.add(new Pose2d(
@@ -457,6 +457,24 @@ public class Drivetrain extends SubsystemBase {
       generateAlignmentController() );
 
     return new SequentialCommandGroup(toAlign, toGoal);
+  }
+
+  public boolean inBetween(double target, double x, double y) {
+    return 
+      ((target + ROBOT_WIDTH_METERS/2) > x && (target + ROBOT_WIDTH_METERS/2 < y)) || 
+      ((target - ROBOT_WIDTH_METERS/2) > x && (target - ROBOT_WIDTH_METERS/2 < y));
+  }
+
+  public boolean greaterThan(double target, double x) {
+    return 
+      ((target + ROBOT_WIDTH_METERS/2) > x) ||
+      ((target - ROBOT_WIDTH_METERS/2) > x);
+  }
+
+  public boolean lessThan(double target, double x) {
+    return 
+      ((target + ROBOT_WIDTH_METERS/2) < x) ||
+      ((target - ROBOT_WIDTH_METERS/2) < x);
   }
 
   public HolonomicController generateAlignmentController() {
