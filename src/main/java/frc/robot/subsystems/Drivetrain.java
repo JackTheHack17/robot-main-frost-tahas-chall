@@ -93,12 +93,12 @@ public class Drivetrain extends SubsystemBase {
   private final TalonFX BL_Azimuth = new TalonFX(BL_AZIMUTH_ID, "drivetrain");
   private final TalonFX BR_Azimuth = new TalonFX(BR_AZIMUTH_ID, "drivetrain");
 
-  private final PIDController FL_PID = new PIDController(0.0095, 0, 0.000275); // 0.105
-  private final PIDController FR_PID = new PIDController(0.0100, 0, 0.000270);
-  private final PIDController BL_PID = new PIDController(0.0100, 0, 0.000270);
-  private final PIDController BR_PID = new PIDController(0.0095, 0, 0.000268);
+  private final PIDController FL_PID = new PIDController(0.0094, 0, 0.000277); // 0.105
+  private final PIDController FR_PID = new PIDController(0.0095, 0, 0.000270);
+  private final PIDController BL_PID = new PIDController(0.0096, 0, 0.000270);
+  private final PIDController BR_PID = new PIDController(0.0093, 0, 0.000270);
 
-  private final double FL_kF = AZIMUTH_kF;
+  private final double FL_kF = 0.047;
   private final double FR_kF = AZIMUTH_kF;
   private final double BL_kF = AZIMUTH_kF;
   private final double BR_kF = 0.05;
@@ -117,7 +117,7 @@ public class Drivetrain extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration AZIMUTH_CURRENT_LIMIT = 
     new StatorCurrentLimitConfiguration(
       true, 
-      40, 
+      30, 
       40, 
       0.2);
 
@@ -129,12 +129,10 @@ public class Drivetrain extends SubsystemBase {
   private Pose2d _robotPose = new Pose2d();
   private Pose2d _lastPose = _robotPose;
 
-  private Pose2d topLeftNode = new Pose2d(11.1, 4.5, new Rotation2d());
-  private Pose2d topRightNode = new Pose2d(14.05, 4.5, new Rotation2d());
-  private Pose2d bottomLeftNode = new Pose2d(11.1, 1.5, new Rotation2d());
-  private Pose2d bottomRightNode = new Pose2d(14.05, 1.5, new Rotation2d());
-
-  private List<Pose2d> rightNodes = new ArrayList<>();
+  private double downChargeLine = 1.0;
+  private double upChargeLine = 4.5;
+  private double rightChargeLine = 14.05;
+  private double leftChargeLine = 11.2;
 
   private double _translationKp = 2.40;// 2.35//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
   private double _translationKi = 0;
@@ -143,13 +141,13 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKi = 0;
   private double _rotationKd = 0.085; // 0.1
 
-  private double _alignXTranslationKp = 2.5;//5; //5.5;
+  private double _alignXTranslationKp = 3.0;//5.5;//5; //5.5;
   private double _alignXTranslationKi = 0.0;//0.1;//0.;
-  private double _alignXTranslationKd = 0.1;//0.05;
+  private double _alignXTranslationKd = 0.03;//0.05;
 
-  private double _alignYTranslationKp = 2.2;//3.1; //5.5;
-  private double _alignYTranslationKi = 0; //0.01;//0.;
-  private double _alignYTranslationKd = 0; //0.03;
+  private double _alignYTranslationKp = 2.5;//2.2;//3.1; //5.5;
+  private double _alignYTranslationKi = 0.00; //0.01;//0.;
+  private double _alignYTranslationKd = 0.02; //0.03;
 
   private double _alignRotationKp = 6.2;//2.5;
   private double _alignRotationKi = 0.0;// 0.03; //.42;
@@ -159,8 +157,8 @@ public class Drivetrain extends SubsystemBase {
 
   private moveToPosition _moveToPosition;
   
-  private Constraints _tranYConstraints = new Constraints(4, 8);
-  private Constraints _tranXConstraints = new Constraints(4.5, 8);
+  private Constraints _tranYConstraints = new Constraints(4, 6);
+  private Constraints _tranXConstraints = new Constraints(3, 5);
   private Constraints _rotConstraints = new Constraints(360, 240);
 
   private HolonomicConstraints _holonomicConstraints = 
@@ -218,13 +216,10 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.setSecondaryCurrentLimit(60);
     shwerveDrive.burnFlash();
 
-    rightNodes.add(bottomRightNode);
-    rightNodes.add(topRightNode);
-
    if (RobotContainer.getDriverAlliance().equals(DriverStation.Alliance.Red)) {
       _coneWaypoints.add(new Pose2d(0.76, 6.13, Rotation2d.fromDegrees(180)));
       _coneWaypoints.add(new Pose2d(0.76, 7.49, Rotation2d.fromDegrees(180)));
-      _coneWaypoints.add(new Pose2d(14.75, 5.09, new Rotation2d()));
+      _coneWaypoints.add(new Pose2d(14.75, 4.98, new Rotation2d()));
       _coneWaypoints.add(new Pose2d(14.75, 3.94 - 0.05, new Rotation2d()));
       _coneWaypoints.add(new Pose2d(14.75, 3.38 - 0.05, new Rotation2d()));
       _coneWaypoints.add(new Pose2d(14.75, 2.28 - 0.05, new Rotation2d()));
@@ -265,7 +260,7 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    for(int i = 0; i <= 3; i++) swerveModules[i].telemetry();
+    for(int i = 0; i < swerveModules.length; i++) swerveModules[i].telemetry();
 
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
     // Telemetry.setValue("e", modules);
@@ -284,7 +279,9 @@ public class Drivetrain extends SubsystemBase {
     m_odometry.addVisionMeasurement(
       vision.getCenterLimelight().getPose(), 
       Timer.getFPGATimestamp() - vision.getCenterLimelight().getLatency(),
-      VecBuilder.fill(0.9, 0.9, 10000000) );
+      VecBuilder.fill(
+        3.1 * vision.getCenterLimelight().getTarget().getTranslation().getNorm(), 
+        3.1 * vision.getCenterLimelight().getTarget().getTranslation().getNorm(), 10000000) );
 
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
@@ -340,15 +337,6 @@ public class Drivetrain extends SubsystemBase {
     setDesiredStates();
   }
 
-  public void lockModules ( SwerveModuleState[] modules ) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
-    m_chassisSpeeds = discretize(m_kinematics.toChassisSpeeds(modules));
-    
-    modules = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
-
-    for(int i = 0; i <= 3; i++) swerveModules[i].setLockedState(modules[i]);
-  }
-
   public void stopModules () { for(int i = 0; i <= 3; i++) swerveModules[i].stopMotors(); }
 
   public void setDesiredStates() { for(int i = 0; i <= 3; i++) swerveModules[i].setDesiredState( modules[i] ); }
@@ -363,57 +351,46 @@ public class Drivetrain extends SubsystemBase {
     shwerveDrive.set(0);
   }
 
-  public List<Pose2d> generateWaypoints(Pose2d target) {
+  public List<Pose2d> optimizeWaypoints(Pose2d target) {
     List<Pose2d> waypoints = new ArrayList<Pose2d>();
+    if(_robotPose.getY() < downChargeLine) waypoints.add(linearOptimize( target, downChargeLine) );
+    else if(_robotPose.getY() > upChargeLine) waypoints.add(linearOptimize(target,  upChargeLine ) );
+    else if(_robotPose.getY() > downChargeLine && _robotPose.getY() < upChargeLine) {
+      List<Pose2d> onTheWay = new ArrayList<Pose2d>();
+      onTheWay.add( new Pose2d( _robotPose.getX(),   upChargeLine, new Rotation2d() ) );
+      onTheWay.add( new Pose2d( _robotPose.getX(), downChargeLine, new Rotation2d() ) );
+      Pose2d nearest = _robotPose.nearest( onTheWay );
 
-    if( (_robotPose.getX() > 14.05) && (_robotPose.getX() < 8) ) {
-      waypoints.add(new Pose2d(
-        m_odometry.getEstimatedPosition().getX(), 
-        target.getY(), 
-        target.getRotation() ));
-        System.out.println("\n\n\n\n\n\nNONE\n\n\n\n\n\n");
-    } else if(inBetween(target.getY(), 1.5, 4)) {
-      if(lessThan(_robotPose.getY(), 1)) {
-        System.out.println("\n\n\n\n\n\nTOP\n\n\n\n\n\n");
-        waypoints.add(bottomRightNode);
-      }
+      // Slope point form
+      double a = _robotPose.getY();
+      double b = _robotPose.getX();
+      double m = (a - target.getY()) / (b - target.getX());
+      double xIntersection = m * (nearest.getY() - b) + a;
+      double yIntersection = ( (rightChargeLine - a) / m ) + b;
 
-      if(inBetween(_robotPose.getY(), 1.5, 4)) {
-        double topDist = 
-          _robotPose.minus(topLeftNode).getTranslation().getNorm()
-          +  target.minus(topRightNode).getTranslation().getNorm();
-        double bottomDist = 
-          _robotPose.minus(bottomLeftNode).getTranslation().getNorm()
-          +  target.minus(bottomRightNode).getTranslation().getNorm();
-        System.out.println("\n\n\n\n\n\n" + topDist + " " + bottomDist + "\n\n\n\n\n\n");
-
-        if(topDist <= bottomDist) {
-          waypoints.add(topLeftNode);
-          waypoints.add(topRightNode);
-          System.out.println("\n\n\n\n\n\nTOP BOTTOM\n\n\n\n\n\n");
-        } else if (bottomDist < topDist) {
-          System.out.println("\n\n\n\n\n\nMIDDLE BOTTOM\n\n\n\n\n\n");
-          waypoints.add(bottomLeftNode);
-          waypoints.add(bottomRightNode);
-        }
-      } else if(greaterThan(_robotPose.getY(), 4)) {
-        System.out.println("\n\n\n\n\n\nBOTTOM\n\n\n\n\n\n");
-        waypoints.add(topRightNode);
-      }
-    } else if(inBetween(_robotPose.getY(), 1.5, 4)) waypoints.add( target.nearest(rightNodes) );
-
-    if((_robotPose.getX() > 8))
-      waypoints.add(new Pose2d(
-        14.05,
-        target.getY(),
-        target.getRotation() ) );
-
-    waypoints.add(target);
-
-    System.out.println("\n\n\n\n\n\nDONE\n\n\n\n\n\n");
-
+      if(target.getY() > downChargeLine && target.getY() < upChargeLine) {
+        waypoints.add( nearest );
+        waypoints.add( new Pose2d(14.05, nearest.getY(), new Rotation2d() ) );
+        waypoints.add( new Pose2d(14.05, target.getY(), new Rotation2d() ) );
+      } else if((xIntersection > leftChargeLine && xIntersection < rightChargeLine) ||
+                (yIntersection > downChargeLine && yIntersection < upChargeLine   )) {
+        waypoints.add( nearest );
+        waypoints.add( new Pose2d(14.05, target.getY(), new Rotation2d() ) );
+      } else waypoints.add( new Pose2d(14.05, target.getY(), new Rotation2d() ) );
+    }
 
     return waypoints;
+  }
+
+  public Pose2d linearOptimize(Pose2d target, double avoidanceLine) {
+    // Uses point slope form to find the equation of the line between the robot and the target
+    double a = _robotPose.getY();
+    double b = _robotPose.getX();
+    double slope = (a - target.getY()) / (b - target.getX());
+    double intersection = slope * (avoidanceLine - b) + a;
+
+    if(intersection > 14.05) return (new Pose2d(14.05, downChargeLine, new Rotation2d(0)));
+    return new Pose2d(14.05, target.getY(), target.getRotation());
   }
 
   public Command moveToPositionCommand () {
@@ -424,32 +401,20 @@ public class Drivetrain extends SubsystemBase {
 
     poseToTelemetry(actualPose, "Align/startPose");
     poseToTelemetry(closest, "Align/choosenWaypoint");
-
-    return pathToCommand( generateWaypoints( closest ) );
+    if(_robotPose.getX() > 14.05) return pathToCommand(closest);
+    return pathToCommand( optimizeWaypoints( closest ) );
   }
 
   public Command pathToCommand (Pose2d target) {
-    Command toAlign = 
-      (_robotPose.getX() < 14.05 && !(_robotPose.getX() < 8)) ?
-        _moveToPosition.generateMoveToPositionCommandTimed(
-          new Pose2d(
-          14.05, 
-            target.getY(), 
-            target.getRotation() ),
-          new ChassisSpeeds(0.75, 0.0, 0.0),
-          new Pose2d( 0.05, 0.05, Rotation2d.fromDegrees(1.5) ),
-          _holonomicConstraints,
-          generateAlignmentController() ) 
-        :
-        _moveToPosition.generateMoveToPositionCommandTimed(
-          new Pose2d(
-            m_odometry.getEstimatedPosition().getX(), 
-            target.getY(), 
-            target.getRotation() ),
-            new ChassisSpeeds(0.75, 0.0, 0.0),
-          new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
-          _holonomicConstraints,
-          generateAlignmentController() );
+    Command toAlign = _moveToPosition.generateMoveToPositionCommandTimed(
+      new Pose2d(
+        m_odometry.getEstimatedPosition().getX(), 
+        target.getY(), 
+        target.getRotation() ),
+        new ChassisSpeeds(0.75, 0.0, 0.0),
+      new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
+      _holonomicConstraints,
+      generateAlignmentController() );
 
     Command toGoal = _moveToPosition.generateMoveToPositionCommand( 
       target,
@@ -459,22 +424,26 @@ public class Drivetrain extends SubsystemBase {
     return new SequentialCommandGroup(toAlign, toGoal);
   }
 
-  public boolean inBetween(double target, double x, double y) {
-    return 
-      ((target + ROBOT_WIDTH_METERS/2) > x && (target + ROBOT_WIDTH_METERS/2 < y)) || 
-      ((target - ROBOT_WIDTH_METERS/2) > x && (target - ROBOT_WIDTH_METERS/2 < y));
-  }
+  public Command pathToCommand(List<Pose2d> waypoints) {
+    field2d.getObject("Targets").setPoses(waypoints);
+    SequentialCommandGroup commands = new SequentialCommandGroup();
 
-  public boolean greaterThan(double target, double x) {
-    return 
-      ((target + ROBOT_WIDTH_METERS/2) > x) ||
-      ((target - ROBOT_WIDTH_METERS/2) > x);
-  }
+    for(int i = 0; i < waypoints.size() - 1; i++) {
+      commands.addCommands(
+        _moveToPosition.generateMoveToPositionCommandTimed(
+          waypoints.get(i),
+          new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
+          _holonomicConstraints,
+          generateAlignmentController() ) );
+    }
 
-  public boolean lessThan(double target, double x) {
-    return 
-      ((target + ROBOT_WIDTH_METERS/2) < x) ||
-      ((target - ROBOT_WIDTH_METERS/2) < x);
+    commands.addCommands(
+      _moveToPosition.generateMoveToPositionCommand(
+        waypoints.get(waypoints.size() - 1 ),
+        new Pose2d(), 
+        generateAlignmentController() ));
+
+    return commands;
   }
 
   public HolonomicController generateAlignmentController() {
@@ -500,40 +469,6 @@ public class Drivetrain extends SubsystemBase {
     controller.thetaControllerIRange(-8.5, 8.5);
 
     return controller;
-  }
-
-  public Command pathToCommand(List<Pose2d> waypoints) {
-    field2d.getObject("Targets").setPoses(waypoints);
-    SequentialCommandGroup commands = new SequentialCommandGroup();
-
-    for(int i = 0; i < waypoints.size() - 1; i++) {
-      ChassisSpeeds speed;
-      try {
-        if(waypoints.get(i).getY() == waypoints.get(i + 1).getY()) 
-          speed = new ChassisSpeeds(0.0, 0.75, 0.0);
-        if(waypoints.get(i).getX() == waypoints.get(i + 1).getX())
-          speed = new ChassisSpeeds(0.75, 0.0, 0.0);
-        else speed = new ChassisSpeeds(0.0, 0.0, 0.0);
-      } catch (Exception e) {
-        speed = new ChassisSpeeds(0.0, 0.0, 0.0);
-      }
-
-    commands.addCommands(
-      _moveToPosition.generateMoveToPositionCommandTimed(
-        waypoints.get(i),
-        speed,
-        new Pose2d( 0.05, 0.05, Rotation2d.fromDegrees(1.5) ),
-        _holonomicConstraints,
-        generateAlignmentController() ) );
-    }
-
-    commands.addCommands(
-      _moveToPosition.generateMoveToPositionCommand(
-        waypoints.get(waypoints.size() - 1 ),
-        new Pose2d(), 
-        generateAlignmentController() ));
-
-    return commands;
   }
 
 

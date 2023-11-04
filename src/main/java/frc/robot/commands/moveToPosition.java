@@ -40,6 +40,10 @@ public class moveToPosition {
     public Command generateMoveToPositionCommand(
         Pose2d targetPose, ChassisSpeeds targetChassisSpeeds, 
         Pose2d tolerance, HolonomicController controller ) {
+        final double xKi = controller.getXController().getI();
+        final double yKi = controller.getYController().getI();
+        final double thetaKi = controller.getThetaController().getI();
+
         return new FunctionalCommand(
             () -> {
                 this.target = targetPose;
@@ -50,6 +54,10 @@ public class moveToPosition {
                 requirements.field2d.getObject( "Goal" ).setPose( controller.getPositionGoal() );
             },
             () -> {
+                controller.xIZone(xKi, controller.getPoseError().getX(), -0.5, 0.5);
+                controller.yIZone(yKi, controller.getPoseError().getY(), -0.5, 0.5);
+                controller.thetaIZone(thetaKi, controller.getPoseError().getRotation().getDegrees(), -5, 5);
+
                 setDesiredStates.accept(
                     discretize( 
                         controller.calculateWithFF( currentPose.get() ) ) );

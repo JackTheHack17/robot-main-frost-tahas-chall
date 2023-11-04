@@ -192,6 +192,18 @@ public class HolonomicController {
         thetaController.setTolerance( tolerance.getRotation().getRadians() );
     }
 
+    public ProfiledPIDController getXController() {
+        return xController;
+    }
+
+    public ProfiledPIDController getYController() {
+        return yController;
+    }
+
+    public ProfiledPIDController getThetaController() {
+        return thetaController;
+    }
+
     public void xControllerIRange(double range) {
         xControllerIRange( -range, range );
     }
@@ -214,6 +226,28 @@ public class HolonomicController {
 
     public void thetaControllerIRange(double lowerBound, double higherBound) {
         thetaController.setIntegratorRange( lowerBound, higherBound );
+    }
+
+    public void xIZone(double kI, double measure, double min, double max) {
+        if((measure < max) || (measure > min)) xController.setI(kI);
+        else xController.setI(0);
+    }
+
+    public void yIZone(double kI, double measure, double min, double max) {
+        if((measure < max) || (measure > min)) xController.setI(kI);
+        else yController.setI(0);
+    }
+    public void thetaIZone(double kI, double measure, double min, double max) {
+        if((measure < max) || (measure > min)) xController.setI(kI);
+        else thetaController.setI(0);
+    }
+
+    public Pose2d getPoseError() {
+        return new Pose2d(
+            xController.getPositionError(),
+            yController.getPositionError(),
+            new Rotation2d(thetaController.getPositionError())
+        );
     }
 
     public static class HolonomicConstraints {
