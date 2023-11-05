@@ -232,19 +232,19 @@ public class Drivetrain extends SubsystemBase {
       _cubeWaypoints.add(new Pose2d(14.75, 2.95 - 0.05, new Rotation2d()));
       _cubeWaypoints.add(new Pose2d(14.75, 4.52 - 0.05, new Rotation2d()));
     } else if (DriverStation.getAlliance().equals(DriverStation.Alliance.Blue)) {
-      _coneWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.82, 5.05 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.82, 3.84 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.82, 3.28 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.82, 2.18 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.82, 1.60 + 0.02, new Rotation2d(0)));
-      _coneWaypoints.add(new Pose2d(1.82, 0.47 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.82, 1.03 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.82, 2.75 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(1.82, 4.42 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(15.79, 7.33 + 0.02, new Rotation2d(0)));
-      _cubeWaypoints.add(new Pose2d(15.79, 6.00 + 0.02, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 5.05, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 3.84, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 3.28, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 2.18, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 1.60, new Rotation2d(0)));
+      _coneWaypoints.add(new Pose2d(1.82, 0.47, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.82, 1.03, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.82, 2.75, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(1.82, 4.42, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 7.33, new Rotation2d(0)));
+      _cubeWaypoints.add(new Pose2d(15.79, 6.00, new Rotation2d(0)));
     }
 
     _moveToPosition = new moveToPosition(
@@ -306,11 +306,11 @@ public class Drivetrain extends SubsystemBase {
   public void joystickDrive(double LX, double LY, double RX) {
     if ( !isRobotOriented ) m_chassisSpeeds = 
       ChassisSpeeds.fromFieldRelativeSpeeds(
-        LY * MAX_LINEAR_SPEED, 
-        -LX * MAX_LINEAR_SPEED, 
+        LY * MAX_LINEAR_SPEED,
+        -LX * MAX_LINEAR_SPEED,
         -RX * MAX_ROTATION_SPEED, 
         m_odometry.getEstimatedPosition().getRotation().plus(Rotation2d.fromDegrees(
-          (DriverStation.getAlliance().equals(DriverStation.Alliance.Red))?  180 : 0 ) ) );
+          (DriverStation.getAlliance().equals(DriverStation.Alliance.Red)) ? 180 : 0 ) ) );
 
     else m_chassisSpeeds = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED);
 
@@ -378,6 +378,7 @@ public class Drivetrain extends SubsystemBase {
         waypoints.add( new Pose2d(14.05, target.getY(), new Rotation2d() ) );
       } else waypoints.add( new Pose2d(14.05, target.getY(), new Rotation2d() ) );
     }
+    waypoints.add(target);
 
     return waypoints;
   }
@@ -396,12 +397,12 @@ public class Drivetrain extends SubsystemBase {
   public Command moveToPositionCommand () {
     Pose2d actualPose = _robotPose; 
 
-    Pose2d closest = actualPose.nearest(m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints);
+    Pose2d closest = actualPose.nearest( m_claw.wantCone() ? _coneWaypoints : _cubeWaypoints );
     if (closest == null) return new InstantCommand();
 
     poseToTelemetry(actualPose, "Align/startPose");
     poseToTelemetry(closest, "Align/choosenWaypoint");
-    if(_robotPose.getX() > 14.05) return pathToCommand(closest);
+    if(_robotPose.getX() >= 14.05 || _robotPose.getX() < 8) return pathToCommand(closest);
     return pathToCommand( optimizeWaypoints( closest ) );
   }
 

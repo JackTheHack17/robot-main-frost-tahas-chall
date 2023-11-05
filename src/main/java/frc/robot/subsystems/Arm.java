@@ -154,11 +154,6 @@ public class Arm extends SubsystemBase {
         m_stage2PID.setTolerance(3.0);//3//2//1//0
         m_stage3PID.setTolerance(3.0);
 
-        m_stage1PID.setIntegratorRange(-0.25, 0.25);
-        m_stage2PID.setIntegratorRange(-0.25, 0.25);
-        m_stage3PID.setIntegratorRange(-0.25, 0.25);
-
-
         m_stage1.restoreFactoryDefaults();
         m_stage1.clearFaults();
         m_stage1.setSmartCurrentLimit(40);
