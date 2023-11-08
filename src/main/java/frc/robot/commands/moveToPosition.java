@@ -54,13 +54,17 @@ public class moveToPosition {
                 requirements.field2d.getObject( "Goal" ).setPose( controller.getPositionGoal() );
             },
             () -> {
-                controller.xIZone(xKi, controller.getPoseError().getX(), -0.5, 0.5);
-                controller.yIZone(yKi, controller.getPoseError().getY(), -0.5, 0.5);
-                controller.thetaIZone(thetaKi, controller.getPoseError().getRotation().getDegrees(), -5, 5);
+                controller.xIZone(xKi, -1, 1);
+                controller.yIZone(yKi, -0.5, 0.5);
+                controller.thetaIZone(thetaKi, -5, 5);
 
                 setDesiredStates.accept(
                     discretize( 
-                        controller.calculateWithFF( currentPose.get() ) ) );
+                        controller.calculateWithFF( 
+                            currentPose.get(),
+                            0.09, 1.2,
+                            0.0, 1.02,
+                            3) ) );
 
                 requirements.field2d.getObject( "Setpoint" ).setPose( controller.getPositionSetpoint() );
                 Telemetry.getValue("PathPlanner/AtGoal", controller.atGoal() );

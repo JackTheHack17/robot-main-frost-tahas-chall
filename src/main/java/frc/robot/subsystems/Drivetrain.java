@@ -27,6 +27,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -106,6 +107,7 @@ public class Drivetrain extends SubsystemBase {
   private SwerveModule[] swerveModules = new SwerveModule[4];
 
   private boolean isRobotOriented = false;
+  private Debouncer deb = new Debouncer(0.2);
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = 
     new StatorCurrentLimitConfiguration(
@@ -121,7 +123,7 @@ public class Drivetrain extends SubsystemBase {
       40, 
       0.2);
 
-  private SwerveDrivePoseEstimator m_odometry;
+  private static SwerveDrivePoseEstimator m_odometry;
 
   private List<Pose2d> _coneWaypoints = new ArrayList<Pose2d>();
   private List<Pose2d> _cubeWaypoints = new ArrayList<Pose2d>();
@@ -142,15 +144,15 @@ public class Drivetrain extends SubsystemBase {
   private double _rotationKd = 0.085; // 0.1
 
   private double _alignXTranslationKp = 3.0;//5.5;//5; //5.5;
-  private double _alignXTranslationKi = 0.0;//0.1;//0.;
+  private double _alignXTranslationKi = 0.12;//0.1;//0.;
   private double _alignXTranslationKd = 0.03;//0.05;
 
   private double _alignYTranslationKp = 2.5;//2.2;//3.1; //5.5;
-  private double _alignYTranslationKi = 0.00; //0.01;//0.;
+  private double _alignYTranslationKi = 0.05; //0.01;//0.;
   private double _alignYTranslationKd = 0.02; //0.03;
 
   private double _alignRotationKp = 6.2;//2.5;
-  private double _alignRotationKi = 0.0;// 0.03; //.42;
+  private double _alignRotationKi = 0.01;// 0.03; //.42;
   private double _alignRotationKd = 0;//.0;
 
   public Field2d field2d = new Field2d();
@@ -224,7 +226,7 @@ public class Drivetrain extends SubsystemBase {
       _coneWaypoints.add(new Pose2d(14.75, 3.38 - 0.05, new Rotation2d()));
       _coneWaypoints.add(new Pose2d(14.75, 2.28 - 0.05, new Rotation2d()));
       _coneWaypoints.add(new Pose2d(14.75, 1.67, new Rotation2d()));
-      _coneWaypoints.add(new Pose2d(14.75, 0.47 + 0.05, new Rotation2d()));
+      _coneWaypoints.add(new Pose2d(14.76, 0.48, new Rotation2d()));
 
       _cubeWaypoints.add(new Pose2d(0.76, 6.13, Rotation2d.fromDegrees(180)));
       _cubeWaypoints.add(new Pose2d(0.76, 7.49, Rotation2d.fromDegrees(180)));
@@ -275,14 +277,17 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void robotPositionTelemetry() {
-    if ( vision.getCenterLimelight().hasTarget() ) 
-    m_odometry.addVisionMeasurement(
-      vision.getCenterLimelight().getPose(), 
-      Timer.getFPGATimestamp() - vision.getCenterLimelight().getLatency(),
-      VecBuilder.fill(
-        3.1 * vision.getCenterLimelight().getTarget().getTranslation().getNorm(), 
-        3.1 * vision.getCenterLimelight().getTarget().getTranslation().getNorm(), 10000000) );
+    if ( deb.calculate( vision.getCenterLimelight().hasTarget() ) ) {
+      System.out.println("MY FATHER" + Timer.getFPGATimestamp());
+      m_odometry.addVisionMeasurement(
+        vision.getCenterLimelight().getPose(), 
+        Timer.getFPGATimestamp() - vision.getCenterLimelight().getLatency(),
+        VecBuilder.fill(
+          3.1 * vision.getCenterLimelight().getTarget().getTranslation().getNorm(), 
+          3.1 * vision.getCenterLimelight().getTarget().getTranslation().getNorm(), 10000000) );
+    }
 
+    // System.out.println("MY MOTHER" + Timer.getFPGATimestamp());
     _robotPose = m_odometry.update(new Rotation2d(Math.toRadians(m_gyro.getYaw())), getSwerveModulePositions());
 
     Transform2d transform = _robotPose.minus(_lastPose).div(0.02);
@@ -412,7 +417,6 @@ public class Drivetrain extends SubsystemBase {
         m_odometry.getEstimatedPosition().getX(), 
         target.getY(), 
         target.getRotation() ),
-        new ChassisSpeeds(0.75, 0.0, 0.0),
       new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
       _holonomicConstraints,
       generateAlignmentController() );
@@ -465,9 +469,9 @@ public class Drivetrain extends SubsystemBase {
         _alignRotationKd,
         _rotConstraints) );
     
-    controller.xControllerIRange(-0.75, 0.75);
-    controller.yControllerIRange(-0.5, 0.5);
-    controller.thetaControllerIRange(-8.5, 8.5);
+    // controller.xControllerIRange(-0.75, 0.75);
+    // controller.yControllerIRange(-0.5, 0.5);
+    // controller.thetaControllerIRange(-8.5, 8.5);
 
     return controller;
   }
