@@ -154,11 +154,6 @@ public class Arm extends SubsystemBase {
         m_stage2PID.setTolerance(3.0);//3//2//1//0
         m_stage3PID.setTolerance(3.0);
 
-        m_stage1PID.setIntegratorRange(-0.25, 0.25);
-        m_stage2PID.setIntegratorRange(-0.25, 0.25);
-        m_stage3PID.setIntegratorRange(-0.25, 0.25);
-
-
         m_stage1.restoreFactoryDefaults();
         m_stage1.clearFaults();
         m_stage1.setSmartCurrentLimit(40);
@@ -563,9 +558,33 @@ public class Arm extends SubsystemBase {
         Telemetry.setValue("Arm/stage2/internalVelocity", m_stage2.getEncoder().getVelocity());
 
         if ( DriverStation.isEnabled() || DriverStation.isAutonomousEnabled() ) {
-            double stage1Calc = MathUtil.clamp(m_stage1FF.calculate(Math.toRadians(m_stage1Target - STAGE_1_OFFSET), 0) + 12.0*m_stage1PID.calculate(m_stage1Encoder.getAbsolutePosition()*360 - STAGE_1_OFFSET, m_stage1Target - STAGE_1_OFFSET), -12, 12);
-            double stage2Calc = MathUtil.clamp(m_stage2FF.calculate(Math.toRadians(m_stage2Target - STAGE_2_OFFSET), 0) + 12.0*m_stage2PID.calculate(m_stage2Encoder.getAbsolutePosition()*360 - STAGE_2_OFFSET, m_stage2Target - STAGE_2_OFFSET), -12, 12);
-            double stage3Calc = MathUtil.clamp(m_stage3FF.calculate(Math.toRadians(m_stage3Target - STAGE_3_OFFSET), 0) + 12.0*m_stage3PID.calculate(m_stage3Encoder.getAbsolutePosition()*360 - STAGE_3_OFFSET, m_stage3Target - STAGE_3_OFFSET), -12, 12);
+            double stage1Calc = 
+                MathUtil.clamp(
+                    m_stage1FF.calculate(
+                        Math.toRadians(m_stage1PID.getSetpoint().position), 
+                        m_stage1PID.getSetpoint().velocity) + 
+                    12.0 * m_stage1PID.calculate( 
+                        m_stage1Encoder.getAbsolutePosition() * 360 - STAGE_1_OFFSET, 
+                        m_stage1Target - STAGE_1_OFFSET), -12, 12);
+            
+            double stage2Calc = 
+                MathUtil.clamp(
+                    m_stage2FF.calculate(
+                        Math.toRadians(
+                            m_stage1PID.getSetpoint().position), 
+                            m_stage2PID.getSetpoint().velocity) + 
+                    12.0 * m_stage2PID.calculate(
+                        m_stage2Encoder.getAbsolutePosition() * 360 - STAGE_2_OFFSET, 
+                        m_stage2Target - STAGE_2_OFFSET), -12, 12);
+
+            double stage3Calc = 
+                MathUtil.clamp(
+                    m_stage3FF.calculate(
+                        Math.toRadians( m_stage1PID.getSetpoint().position ), 
+                        m_stage2PID.getSetpoint().velocity ) + 
+                    12.0 * m_stage3PID.calculate(
+                        m_stage3Encoder.getAbsolutePosition() * 360 - STAGE_3_OFFSET, 
+                        m_stage3Target - STAGE_3_OFFSET), -12, 12);
 
             Telemetry.setValue("Arm/stage1/PIDVOLT", stage1Calc);
             Telemetry.setValue("Arm/stage2/PIDVOLT", stage2Calc);

@@ -41,10 +41,12 @@ public class HolonomicController {
                 startPose.getY(),
                 targetChassisSpeeds.vyMetersPerSecond ) );
 
-        thetaController.reset(
-            new State(
-                startPose.getRotation().getRadians(),
-                targetChassisSpeeds.omegaRadiansPerSecond ) );
+        if(thetaController.getPositionError() > 7.5) {
+            thetaController.reset(
+                new State(
+                    startPose.getRotation().getRadians(),
+                    targetChassisSpeeds.omegaRadiansPerSecond ) );
+        }
     }
 
     public boolean atGoal() {
@@ -146,15 +148,15 @@ public class HolonomicController {
             );
     }
 
-    public ChassisSpeeds calculateWithFF(Pose2d robotPose) {
+    public ChassisSpeeds calculateWithFF(Pose2d robotPose, double xkS, double xkV, double ykS, double ykV, double thetakS) {
 
         ChassisSpeeds speeds = new ChassisSpeeds(
             xController.calculate( robotPose.getX() )
-            + xController.getSetpoint().velocity,
+            + xController.getSetpoint().velocity * xkV + xkS * Math.signum(xController.getSetpoint().velocity),
             yController.calculate( robotPose.getY() )
-            + yController.getSetpoint().velocity,
+            + yController.getSetpoint().velocity * ykV + ykS * Math.signum(yController.getSetpoint().velocity),
             thetaController.calculate( robotPose.getRotation().getRadians()
-            + thetaController.getSetpoint().velocity ) );
+            + thetaController.getSetpoint().velocity + thetakS * Math.signum(thetaController.getSetpoint().velocity) ) );
         
         Telemetry.setValue("ALIGNMENT/XOUTPUT", speeds.vxMetersPerSecond);
         Telemetry.setValue("ALIGNMENT/YOUTPUT", speeds.vyMetersPerSecond);
@@ -192,6 +194,18 @@ public class HolonomicController {
         thetaController.setTolerance( tolerance.getRotation().getRadians() );
     }
 
+    public ProfiledPIDController getXController() {
+        return xController;
+    }
+
+    public ProfiledPIDController getYController() {
+        return yController;
+    }
+
+    public ProfiledPIDController getThetaController() {
+        return thetaController;
+    }
+
     public void xControllerIRange(double range) {
         xControllerIRange( -range, range );
     }
@@ -214,6 +228,29 @@ public class HolonomicController {
 
     public void thetaControllerIRange(double lowerBound, double higherBound) {
         thetaController.setIntegratorRange( lowerBound, higherBound );
+    }
+
+    public void xIZone(double kI, double min, double max) {
+        if((xController.getPositionError() < max) || (xController.getPositionError() > min)) xController.setI(kI);
+        else xController.setI(0);
+    }
+
+    public void yIZone(double kI, double min, double max) {
+        if((yController.getPositionError() < max) || (yController.getPositionError() > min)) xController.setI(kI);
+        else yController.setI(0);
+    }
+
+    public void thetaIZone(double kI, double min, double max) {
+        if((thetaController.getPositionError() < max) || (thetaController.getPositionError() > min)) xController.setI(kI);
+        else thetaController.setI(0);
+    }
+
+    public Pose2d getPoseError() {
+        return new Pose2d(
+            xController.getPositionError(),
+            yController.getPositionError(),
+            new Rotation2d(thetaController.getPositionError())
+        );
     }
 
     public static class HolonomicConstraints {

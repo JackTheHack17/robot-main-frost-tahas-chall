@@ -73,8 +73,8 @@ public final class Constants {
         public static final double AZIMUTH_GEAR_RATIO = 12.8;
 
         // encoder offsets (degrees)
-        public static final double FL_ECODER_OFFSET = -313.506;// + 0.5;
-        public static final double FR_ECODER_OFFSET = -69.082;// + 0.5;
+        public static final double FL_ECODER_OFFSET = -313.506 + 0.5;
+        public static final double FR_ECODER_OFFSET = -69.082 + 0.5;
         public static final double BL_ECODER_OFFSET = -45.791 + 180;
         public static final double BR_ECODER_OFFSET = -257.783;
 

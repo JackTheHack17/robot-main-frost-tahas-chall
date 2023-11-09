@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.Telemetry;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.commands.HolonomicController.HolonomicConstraints;
 
 import java.util.function.Consumer;
@@ -40,6 +41,10 @@ public class moveToPosition {
     public Command generateMoveToPositionCommand(
         Pose2d targetPose, ChassisSpeeds targetChassisSpeeds, 
         Pose2d tolerance, HolonomicController controller ) {
+        final double xKi = controller.getXController().getI();
+        final double yKi = controller.getYController().getI();
+        final double thetaKi = controller.getThetaController().getI();
+
         return new FunctionalCommand(
             () -> {
                 this.target = targetPose;
@@ -50,12 +55,22 @@ public class moveToPosition {
                 requirements.field2d.getObject( "Goal" ).setPose( controller.getPositionGoal() );
             },
             () -> {
+                controller.xIZone(xKi, -1, 1);
+                controller.yIZone(yKi, -0.5, 0.5);
+                controller.thetaIZone(thetaKi, -5, 5);
+
                 setDesiredStates.accept(
                     discretize( 
-                        controller.calculateWithFF( currentPose.get() ) ) );
+                        controller.calculateWithFF( 
+                            currentPose.get(),
+                            0.09, 1.2,
+                            0.0, 1.02,
+                            3) ) );
 
                 requirements.field2d.getObject( "Setpoint" ).setPose( controller.getPositionSetpoint() );
                 Telemetry.getValue("PathPlanner/AtGoal", controller.atGoal() );
+
+                if(RobotBase.isSimulation()) requirements.resetPose( controller.getPositionSetpoint() );
             }, 
             (interrupted) -> { requirements.joystickDrive(0, 0, 0); }, 
             () -> controller.atGoal(),
@@ -71,8 +86,9 @@ public class moveToPosition {
     public Command generateMoveToPositionCommandTimed(
         Pose2d targetPose, ChassisSpeeds targetChassisSpeeds, 
         Pose2d tolerance,  HolonomicConstraints profiles, HolonomicController controller) {
+        Telemetry.setValue("Alignment/MOM", profiles.getLongestTime(targetPose, targetChassisSpeeds));
         return generateMoveToPositionCommand(targetPose, targetChassisSpeeds, tolerance, controller)
-            .withTimeout(profiles.getLongestTime(tolerance, targetChassisSpeeds));
+            .withTimeout(profiles.getLongestTime(targetPose, targetChassisSpeeds));
     }
 
     public ChassisSpeeds discretize(ChassisSpeeds speeds) {
