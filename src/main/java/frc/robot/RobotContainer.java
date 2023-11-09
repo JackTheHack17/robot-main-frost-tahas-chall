@@ -67,8 +67,6 @@ public class RobotContainer {
     driverController.a().onTrue(new InstantCommand(m_swerve::zeroGyro));
     driverController.b().onTrue(new InstantCommand(m_swerve::toggleRobotOrient));
     driverController.y().onTrue(new InstantCommand(m_swerve::resetPoseWithLL));
-    // driverController.y().onTrue(
-    //   new InstantCommand( () -> m_swerve.resetPose(new Pose2d(9 , 3, new Rotation2d())) ));
       
     driverController.x().whileTrue(new InstantCommand(() -> m_swerve.moveToPositionCommand().schedule()));
     driverController.x().onFalse(new InstantCommand(() -> {}, m_swerve));

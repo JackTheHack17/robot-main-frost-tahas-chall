@@ -57,8 +57,7 @@
           },
           "Odometry": {
             "open": true
-          },
-          "open": true
+          }
         },
         "Rlimelight-limetwo": {
           "Odometry": {
@@ -68,6 +67,9 @@
         },
         "drivetrain": {
           "Align": {
+            "open": true
+          },
+          "chassis": {
             "open": true
           },
           "kinematics": {
@@ -107,7 +109,8 @@
               "open": true
             },
             "open": true
-          }
+          },
+          "open": true
         },
         "general": {
           "autonomous": {

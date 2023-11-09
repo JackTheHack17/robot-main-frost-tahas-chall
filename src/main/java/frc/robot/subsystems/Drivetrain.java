@@ -358,8 +358,8 @@ public class Drivetrain extends SubsystemBase {
 
   public List<Pose2d> optimizeWaypoints(Pose2d target) {
     List<Pose2d> waypoints = new ArrayList<Pose2d>();
-    if(_robotPose.getY() < downChargeLine) waypoints.add(linearOptimize( target, downChargeLine) );
-    else if(_robotPose.getY() > upChargeLine) waypoints.add(linearOptimize(target,  upChargeLine ) );
+    if(_robotPose.getY() < downChargeLine) waypoints.add( linearOptimize( target, downChargeLine ) );
+    else if(_robotPose.getY() > upChargeLine) waypoints.add( linearOptimize( target,  upChargeLine  ) );
     else if(_robotPose.getY() > downChargeLine && _robotPose.getY() < upChargeLine) {
       List<Pose2d> onTheWay = new ArrayList<Pose2d>();
       onTheWay.add( new Pose2d( _robotPose.getX(),   upChargeLine, new Rotation2d() ) );
@@ -378,11 +378,9 @@ public class Drivetrain extends SubsystemBase {
         waypoints.add( new Pose2d(14.05, nearest.getY(), new Rotation2d() ) );
         waypoints.add( new Pose2d(14.05, target.getY(), new Rotation2d() ) );
       } else if((xIntersection > leftChargeLine && xIntersection < rightChargeLine) ||
-                (yIntersection > downChargeLine && yIntersection < upChargeLine   )) {
-        waypoints.add( nearest );
-        waypoints.add( new Pose2d(14.05, target.getY(), new Rotation2d() ) );
-      } else waypoints.add( new Pose2d(14.05, target.getY(), new Rotation2d() ) );
+                (yIntersection > downChargeLine && yIntersection < upChargeLine   )) waypoints.add( nearest );
     }
+    waypoints.add(new Pose2d(14.05, target.getY(), new Rotation2d()));
     waypoints.add(target);
 
     return waypoints;
@@ -395,7 +393,7 @@ public class Drivetrain extends SubsystemBase {
     double slope = (a - target.getY()) / (b - target.getX());
     double intersection = slope * (avoidanceLine - b) + a;
 
-    if(intersection > 14.05) return (new Pose2d(14.05, downChargeLine, new Rotation2d(0)));
+    if(intersection < 14.05) return (new Pose2d(14.05, avoidanceLine, new Rotation2d(0)));
     return new Pose2d(14.05, target.getY(), target.getRotation());
   }
 
@@ -436,7 +434,7 @@ public class Drivetrain extends SubsystemBase {
     for(int i = 0; i < waypoints.size() - 1; i++) {
       commands.addCommands(
         _moveToPosition.generateMoveToPositionCommandTimed(
-          waypoints.get(i),
+          waypoints.get( i ),
           new Pose2d( 0.1, 0.1, Rotation2d.fromDegrees(3) ),
           _holonomicConstraints,
           generateAlignmentController() ) );
@@ -444,7 +442,7 @@ public class Drivetrain extends SubsystemBase {
 
     commands.addCommands(
       _moveToPosition.generateMoveToPositionCommand(
-        waypoints.get(waypoints.size() - 1 ),
+        waypoints.get( waypoints.size() - 1 ),
         new Pose2d(), 
         generateAlignmentController() ));
 

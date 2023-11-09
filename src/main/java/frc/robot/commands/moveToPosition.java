@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.Telemetry;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.commands.HolonomicController.HolonomicConstraints;
 
 import java.util.function.Consumer;
@@ -68,6 +69,8 @@ public class moveToPosition {
 
                 requirements.field2d.getObject( "Setpoint" ).setPose( controller.getPositionSetpoint() );
                 Telemetry.getValue("PathPlanner/AtGoal", controller.atGoal() );
+
+                if(RobotBase.isSimulation()) requirements.resetPose( controller.getPositionSetpoint() );
             }, 
             (interrupted) -> { requirements.joystickDrive(0, 0, 0); }, 
             () -> controller.atGoal(),
