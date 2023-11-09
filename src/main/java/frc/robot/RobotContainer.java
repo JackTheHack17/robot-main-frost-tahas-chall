@@ -32,7 +32,7 @@ public class RobotContainer {
   public Pigeon m_gyro = new Pigeon();
   public VisionSubsystem vision = new VisionSubsystem();
   public LEDs m_LEDs = new LEDs();
-  public PinchersofPower m_claw = new PinchersofPower(this);
+  public PinchersofPower m_claw = new PinchersofPower();
   public Arm m_arm = new Arm(m_claw, copilotController);
   public Drivetrain m_swerve = new Drivetrain(m_gyro, m_arm, m_claw, vision);
 
@@ -45,6 +45,7 @@ public class RobotContainer {
     }
     Telemetry.setValue("general/autonomous/availableRoutines", pathsString);
     Telemetry.setValue("general/autonomous/selectedRoutine", "SET ME");
+    m_claw.setArmPos(() -> m_arm.target);
 
     SmartDashboard.putNumber("alignTranslateP", 5);//1.8;//3.25;//2.75;//2.5;//2.1;//2;//0.018;//0.03;//0.004 0.001
     SmartDashboard.putNumber("alignTranslateI", 0.1);
