@@ -77,7 +77,18 @@ public class RobotContainer {
     //     m_swerve.getTargetPose().plus(
     //       new Transform2d(
     //         new Translation2d(0.09, -0.09), 
-    //         Rotation2d.fromDegrees(0.8))))));
+    //         Rotation2d.fromDegrees(0.8)))))); 
+    driverController.povLeft().onTrue(new InstantCommand( 
+      () -> { 
+         m_claw.closeGrip();
+      }
+    )); 
+
+    driverController.povRight().onTrue(new InstantCommand( 
+      () -> { 
+        m_claw.openGrip();
+      }
+    ));
 
     copilotController.button(0).whileTrue(m_arm.moveToPositionCommand(positions.Substation));
     copilotController.button(0).onFalse(m_claw.intakeCommand().alongWith(m_arm.moveToPositionCommand(positions.Idle)));

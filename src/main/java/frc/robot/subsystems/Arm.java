@@ -171,8 +171,8 @@ public class Arm extends SubsystemBase {
         m_stage3.setSmartCurrentLimit(40);
         m_stage3.setSecondaryCurrentLimit(40);
         m_stage3.burnFlash();
-
-        m_copilotController.button(10).whileTrue(new RepeatCommand( new InstantCommand(() -> {
+        
+       RobotContainer.driverController.povUp().whileTrue(new RepeatCommand( new InstantCommand(() -> {
             if (m_copilotController.getRawButton(9)) {
                 m_manualTargetTheta += THETA_SPEED;
                 stage3 += THETA_SPEED;
