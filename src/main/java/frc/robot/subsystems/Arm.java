@@ -172,17 +172,15 @@ public class Arm extends SubsystemBase {
         m_stage3.setSecondaryCurrentLimit(40);
         m_stage3.burnFlash();
         
-       RobotContainer.driverController.povUp().whileTrue(new RepeatCommand( new InstantCommand(() -> {
-            if (m_copilotController.getRawButton(9)) {
+       RobotContainer.driverController.povUp().whileTrue((new RepeatCommand( new InstantCommand(() -> {
                 m_manualTargetTheta += THETA_SPEED;
                 stage3 += THETA_SPEED;
-            }
-        })));
-        m_copilotController.button(11).whileTrue(new RepeatCommand( new InstantCommand(() -> {
-            if (m_copilotController.getRawButton(9)) {
+            
+        }))));
+       RobotContainer.driverController.povDown().whileTrue(new RepeatCommand( new InstantCommand(() -> {
                 m_manualTargetTheta -= THETA_SPEED;
                 stage3 -= THETA_SPEED;
-            }
+            
         })));
     }
 
@@ -208,8 +206,8 @@ public class Arm extends SubsystemBase {
 
     private void moveToPoint (double x, double y, double theta) {
         if (IS_E_HAPPY) {
-            stage1 += m_copilotController.getJoystick().getY()*tempThetaSpeed;
-            stage2 += m_copilotController.getJoystick().getX()*tempThetaSpeed;
+            stage1 += RobotContainer.driverController.getLeftY()*tempThetaSpeed;
+            stage2 += RobotContainer.driverController.getRightY()*tempThetaSpeed;
             if (tempThetaSpeed != THETA_SPEED && m_copilotController.getJoystick().getNorm() != 0) tempThetaSpeed = THETA_SPEED;
             moveToAngles(stage1, stage2, stage3);
             return;
