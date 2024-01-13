@@ -1,2 +1,2 @@
-# Lofty-2023
-The in-season code for Lofty (Working name), our robot for the FRC Charged Up 2023 Season. 
+Challenge Version of frost
+This a challenge to change how Frost's arms are controlled 
